@@ -1,25 +1,35 @@
 <!DOCTYPE html>
-<html lang=zh>
+<html lang=en>
 <head>
     <!-- so meta -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="hhh">
+    <meta name="description" content="0x00：前言突然心血来潮，想要搭建个人博客。在网上了解了一下，GitHub+Hexo看起来不错，免费而且不难。由于搭建过程的记录是在搭建完之后才记录的，尽管努力回忆，但恐怕还是会有一些过程丢失。如果搭建过程遇到解决不了的问题，欢迎通过QQ与我交流！ 0x01：Node.js、git和hexo的安装Node.js：Node.js是一个基于Chrome V8 引擎的JavaScript运行环境。 我">
 <meta property="og:type" content="article">
 <meta property="og:title" content="记一次GitHub+Hexo搭建个人博客的过程">
 <meta property="og:url" content="http://example.com/2022/10/02/%E8%AE%B0%E4%B8%80%E6%AC%A1GitHub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E7%9A%84%E8%BF%87%E7%A8%8B/index.html">
 <meta property="og:site_name" content="tolele&#39;s blog">
-<meta property="og:description" content="hhh">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://cdn.flowus.cn/oss/92fe9db8-aa49-422d-a330-9ce517fbf26a/image.png?filename=image.png&time=1664670956&token=e5d666c5dcbca2fc9e6b73b8867b6abd">
+<meta property="og:description" content="0x00：前言突然心血来潮，想要搭建个人博客。在网上了解了一下，GitHub+Hexo看起来不错，免费而且不难。由于搭建过程的记录是在搭建完之后才记录的，尽管努力回忆，但恐怕还是会有一些过程丢失。如果搭建过程遇到解决不了的问题，欢迎通过QQ与我交流！ 0x01：Node.js、git和hexo的安装Node.js：Node.js是一个基于Chrome V8 引擎的JavaScript运行环境。 我">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/4f952536-d59d-4950-a792-3a989ef4d978/image.png?filename=image.png&time=1664689091&token=6d69c572962624e381625fc20d43f406">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/c213bedb-ebb5-4630-9e91-db96125387ff/image.png?filename=image.png&time=1664689194&token=5b0dc581a5a39c2144849474b73341dd">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/b0b19090-4be1-4e18-b3a2-58e5be20b387/image.png?filename=image.png&time=1664689251&token=e4c495e7e83c52df712a00d9e65c53ba">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/c360bf2e-0dcc-4463-9589-3b207f51dac3/image.png?filename=image.png&time=1664689285&token=fa6a3c6fa27ad3fe8efcf44592d576fa">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/cccfacc7-485d-46a4-a11a-3ce61b20f946/image.png?filename=image.png&time=1664689494&token=90d79a1f7760ba5555db42d0506474b4">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/0a8347b0-f962-4e6f-a229-9a0d6d99d5ee/image.png?filename=image.png&time=1664689580&token=af8f4ab3ba65d908ff1546318f278e95">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/db159c90-d7d0-4d5e-8045-209026bf4c09/image.png?filename=image.png&time=1664689670&token=e1efe610b5709696d27bd453f2496983">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/803cc878-0e71-4fe8-8132-de1d21287cc8/image.png?filename=image.png&time=1664689715&token=534b0aa1bd52869ebae1fe71b8e644e9">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/cea2ee42-06d6-452b-b1c4-05294719535d/image.png?filename=image.png&time=1664689775&token=a628f46db6e47c8b37011a027384a1a9">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/7f67977e-aeda-41d3-b22c-2d60106974a2/image.png?filename=image.png&time=1664689788&token=764d6fdb7a122d9601b15a314faf6ece">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/370f3822-275e-46d3-9ef1-d781d6383a86/image.png?filename=image.png&time=1664689896&token=d75c3ca086a34f9cff20b34cfe6d8e51">
+<meta property="og:image" content="https://cdn.flowus.cn/oss/01990862-14bc-4385-959f-70eac5268cb5/image.png?filename=image.png&time=1664690195&token=39b7d9b9731839493e539d6973afbbdd">
 <meta property="article:published_time" content="2022-10-02T00:10:37.000Z">
-<meta property="article:modified_time" content="2022-10-02T02:56:52.462Z">
+<meta property="article:modified_time" content="2022-10-02T05:56:59.906Z">
 <meta property="article:author" content="tolele">
-<meta property="article:tag" content="渡劫场">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn.flowus.cn/oss/92fe9db8-aa49-422d-a330-9ce517fbf26a/image.png?filename=image.png&time=1664670956&token=e5d666c5dcbca2fc9e6b73b8867b6abd">
+<meta name="twitter:image" content="https://cdn.flowus.cn/oss/4f952536-d59d-4950-a792-3a989ef4d978/image.png?filename=image.png&time=1664689091&token=6d69c572962624e381625fc20d43f406">
     
     
       
@@ -56,20 +66,20 @@
 <body class="max-width mx-auto px3 ltr">
     
       <div id="header-post">
-  <a id="menu-icon" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
-  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fas fa-bars fa-lg"></i></a>
-  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
   <span id="menu">
     <span id="nav">
       <ul>
         <!--
-       --><li><a href="/">首页</a></li><!--
+       --><li><a href="/">Home</a></li><!--
      --><!--
-       --><li><a href="/about/">关于</a></li><!--
+       --><li><a href="/about/">About</a></li><!--
      --><!--
-       --><li><a href="/archives/">归档</a></li><!--
+       --><li><a href="/archives/">Writing</a></li><!--
      --><!--
-       --><li><a href="/search/">搜索</a></li><!--
+       --><li><a href="/search/">Search</a></li><!--
      -->
       </ul>
     </span>
@@ -78,13 +88,13 @@
       <ul>
         
         
-        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
-        <li><a class="icon" aria-label="分享文章" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
       </ul>
-      <span id="i-prev" class="info" style="display:none;">上一篇</span>
-      <span id="i-next" class="info" style="display:none;">下一篇</span>
-      <span id="i-top" class="info" style="display:none;">返回顶部</span>
-      <span id="i-share" class="info" style="display:none;">分享文章</span>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
     </span>
     <br/>
     <div id="share" style="display: none">
@@ -104,7 +114,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text"></span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00%EF%BC%9A%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">0x00：前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9ANode-js%E3%80%81git%E5%92%8Chexo%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">0x01：Node.js、git和hexo的安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Node-js%EF%BC%9A"><span class="toc-number">2.1.</span> <span class="toc-text">Node.js：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git%EF%BC%9A"><span class="toc-number">2.2.</span> <span class="toc-text">git：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hexo%EF%BC%9A"><span class="toc-number">2.3.</span> <span class="toc-text">Hexo：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E5%88%9B%E5%BB%BAGitHub%E4%BB%93%E5%BA%93%E5%8F%8A%E9%85%8D%E7%BD%AEssh%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.</span> <span class="toc-text">0x02：创建GitHub仓库及配置ssh连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAGitHub%E5%8D%9A%E5%AE%A2%E4%BB%93%E5%BA%93%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">创建GitHub博客仓库：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8Cssh%E8%BF%9E%E6%8E%A5%EF%BC%9A"><span class="toc-number">3.2.</span> <span class="toc-text">进行ssh连接：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9A%E5%9C%A8%E6%9C%AC%E5%9C%B0%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2"><span class="toc-number">4.</span> <span class="toc-text">0x03：在本地搭建博客</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96Hexo%EF%BC%9A"><span class="toc-number">4.1.</span> <span class="toc-text">初始化Hexo：</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -137,19 +147,95 @@
       
 
       
-    <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link-link" href="/tags/%E6%B8%A1%E5%8A%AB%E5%9C%BA/" rel="tag">渡劫场</a>
-    </div>
-
 
     </div>
   </header>
   
 
   <div class="content" itemprop="articleBody">
-    <h2 id=""><a href="#" class="headerlink" title=""></a></h2><p><img src="https://cdn.flowus.cn/oss/92fe9db8-aa49-422d-a330-9ce517fbf26a/image.png?filename=image.png&time=1664670956&token=e5d666c5dcbca2fc9e6b73b8867b6abd" alt="大图预览"></p>
-<p>hhh</p>
+    <h2 id="0x00：前言"><a href="#0x00：前言" class="headerlink" title="0x00：前言"></a>0x00：前言</h2><p>突然心血来潮，想要搭建个人博客。在网上了解了一下，GitHub+Hexo看起来不错，免费而且不难。由于搭建过程的记录是在搭建完之后才记录的，尽管努力回忆，但恐怕还是会有一些过程丢失。如果搭建过程遇到解决不了的问题，欢迎通过QQ与我交流！</p>
+<h2 id="0x01：Node-js、git和hexo的安装"><a href="#0x01：Node-js、git和hexo的安装" class="headerlink" title="0x01：Node.js、git和hexo的安装"></a>0x01：Node.js、git和hexo的安装</h2><h3 id="Node-js："><a href="#Node-js：" class="headerlink" title="Node.js："></a>Node.js：</h3><p>Node.js是一个基于Chrome V8 引擎的JavaScript运行环境。</p>
+<p>我们首先需要知道，JavaScript脚本是通过嵌入在HTML中，来为网页添加各式各样的动态功能。随着JavaScript语言越来越多人使用，人们不禁想要将其用于后端开发。了解到，JavaScript脚本能够在浏览器运行是因为浏览器中配有JavaScript解析引擎，所以人们就想到将解析引擎脱离出来，这就是Node.js的来源。</p>
+<p>官网下载：<a target="_blank" rel="noopener" href="https://nodejs.org/en/">https://nodejs.org/en/</a></p>
+<p>下载推荐的版本即可！</p>
+<img src="https://cdn.flowus.cn/oss/4f952536-d59d-4950-a792-3a989ef4d978/image.png?filename=image.png&time=1664689091&token=6d69c572962624e381625fc20d43f406" alt="大图预览" style="zoom: 80%;" />
+
+<p>安装过程就是无脑next，可自行选择安装目录。</p>
+<p>检查一下是否安装成功：</p>
+<p><img src="https://cdn.flowus.cn/oss/c213bedb-ebb5-4630-9e91-db96125387ff/image.png?filename=image.png&time=1664689194&token=5b0dc581a5a39c2144849474b73341dd" alt="大图预览"></p>
+<p>有显示版本说明已经安装配置好了。这里的npm是nodejs的包管理器（package manager），就像apt是Ubuntu的包管理器一样。</p>
+<h3 id="git："><a href="#git：" class="headerlink" title="git："></a>git：</h3><p>git是一种分布式的版本管理系统，Linux的创造者Linus写的。</p>
+<p>git的作用就是对文件进行版本管理，方便在不同版本进行切换修改，类似文件分不同时间备份让后需要时找回其中一份代替，不过更方便使用。</p>
+<p>官网下载：<a target="_blank" rel="noopener" href="https://git-scm.com/">https://git-scm.com</a></p>
+<p>点击下面的Download，然后选择Windows系统：</p>
+<p><img src="https://cdn.flowus.cn/oss/b0b19090-4be1-4e18-b3a2-58e5be20b387/image.png?filename=image.png&time=1664689251&token=e4c495e7e83c52df712a00d9e65c53ba" alt="大图预览"></p>
+<p>组件的选择：</p>
+<p><img src="https://cdn.flowus.cn/oss/c360bf2e-0dcc-4463-9589-3b207f51dac3/image.png?filename=image.png&time=1664689285&token=fa6a3c6fa27ad3fe8efcf44592d576fa" alt="大图预览"></p>
+<p>各个组件勾选含义 ：</p>
+<ul>
+<li><p>Additional icons On the Desktop:桌面添加图标</p>
+</li>
+<li><p>Windows Explorer integration Git Bash Here&#x2F;Git GUI here:在windows资源管理器里集成Git Bash和Git GUI</p>
+</li>
+<li><p>Git LFS（Large File Support）:Git大文件支持</p>
+</li>
+<li><p>Associate .git* configuration files with the default text editor:将 .git* 配置文件与默认文本编辑器关联</p>
+</li>
+<li><p>Associate .sh files to be run with Bash:关联要与 Bash 运行的 .sh 文件</p>
+</li>
+<li><p>Check daily for Git for Windows updates:每日检查Windows版本的Git更新</p>
+</li>
+<li><p>(NEW!)Add a Git Bash Profile to Windows Terminal:将Git Bash的配置文件添加在Windows终端中的配置文件中（这是2.34.1版本新增的功能，省去了自己额外单独添加）</p>
+</li>
+</ul>
+<p>可以按照上述截图进行勾选，也可以自己根据组件含义进行勾选自己需要的组件，之后点击Next。</p>
+<p>其它的无脑next即可，若想了解其中选项的含义，这里篇文章有部分解释：<a target="_blank" rel="noopener" href="https://sxlz.me/post/hexo-aurora-github%E6%90%AD%E5%BB%BA#2-%E5%AE%89%E8%A3%85git">https://sxlz.me/post/hexo-aurora-github%E6%90%AD%E5%BB%BA#2-%E5%AE%89%E8%A3%85git</a></p>
+<h3 id="Hexo："><a href="#Hexo：" class="headerlink" title="Hexo："></a>Hexo：</h3><p>一般网站需要两种东西：程序+服务器（用于存放程序）。</p>
+<p>hexo可以看着是一个工具，用来生成博客中的html页面。而GitHub仓库相当于服务器，用来存放hexo生成的html等文件的地方。</p>
+<p>安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-cli -g</span><br></pre></td></tr></table></figure>
+
+<p>可以在本地终端执行，好像也可以在git bash中执行。</p>
+<p>执行可能遇到权限不够的报错，这样需要用管理员的方式打开cmd或者git bash</p>
+<p><strong><u>最后全部检查一下：</u></strong></p>
+<p><img src="https://cdn.flowus.cn/oss/cccfacc7-485d-46a4-a11a-3ce61b20f946/image.png?filename=image.png&time=1664689494&token=90d79a1f7760ba5555db42d0506474b4" alt="大图预览"></p>
+<h2 id="0x02：创建GitHub仓库及配置ssh连接"><a href="#0x02：创建GitHub仓库及配置ssh连接" class="headerlink" title="0x02：创建GitHub仓库及配置ssh连接"></a>0x02：创建GitHub仓库及配置ssh连接</h2><h3 id="创建GitHub博客仓库："><a href="#创建GitHub博客仓库：" class="headerlink" title="创建GitHub博客仓库："></a>创建GitHub博客仓库：</h3><p>GitHub官网：<a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a></p>
+<p>没账号的先注册一个，注意用户名要取好点，最后搭好的博客的url为<code>用户名.github.io</code>。如果已经注册了但对用户名不满意的话，不知道有没有其它方法，仓库如果没有重要的东西，可以注销掉账号，然后再重新注册。</p>
+<p>点击右上角的三角形，New repository创建一个新仓库。仓库名需要为<code>用户名.github.io</code>，这样最后搭好的博客的url才可以为<code>用户名+github.io</code>。仓库描述可写可不写，最后点击下面的创建即可。</p>
+<p><img src="https://cdn.flowus.cn/oss/0a8347b0-f962-4e6f-a229-9a0d6d99d5ee/image.png?filename=image.png&time=1664689580&token=af8f4ab3ba65d908ff1546318f278e95" alt="大图预览"></p>
+<h3 id="进行ssh连接："><a href="#进行ssh连接：" class="headerlink" title="进行ssh连接："></a>进行ssh连接：</h3><p>先创建一个目录作为博客根目录，用于存放和博客相关的文件。</p>
+<p>这是我的博客根目录：E:\myblog\GitHub_text\blogfile</p>
+<p>在博客根目录右键，点击<code>Git Bash Here</code>。执行命令ssh，检查ssh工具是否已安装。</p>
+<p><img src="https://cdn.flowus.cn/oss/db159c90-d7d0-4d5e-8045-209026bf4c09/image.png?filename=image.png&time=1664689670&token=e1efe610b5709696d27bd453f2496983" alt="大图预览"></p>
+<p>在本地生成ssh key：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -C &quot;邮箱地址&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.flowus.cn/oss/803cc878-0e71-4fe8-8132-de1d21287cc8/image.png?filename=image.png&time=1664689715&token=534b0aa1bd52869ebae1fe71b8e644e9" alt="大图预览"></p>
+<p>按图输入即可，key保存在了本地上，具体路径可看红框中。</p>
+<p>找到key的位置，用记事本打开id_rsa.pub文件，<code>ctrl + A</code> 全选，<code>ctrl + C</code>复制。</p>
+<p>将key复制到GitHub上，用于与主机连接：</p>
+<p><img src="https://cdn.flowus.cn/oss/cea2ee42-06d6-452b-b1c4-05294719535d/image.png?filename=image.png&time=1664689775&token=a628f46db6e47c8b37011a027384a1a9" alt="大图预览"></p>
+<p>填写key：</p>
+<p><img src="https://cdn.flowus.cn/oss/7f67977e-aeda-41d3-b22c-2d60106974a2/image.png?filename=image.png&time=1664689788&token=764d6fdb7a122d9601b15a314faf6ece" alt="大图预览"></p>
+<p>在Git Bash里执行以下命令，测试ssh是否绑定成功：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -T git@github.com</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.flowus.cn/oss/370f3822-275e-46d3-9ef1-d781d6383a86/image.png?filename=image.png&time=1664689896&token=d75c3ca086a34f9cff20b34cfe6d8e51" alt="大图预览"></p>
+<p>若发生报错：<code>[git@github.com](mailto:git@github.com): Permission denied (publickey).</code></p>
+<p>可试试命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh-agent -s</span><br><span class="line">ssh-add ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>来源：<a target="_blank" rel="noopener" href="https://blog.csdn.net/helloasimo/article/details/123778112">https://blog.csdn.net/helloasimo/article/details/123778112</a></p>
+</blockquote>
+<h2 id="0x03：在本地搭建博客"><a href="#0x03：在本地搭建博客" class="headerlink" title="0x03：在本地搭建博客"></a>0x03：在本地搭建博客</h2><blockquote>
+<p>说明一下，这一步会发生很多报错，要做好心理准备！</p>
+</blockquote>
+<h3 id="初始化Hexo："><a href="#初始化Hexo：" class="headerlink" title="初始化Hexo："></a>初始化Hexo：</h3><p>在博客根目录右键，打开Git Bash：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo init</span><br></pre></td></tr></table></figure>
+
+<p>(之前弄过了，所以这里就用别人博客中的图啦~)</p>
+<p><img src="https://cdn.flowus.cn/oss/01990862-14bc-4385-959f-70eac5268cb5/image.png?filename=image.png&time=1664690195&token=39b7d9b9731839493e539d6973afbbdd" alt="大图预览"></p>
 
   </div>
 </article>
@@ -163,19 +249,19 @@
     <div id="nav-footer" style="display: none">
       <ul>
          
-          <li><a href="/">首页</a></li>
+          <li><a href="/">Home</a></li>
          
-          <li><a href="/about/">关于</a></li>
+          <li><a href="/about/">About</a></li>
          
-          <li><a href="/archives/">归档</a></li>
+          <li><a href="/archives/">Writing</a></li>
          
-          <li><a href="/search/">搜索</a></li>
+          <li><a href="/search/">Search</a></li>
         
       </ul>
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text"></span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00%EF%BC%9A%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">0x00：前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9ANode-js%E3%80%81git%E5%92%8Chexo%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">0x01：Node.js、git和hexo的安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Node-js%EF%BC%9A"><span class="toc-number">2.1.</span> <span class="toc-text">Node.js：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git%EF%BC%9A"><span class="toc-number">2.2.</span> <span class="toc-text">git：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hexo%EF%BC%9A"><span class="toc-number">2.3.</span> <span class="toc-text">Hexo：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E5%88%9B%E5%BB%BAGitHub%E4%BB%93%E5%BA%93%E5%8F%8A%E9%85%8D%E7%BD%AEssh%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.</span> <span class="toc-text">0x02：创建GitHub仓库及配置ssh连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAGitHub%E5%8D%9A%E5%AE%A2%E4%BB%93%E5%BA%93%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">创建GitHub博客仓库：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8Cssh%E8%BF%9E%E6%8E%A5%EF%BC%9A"><span class="toc-number">3.2.</span> <span class="toc-text">进行ssh连接：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9A%E5%9C%A8%E6%9C%AC%E5%9C%B0%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2"><span class="toc-number">4.</span> <span class="toc-text">0x03：在本地搭建博客</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96Hexo%EF%BC%9A"><span class="toc-number">4.1.</span> <span class="toc-text">初始化Hexo：</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
@@ -196,10 +282,10 @@
     </div>
 
     <div id="actions-footer">
-        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
-        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
-        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
-        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
     </div>
 
   </div>
@@ -218,13 +304,13 @@
     <nav>
       <ul>
         <!--
-       --><li><a href="/">首页</ a></li><!--
+       --><li><a href="/">Home</ a></li><!--
      --><!--
-       --><li><a href="/about/">关于</ a></li><!--
+       --><li><a href="/about/">About</ a></li><!--
      --><!--
-       --><li><a href="/archives/">归档</ a></li><!--
+       --><li><a href="/archives/">Writing</ a></li><!--
      --><!--
-       --><li><a href="/search/">搜索</ a></li><!--
+       --><li><a href="/search/">Search</ a></li><!--
      -->
       </ul>
     </nav>
@@ -253,7 +339,7 @@
   <script type="text/javascript">
   $(function() {
     // copy-btn HTML
-    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
     btn += '<i class="far fa-clone"></i>';
     btn += '</span>'; 
     // mount it!
@@ -264,7 +350,7 @@
       }
     });
     clip.on('success', function(e) {
-      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.trigger.setAttribute('aria-label', "Copied!");
       e.clearSelection();
     })
   })
