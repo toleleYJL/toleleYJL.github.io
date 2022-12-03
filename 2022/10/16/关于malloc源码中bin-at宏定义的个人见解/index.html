@@ -1,103 +1,147 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>关于malloc源码中bin_at宏定义的个人见解 | tolele的自由小屋</title><meta name="author" content="tolele,1623093551@qq.com"><meta name="copyright" content="tolele"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="0x01：简介在堆中的内存申请和释放中，为了减少使用系统调用函数对内存操作，malloc_state（分配区）结构中使用了fastbinsY数组和bins数组。当chunk被free后，bins链会将这些free chunk组织起来。当下次malloc时，会先对bins链中的free chunk进行遍历，有适合的则使用，无合适的再进行下一步操作。  在申请和释放操作时，一般是有一个arena（分配">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于malloc源码中bin_at宏定义的个人见解">
+<meta property="og:url" content="http://example.com/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/index.html">
+<meta property="og:site_name" content="tolele的自由小屋">
+<meta property="og:description" content="0x01：简介在堆中的内存申请和释放中，为了减少使用系统调用函数对内存操作，malloc_state（分配区）结构中使用了fastbinsY数组和bins数组。当chunk被free后，bins链会将这些free chunk组织起来。当下次malloc时，会先对bins链中的free chunk进行遍历，有适合的则使用，无合适的再进行下一步操作。  在申请和释放操作时，一般是有一个arena（分配">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/fen/wen08.jpg">
+<meta property="article:published_time" content="2022-10-16T02:26:50.000Z">
+<meta property="article:modified_time" content="2022-10-16T02:48:17.014Z">
+<meta property="article:author" content="tolele">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/fen/wen08.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: undefined,
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '关于malloc源码中bin_at宏定义的个人见解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-10-16 10:48:17'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
 
-<head>
-  <meta charset="UTF-8">
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
 
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
 
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
 
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="ie=edge">
-
-  <meta name="author" content="tolele">
-
-
-  <meta name="subtitle" content="tolele">
-
-
-
-
-<title>关于malloc源码中bin_at宏定义的个人见解 | tolele的自由小屋</title>
-
-
-
-    <link rel="icon" href="/favicon.png">
-
-
-
-<link rel="stylesheet" href="/css/style.css">
-
-
-<link rel="stylesheet" href="/lib/tocbot/tocbot.css">
-
-
-<link rel="stylesheet" href="/lib/fancybox/fancybox.min.css">
-
-
-
-
-
-
-<meta name="generator" content="Hexo 5.4.2"></head>
-<body>
-  <div id="app">
-    <header class="header">
-  <a href="/" class="logo" focusable="false">
-    <img src="/images/logo.svg" alt="tolele的自由小屋" />
-  </a>
-  <nav class="nav">
-    <div class="spacer"></div>
-    <div class="right">
-      <div class="menu">
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
         
-          <a class="item" href="/archives">Posts</a>
-          
-          <a class="item" href="/category">Categories</a>
-          
-          <a class="item" href="/tag">Tags</a>
-          
-      </div>
-      <div class="links">
-        
-          
-            <a title="Github" target="_blank" rel="noopener" href="https://github.com/toleleyjl" class="link-item">
-              <span class="iconify" data-icon="ri:github-line"></span>
-            </a>
-          
-        
-      </div>
-      <a class="toggleDark" id="dark-mode">
-        <span class="iconify" data-icon="ri:sun-line" id="sun-icon" style="display: none"></span>
-        <span class="iconify" data-icon="ri:moon-line" id="moon-icon" style="display: none"></span>
-      </a>
-    </div>
-  </nav>
-</header>
-
-    <main class="container">
-      
-
-  <div class="post-toc">
-  <div class="tocbot-list">
-  </div>
-  <div class="tocbot-list-menu">
-    <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
-    <a onclick="go_top()">Back to top</a>
-    <a onclick="go_bottom()">Go to bottom</a>
-  </div>
-</div>
-
-
-
-<div class="post">
-  <div class="post-header">
-    <h1 class="post-title">关于malloc源码中bin_at宏定义的个人见解</h1>
-    <p class="post-meta">2022-10-16 10:26:50</p>
-  </div>
-  <div class="post-content">
-    <article>
-      <h2 id="0x01：简介"><a href="#0x01：简介" class="headerlink" title="0x01：简介"></a>0x01：简介</h2><p>在堆中的内存申请和释放中，为了减少使用系统调用函数对内存操作，malloc_state（分配区）结构中使用了fastbinsY数组和bins数组。当chunk被free后，bins链会将这些free chunk组织起来。当下次malloc时，会先对bins链中的free chunk进行遍历，有适合的则使用，无合适的再进行下一步操作。</p>
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/cropPhoto.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/top/wen08.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">tolele的自由小屋</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">关于malloc源码中bin_at宏定义的个人见解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-10-16T02:26:50.000Z" title="发表于 2022-10-16 10:26:50">2022-10-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-10-16T02:48:17.014Z" title="更新于 2022-10-16 10:48:17">2022-10-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">二进制漏洞分析</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="关于malloc源码中bin_at宏定义的个人见解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="0x01：简介"><a href="#0x01：简介" class="headerlink" title="0x01：简介"></a>0x01：简介</h2><p>在堆中的内存申请和释放中，为了减少使用系统调用函数对内存操作，malloc_state（分配区）结构中使用了fastbinsY数组和bins数组。当chunk被free后，bins链会将这些free chunk组织起来。当下次malloc时，会先对bins链中的free chunk进行遍历，有适合的则使用，无合适的再进行下一步操作。</p>
 <p> 在申请和释放操作时，一般是有一个arena（分配区，其为malloc_state结构类型）。通过宏定义bin_at(m,i)即可获得对相应bins链进行操作，m为分配区，i为索引，当i=1是为unsorted bin，<code>i=2~63</code>是small bin，<code>i=64~126</code>为large bin。</p>
 <pre><code class="C">bin_at可以这样使用：
 p = bin_at(m,1)  //unsorted bin
@@ -161,262 +205,4 @@ int main()
 
 <h2 id="0x04：思考"><a href="#0x04：思考" class="headerlink" title="0x04：思考"></a>0x04：思考</h2><p>在刚开始看这个宏定义时，一脸懵逼，觉得这个宏定义是有问题吧，减去16不是超出了范围了么？后来继续分析源码时发现了-&gt;fd和-&gt;bk的操作，陷入了沉思。巧的是，群里有师傅刚好提到这个问题，所以和该师傅交流了一下，最后得到了一个比较合理的解释。</p>
 <p> 但是令我疑惑的是，为什么在后面会留两个空白单元嘞？留在前面不是更恰当么？bin_at(m,1)指向了bins数组外面的单元（存top chunk地址的单元），这样会不会存有遗患呢？😶</p>
-
-    </article>
-  </div>
-  <div class="post-footer">
-    <a href="javascript:window.history.back();">
-      cd ..
-    </a>
-    <br>
-    <a href="/">
-      cd /
-    </a>
-  </div>
-  <div class="post-license">
-    <span>
-      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" style="color: inherit;">
-        CC BY-NC-SA 4.0
-      </a>
-      2021-PRESENT © tolele
-    </span>
-    <div></div>
-  </div>
-  <div class="post-comment">
-    <div id="disqusjs"></div>
-  </div>
-</div>
-
-    </main>
-    <footer class="footer">
-  <div class="copyright">
-    <span>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/xbmlz/hexo-theme-maple" target="_blank">Maple</a></span>
-  </div>
-</footer>
-
-  </div>
-  <script>
-  (function() {
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    const setting = localStorage.getItem('hexo-color-scheme') || 'auto'
-    if (setting === 'dark' || (prefersDark && setting !== 'light'))
-      document.documentElement.classList.toggle('dark', true)
-  })()
-</script>
-
-
-<script src="/js/jquery-3.4.1.min.js"></script>
-
-
-<script src="/js/index.js"></script>
-
-
-
-<script src="/js/iconify.min.js"></script>
-
-
-<script>
-  window.onload = () => {
-    let media = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')
-    let isDark = () => {
-      const setting = localStorage.getItem('hexo-color-scheme') || 'auto'
-      if (setting === 'dark' || (media.matches && setting !== 'light')) {
-        return true
-      } else{
-        return false
-      }
-    }
-    // 切换为深色模式
-    let toggleDarkMode = () => {
-      document.documentElement.classList.toggle('dark', true)
-      document.getElementById('moon-icon').style.display = 'block'
-      document.getElementById('sun-icon').style.display = 'none'
-      setDarkMode('dark')
-    }
-    // 切换为浅色模式
-    let toggleLightMode = () => {
-      document.documentElement.classList.toggle('dark', false)
-      document.getElementById('moon-icon').style.display = 'none'
-      document.getElementById('sun-icon').style.display = 'block'
-      setDarkMode('light')
-    }
-    let setDarkMode = (scheme) => {
-      const darkMode = media.matches ? 'dark' : 'light'
-      if (darkMode !== scheme) {
-        localStorage.setItem('hexo-color-scheme', scheme)
-      } else{
-        localStorage.setItem('hexo-color-scheme', 'auto')
-      }
-    }
-    // 切换为自动模式
-    let updateMode = (e) => {
-      const setting = localStorage.getItem('hexo-color-scheme') || 'auto'
-      console.log(setting, e.matches)
-      if (setting === 'auto') {
-        if (e.matches) {
-          toggleDarkMode()
-        } else {
-          toggleLightMode()
-        }
-      }
-    }
-
-    // let media = getMedia()
-    if (typeof media.addEventListener === 'function') {
-      media.addEventListener('change', updateMode)
-    } else if (typeof media.addListener === 'function') {
-      media.addListener(updateMode)
-    }
-
-    if (isDark()) {
-      document.getElementById('moon-icon').style.display = 'block'
-    } else {
-      document.getElementById('sun-icon').style.display = 'block'
-    }
-
-    document.getElementById('moon-icon').addEventListener('click', () => {
-      toggleLightMode()
-    })
-    document.getElementById('sun-icon').addEventListener('click', () => {
-      toggleDarkMode()
-    })
-  }
-</script>
-
-
-
-<script src="/lib/tocbot/tocbot.min.js"></script>
-
-<script>
-  var tocbot_timer;
-  var DEPTH_MAX = 6; // 为 6 时展开所有
-  var tocbot_default_config = {
-    tocSelector: '.tocbot-list',
-    contentSelector: '.post-content',
-    headingSelector: 'h1, h2, h3, h4, h5',
-    orderedList: false,
-    scrollSmooth: true,
-    onClick: extend_click,
-  };
-  function extend_click() {
-    clearTimeout(tocbot_timer);
-    tocbot_timer = setTimeout(function () {
-      tocbot.refresh(obj_merge(tocbot_default_config, {
-        hasInnerContainers: true
-      }));
-    }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
-  }
-  function expand_toc() {
-    var b = document.querySelector('.tocbot-toc-expand');
-    var expanded = b.getAttribute('data-expanded');
-    expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
-    tocbot.refresh(obj_merge(tocbot_default_config, {
-      collapseDepth: expanded ? 1 : DEPTH_MAX
-    }));
-    b.innerText = expanded ? 'Expand all' : 'Collapse all';
-  }
-  function go_top() {
-    window.scrollTo(0, 0);
-  }
-  function go_bottom() {
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-  function obj_merge(target, source) {
-    for (var item in source) {
-      if (source.hasOwnProperty(item)) {
-        target[item] = source[item];
-      }
-    }
-    return target;
-  }
-  $(document).ready(() => {
-    tocbot.init(obj_merge(tocbot_default_config, {
-      collapseDepth: 1
-    }));
-  });
-</script>
-
-
-
-
-
-
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    "HTML-CSS": {
-        preferredFont: "TeX",
-        availableFonts: ["STIX","TeX"],
-        linebreaks: { automatic:true },
-        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
-    },
-    tex2jax: {
-        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
-        processEscapes: true,
-        ignoreClass: "tex2jax_ignore|dno",
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-    },
-    TeX: {
-        equationNumbers: { autoNumber: "AMS" },
-        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
-        Macros: { href: "{}" }
-    },
-    messageStyle: "none"
-  });
-</script>
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Queue(function() {
-      var all = MathJax.Hub.getAllJax(), i;
-      for (i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-      }
-  });
-</script>
-
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-<script>
-  $(document).ready(() => {
-    const maraidConfig = {
-      theme: "default",
-      logLevel: 3,
-      flowchart: { curve: "linear" },
-      gantt: { axisFormat: "%m/%d/%Y" },
-      sequence: { actorMargin: 50 },
-    };
-    mermaid.initialize(maraidConfig);
-  });
-</script>
-
-
-
-
-<script src="/lib/fancybox/fancybox.umd.js"></script>
-
-<script>
-  $(document).ready(() => {
-    $('.post-content').each(function(i){
-      $(this).find('img').each(function(){
-        if ($(this).parent().hasClass('fancybox') || $(this).parent().is('a')) return;
-        var alt = this.alt;
-        if (alt) $(this).after('<span class="fancybox-alt">' + alt + '</span>');
-        $(this).wrap('<a class="fancybox-img" href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
-      });
-      $(this).find('.fancybox').each(function(){
-        $(this).attr('rel', 'article' + i);
-      });
-    });
-
-    Fancybox.bind('[data-fancybox="gallery"]', {
-        // options
-    })
-  })
-</script>
-
-
-
-</body>
-
-</html>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://example.com">tolele</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/">http://example.com/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">tolele的自由小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/img/fen/wen08.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/10/30/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/"><img class="prev-cover" src="/img/fen/wen09.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">格式化字符串漏洞</div></div></a></div><div class="next-post pull-right"><a href="/2022/10/16/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/"><img class="next-cover" src="/img/fen/wen07.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Angr学习记录</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/cropPhoto.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">tolele</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/toleleYJL"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/toleleYJL" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:1623093551@qq.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="/1623093551" target="_blank" title="QQ"><i class="fa-brands fa-qq"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎交流~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9A%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">0x01：简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E4%B8%AA%E4%BA%BA%E7%90%86%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">0x02：个人理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9A%E6%B5%8B%E8%AF%95"><span class="toc-number">3.</span> <span class="toc-text">0x03：测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04%EF%BC%9A%E6%80%9D%E8%80%83"><span class="toc-number">4.</span> <span class="toc-text">0x04：思考</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/10/30/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/" title="格式化字符串漏洞"><img src="/img/fen/wen09.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="格式化字符串漏洞"/></a><div class="content"><a class="title" href="/2022/10/30/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/" title="格式化字符串漏洞">格式化字符串漏洞</a><time datetime="2022-10-30T13:30:33.000Z" title="发表于 2022-10-30 21:30:33">2022-10-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/" title="关于malloc源码中bin_at宏定义的个人见解"><img src="/img/fen/wen08.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="关于malloc源码中bin_at宏定义的个人见解"/></a><div class="content"><a class="title" href="/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/" title="关于malloc源码中bin_at宏定义的个人见解">关于malloc源码中bin_at宏定义的个人见解</a><time datetime="2022-10-16T02:26:50.000Z" title="发表于 2022-10-16 10:26:50">2022-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/16/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" title="Angr学习记录"><img src="/img/fen/wen07.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Angr学习记录"/></a><div class="content"><a class="title" href="/2022/10/16/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" title="Angr学习记录">Angr学习记录</a><time datetime="2022-10-16T00:34:32.000Z" title="发表于 2022-10-16 08:34:32">2022-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/15/Base64%E9%9A%90%E5%86%99/" title="Base64隐写"><img src="/img/fen/wen06.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Base64隐写"/></a><div class="content"><a class="title" href="/2022/10/15/Base64%E9%9A%90%E5%86%99/" title="Base64隐写">Base64隐写</a><time datetime="2022-10-15T01:14:05.000Z" title="发表于 2022-10-15 09:14:05">2022-10-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/12/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/" title="更换可执行文件glibc版本的某一次挣扎"><img src="/img/fen/wen05.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="更换可执行文件glibc版本的某一次挣扎"/></a><div class="content"><a class="title" href="/2022/10/12/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/" title="更换可执行文件glibc版本的某一次挣扎">更换可执行文件glibc版本的某一次挣扎</a><time datetime="2022-10-12T00:36:20.000Z" title="发表于 2022-10-12 08:36:20">2022-10-12</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 By tolele</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
