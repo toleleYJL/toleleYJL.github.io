@@ -1,6 +1,403 @@
-<!DOCTYPE html><html lang="zh-CN"><head><title>tolele的自由小屋</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
-  document.body.classList.add('mobile')
-}</script><div><div class="outer"><ul class="list-group"><li class="list-group-item title"><div class="date">2022-10-30</div><a href="/2022/10/30/格式化字符串漏洞/" target="_self">格式化字符串漏洞</a></li><li class="list-group-item title"><div class="date">2022-10-16</div><a href="/2022/10/16/关于malloc源码中bin-at宏定义的个人见解/" target="_self">关于malloc源码中bin_at宏定义的个人见解</a></li><li class="list-group-item title"><div class="date">2022-10-16</div><a href="/2022/10/16/Angr学习记录/" target="_self">Angr学习记录</a></li><li class="list-group-item title"><div class="date">2022-10-15</div><a href="/2022/10/15/Base64隐写/" target="_self">Base64隐写</a></li><li class="list-group-item title"><div class="date">2022-10-12</div><a href="/2022/10/12/更换可执行文件glibc版本的某一次挣扎/" target="_self">更换可执行文件glibc版本的某一次挣扎</a></li><li class="list-group-item title"><div class="date">2022-10-10</div><a href="/2022/10/10/Pwn-从入门到入坟/" target="_self">Pwn 从入门到入坟</a></li><li class="list-group-item title"><div class="date">2022-10-09</div><a href="/2022/10/09/异构Pwn/" target="_self">异构Pwn</a></li><li class="list-group-item title"><div class="date">2022-10-08</div><a href="/2022/10/08/2022年 第五届美团CTF Pwn题复现/" target="_self">2022年 第五届美团CTF Pwn题复现</a></li><li class="list-group-item title"><div class="date">2022-10-02</div><a href="/2022/10/02/记一次GitHub-Hexo搭建个人博客的过程/" target="_self">记一次GitHub+Hexo搭建个人博客的过程</a></li></ul></div><div class="footer"><p class="text-center">© toleleyjl.github.io</p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', '');</script></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <meta name="author" content="tolele">
+
+
+  <meta name="subtitle" content="tolele">
+
+
+
+
+<title>归档: 2022/10 | tolele的自由小屋</title>
+
+
+
+    <link rel="icon" href="/favicon.png">
+
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+<link rel="stylesheet" href="/lib/tocbot/tocbot.css">
+
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.min.css">
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+  <div id="app">
+    <header class="header">
+  <a href="/" class="logo" focusable="false">
+    <img src="/images/logo.svg" alt="tolele的自由小屋" />
+  </a>
+  <nav class="nav">
+    <div class="spacer"></div>
+    <div class="right">
+      <div class="menu">
+        
+          <a class="item" href="/archives">Posts</a>
+          
+          <a class="item" href="/category">Categories</a>
+          
+          <a class="item" href="/tag">Tags</a>
+          
+      </div>
+      <div class="links">
+        
+          
+            <a title="Github" target="_blank" rel="noopener" href="https://github.com/toleleyjl" class="link-item">
+              <span class="iconify" data-icon="ri:github-line"></span>
+            </a>
+          
+        
+      </div>
+      <a class="toggleDark" id="dark-mode">
+        <span class="iconify" data-icon="ri:sun-line" id="sun-icon" style="display: none"></span>
+        <span class="iconify" data-icon="ri:moon-line" id="moon-icon" style="display: none"></span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+    <main class="container">
+      <div class="posts">
+  
+  <ul>
+    
+    
+    
+      <h2>2022</h2>
+    
+    <a href="/2022/10/30/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/" class="item">
+      <li>
+        <div class="title">格式化字符串漏洞</div>
+        <div class="time">2022-10-30 21:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/16/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/" class="item">
+      <li>
+        <div class="title">关于malloc源码中bin_at宏定义的个人见解</div>
+        <div class="time">2022-10-16 10:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/16/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" class="item">
+      <li>
+        <div class="title">Angr学习记录</div>
+        <div class="time">2022-10-16 08:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/15/Base64%E9%9A%90%E5%86%99/" class="item">
+      <li>
+        <div class="title">Base64隐写</div>
+        <div class="time">2022-10-15 09:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/12/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/" class="item">
+      <li>
+        <div class="title">更换可执行文件glibc版本的某一次挣扎</div>
+        <div class="time">2022-10-12 08:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/10/Pwn-%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9D%9F/" class="item">
+      <li>
+        <div class="title">Pwn 从入门到入坟</div>
+        <div class="time">2022-10-10 18:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/09/%E5%BC%82%E6%9E%84Pwn/" class="item">
+      <li>
+        <div class="title">异构Pwn</div>
+        <div class="time">2022-10-09 19:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/08/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/" class="item">
+      <li>
+        <div class="title">2022年 第五届美团CTF Pwn题复现</div>
+        <div class="time">2022-10-08 15:10</div>
+      </li>
+    </a>
+    
+    
+    
+    <a href="/2022/10/02/%E8%AE%B0%E4%B8%80%E6%AC%A1GitHub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E7%9A%84%E8%BF%87%E7%A8%8B/" class="item">
+      <li>
+        <div class="title">记一次GitHub+Hexo搭建个人博客的过程</div>
+        <div class="time">2022-10-02 08:10</div>
+      </li>
+    </a>
+    
+  </ul>
+  
+
+</div>
+
+    </main>
+    <footer class="footer">
+  <div class="copyright">
+    <span>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/xbmlz/hexo-theme-maple" target="_blank">Maple</a></span>
+  </div>
+</footer>
+
+  </div>
+  <script>
+  (function() {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    const setting = localStorage.getItem('hexo-color-scheme') || 'auto'
+    if (setting === 'dark' || (prefersDark && setting !== 'light'))
+      document.documentElement.classList.toggle('dark', true)
+  })()
+</script>
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/js/index.js"></script>
+
+
+
+<script src="/js/iconify.min.js"></script>
+
+
+<script>
+  window.onload = () => {
+    let media = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')
+    let isDark = () => {
+      const setting = localStorage.getItem('hexo-color-scheme') || 'auto'
+      if (setting === 'dark' || (media.matches && setting !== 'light')) {
+        return true
+      } else{
+        return false
+      }
+    }
+    // 切换为深色模式
+    let toggleDarkMode = () => {
+      document.documentElement.classList.toggle('dark', true)
+      document.getElementById('moon-icon').style.display = 'block'
+      document.getElementById('sun-icon').style.display = 'none'
+      setDarkMode('dark')
+    }
+    // 切换为浅色模式
+    let toggleLightMode = () => {
+      document.documentElement.classList.toggle('dark', false)
+      document.getElementById('moon-icon').style.display = 'none'
+      document.getElementById('sun-icon').style.display = 'block'
+      setDarkMode('light')
+    }
+    let setDarkMode = (scheme) => {
+      const darkMode = media.matches ? 'dark' : 'light'
+      if (darkMode !== scheme) {
+        localStorage.setItem('hexo-color-scheme', scheme)
+      } else{
+        localStorage.setItem('hexo-color-scheme', 'auto')
+      }
+    }
+    // 切换为自动模式
+    let updateMode = (e) => {
+      const setting = localStorage.getItem('hexo-color-scheme') || 'auto'
+      console.log(setting, e.matches)
+      if (setting === 'auto') {
+        if (e.matches) {
+          toggleDarkMode()
+        } else {
+          toggleLightMode()
+        }
+      }
+    }
+
+    // let media = getMedia()
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', updateMode)
+    } else if (typeof media.addListener === 'function') {
+      media.addListener(updateMode)
+    }
+
+    if (isDark()) {
+      document.getElementById('moon-icon').style.display = 'block'
+    } else {
+      document.getElementById('sun-icon').style.display = 'block'
+    }
+
+    document.getElementById('moon-icon').addEventListener('click', () => {
+      toggleLightMode()
+    })
+    document.getElementById('sun-icon').addEventListener('click', () => {
+      toggleDarkMode()
+    })
+  }
+</script>
+
+
+
+<script src="/lib/tocbot/tocbot.min.js"></script>
+
+<script>
+  var tocbot_timer;
+  var DEPTH_MAX = 6; // 为 6 时展开所有
+  var tocbot_default_config = {
+    tocSelector: '.tocbot-list',
+    contentSelector: '.post-content',
+    headingSelector: 'h1, h2, h3, h4, h5',
+    orderedList: false,
+    scrollSmooth: true,
+    onClick: extend_click,
+  };
+  function extend_click() {
+    clearTimeout(tocbot_timer);
+    tocbot_timer = setTimeout(function () {
+      tocbot.refresh(obj_merge(tocbot_default_config, {
+        hasInnerContainers: true
+      }));
+    }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+  }
+  function expand_toc() {
+    var b = document.querySelector('.tocbot-toc-expand');
+    var expanded = b.getAttribute('data-expanded');
+    expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+    tocbot.refresh(obj_merge(tocbot_default_config, {
+      collapseDepth: expanded ? 1 : DEPTH_MAX
+    }));
+    b.innerText = expanded ? 'Expand all' : 'Collapse all';
+  }
+  function go_top() {
+    window.scrollTo(0, 0);
+  }
+  function go_bottom() {
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+  function obj_merge(target, source) {
+    for (var item in source) {
+      if (source.hasOwnProperty(item)) {
+        target[item] = source[item];
+      }
+    }
+    return target;
+  }
+  $(document).ready(() => {
+    tocbot.init(obj_merge(tocbot_default_config, {
+      collapseDepth: 1
+    }));
+  });
+</script>
+
+
+
+
+
+
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+  });
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  $(document).ready(() => {
+    const maraidConfig = {
+      theme: "default",
+      logLevel: 3,
+      flowchart: { curve: "linear" },
+      gantt: { axisFormat: "%m/%d/%Y" },
+      sequence: { actorMargin: 50 },
+    };
+    mermaid.initialize(maraidConfig);
+  });
+</script>
+
+
+
+
+<script src="/lib/fancybox/fancybox.umd.js"></script>
+
+<script>
+  $(document).ready(() => {
+    $('.post-content').each(function(i){
+      $(this).find('img').each(function(){
+        if ($(this).parent().hasClass('fancybox') || $(this).parent().is('a')) return;
+        var alt = this.alt;
+        if (alt) $(this).after('<span class="fancybox-alt">' + alt + '</span>');
+        $(this).wrap('<a class="fancybox-img" href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
+      });
+      $(this).find('.fancybox').each(function(){
+        $(this).attr('rel', 'article' + i);
+      });
+    });
+
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        // options
+    })
+  })
+</script>
+
+
+
+</body>
+
+</html>
