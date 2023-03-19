@@ -49,73 +49,73 @@
 <h2 id="0x02：Angr执行环境配置"><a href="#0x02：Angr执行环境配置" class="headerlink" title="0x02：Angr执行环境配置"></a>0x02：Angr执行环境配置</h2><div style="font-size: 21px;"><b>本地环境下：</b></div>
 
 <p>目前使用的是这个，比较方便。</p>
-<pre><code class="shell"># 直接运行：
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 直接运行：
 sudo apt install ipython3
 pip install angr
 
-#执行脚本时：ipython3 exp.py
-</code></pre>
+#执行脚本时：ipython3 exp.py<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>虚拟环境：</b></div>
 
-<pre><code class="shell"># @@@angr容器
-sudo docker run -itd --name angr angr/angr
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># @@@angr容器
+sudo docker run -itd --name angr angr&#x2F;angr
 sudo docker exec -it angr bash
 su angr # root用户没有angr的环境，需切换到angr用户
 # 如果su angr显示需要密码，但你又不知道密码的话，可以在上一命令加上参数：-u 0
 # 即sudo docker exec -u 0 -it angr bash 可以直接root权限打开容器
 
 # @@@安装checksec工具
-mkdir /opt/tools
-cd /opt/tools
+mkdir &#x2F;opt&#x2F;tools
+cd &#x2F;opt&#x2F;tools
 # 官方
-# git clone https://github.com/slimm609/checksec.sh.git
+# git clone https:&#x2F;&#x2F;github.com&#x2F;slimm609&#x2F;checksec.sh.git
 # 加速
-git clone https://gitclone.com/github.com/slimm609/checksec.sh.git
+git clone https:&#x2F;&#x2F;gitclone.com&#x2F;github.com&#x2F;slimm609&#x2F;checksec.sh.git
  
 cd checksec.sh
 # 建立链接
-ln -s /opt/tools/checksec.sh/checksec /usr/local/bin/checksec
+ln -s &#x2F;opt&#x2F;tools&#x2F;checksec.sh&#x2F;checksec &#x2F;usr&#x2F;local&#x2F;bin&#x2F;checksec
 
 # @@@克隆项目
-cd /opt
+cd &#x2F;opt
  
 # 官方
-# git clone https://github.com/jakespringer/angr_ctf.git
+# git clone https:&#x2F;&#x2F;github.com&#x2F;jakespringer&#x2F;angr_ctf.git
 # 加速
-git clone https://gitclone.com/github.com/jakespringer/angr_ctf.git
+git clone https:&#x2F;&#x2F;gitclone.com&#x2F;github.com&#x2F;jakespringer&#x2F;angr_ctf.git
  
 # 查看二进制文件
-cd angr_ctf/dist/
-</code></pre>
+cd angr_ctf&#x2F;dist&#x2F;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x03：angr-amp-explore"><a href="#0x03：angr-amp-explore" class="headerlink" title="0x03：angr &amp; explore"></a>0x03：angr &amp; explore</h2><div style="font-size: 21px;"><b>00_angr_find：</b></div>
 
 <p>IDA静态分析：</p>
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  int i; // [esp+1Ch] [ebp-1Ch]
-  char s1[9]; // [esp+23h] [ebp-15h] BYREF
-  unsigned int v6; // [esp+2Ch] [ebp-Ch]
+  int i; &#x2F;&#x2F; [esp+1Ch] [ebp-1Ch]
+  char s1[9]; &#x2F;&#x2F; [esp+23h] [ebp-15h] BYREF
+  unsigned int v6; &#x2F;&#x2F; [esp+2Ch] [ebp-Ch]
 
-  v6 = __readgsdword(0x14u);
+  v6 &#x3D; __readgsdword(0x14u);
   printf(&quot;Enter the password: &quot;);
   __isoc99_scanf(&quot;%8s&quot;, s1);
-  for ( i = 0; i &lt;= 7; ++i )
-    s1[i] = complex_function(s1[i], i);
+  for ( i &#x3D; 0; i &lt;&#x3D; 7; ++i )
+    s1[i] &#x3D; complex_function(s1[i], i);
   if ( !strcmp(s1, &quot;JACEJGCS&quot;) )
-    puts(&quot;Good Job.&quot;);    //目标位置
+    puts(&quot;Good Job.&quot;);    &#x2F;&#x2F;目标位置
   else
     puts(&quot;Try again.&quot;);
   return 0;
 &#125;
 
-// other:
+&#x2F;&#x2F; other:
 int __cdecl complex_function(int a1, int a2)
 &#123;
-  if ( a1 &lt;= 64 || a1 &gt; 90 )
+  if ( a1 &lt;&#x3D; 64 || a1 &gt; 90 )
   &#123;
     puts(&quot;Try again.&quot;);
     exit(1);
@@ -123,28 +123,28 @@ int __cdecl complex_function(int a1, int a2)
   return (3 * a2 + a1 - 65) % 26 + 65;
 &#125;
 
-//目标所在位置：
+&#x2F;&#x2F;目标所在位置：
 .text:08048675 loc_8048675:                            ; CODE XREF: main+9A↑j
 .text:08048675                 sub     esp, 0Ch
 .text:08048678                 push    offset aGoodJob ; &quot;Good Job.&quot;
 .text:0804867D                 call    _puts
-.text:08048682                 add     esp, 10h
-</code></pre>
+.text:08048682                 add     esp, 10h<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>Project是angr中的控制基础，是后续操作的把柄。有了它就能对刚加载的可执行文件进行分析和仿真。几乎在angr中使用的每一个对象都依赖于Project的存在。</p>
 <p>程序状态 state 是一个 SimState 类型的对象，<code>angr.factory.AngrObjectFactory</code> 类提供了创建 state 对象的方法。其中，<code>.entry_state()</code>：从主对象文件的入口点创建一个 state。</p>
 <p>程序执行过程中会产生很多state，模拟管理器（Simulation Managers）则是对这些状态进行管理。创建模拟管理器对象是需要一个状态，没有参数是默认是程序入口点的状态，即.entry_state()</p>
 <p>模拟管理器对象实现了<code>.explore()</code> 功能，允许在探索时查找(find)或避免(avoid)某些地址。</p>
-<pre><code class="python">import angr   # 引入angr模块
-proj = angr.Project(&#39;./00_angr_find&#39;)  # 将一个二进制文件定义为一个对象,是后续操作的基础
-init_state = proj.factory.entry_state() # 程序的入口状态，start函数，并不是main
-sm = proj.factory.simulation_manager(init_state)   #使用执行模拟器，执行起点为init_state。simulation_manager()也可以缩写为simgr()
-sm.explore(find=0x08048675)  # 开始模拟执行，并设置探索目标为0x08048678处
-find_state = sm.found[0]  # 探索到的状态
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr   # 引入angr模块
+proj &#x3D; angr.Project(&#39;.&#x2F;00_angr_find&#39;)  # 将一个二进制文件定义为一个对象,是后续操作的基础
+init_state &#x3D; proj.factory.entry_state() # 程序的入口状态，start函数，并不是main
+sm &#x3D; proj.factory.simulation_manager(init_state)   #使用执行模拟器，执行起点为init_state。simulation_manager()也可以缩写为simgr()
+sm.explore(find&#x3D;0x08048675)  # 开始模拟执行，并设置探索目标为0x08048678处
+find_state &#x3D; sm.found[0]  # 探索到的状态
 print(find_state.posix.dumps(0)) # posix.dumps模拟posix环境下的输出输入
 # 0为能到达该状态的输入值
 # 1时为程序的输出信息
-# 结果： b&#39;JXWVXRKX&#39;
-</code></pre>
+# 结果： b&#39;JXWVXRKX&#39;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>01_angr_avoid：</b></div>
@@ -154,7 +154,7 @@ print(find_state.posix.dumps(0)) # posix.dumps模拟posix环境下的输出输�
 <p>程序和上一程序类似，但main函数中出现超级多次avoid_me函数，导致main不能在IDA反汇编。在模拟执行的explore函数中，参数除了find外还有avoid。因此我们可以通过传入avoid_me函数的地址进行符号执行分析。</p>
 <p>目的地：<code>.text:080485E0                 push    offset aGoodJob ; &quot;Good Job.&quot;</code></p>
 <p>需避免的：<code>.text:080485A8 avoid_me        proc near               ; CODE XREF: main+1CA↓p</code></p>
-<pre><code class="C">// maybe_good函数
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">&#x2F;&#x2F; maybe_good函数
 int __cdecl maybe_good(char *s1, char *s2)
 &#123;
   if ( should_succeed &amp;&amp; !strncmp(s1, s2, 8u) )
@@ -163,72 +163,72 @@ int __cdecl maybe_good(char *s1, char *s2)
     return puts(&quot;Try again.&quot;);
 &#125;
 
-// avoid_me函数
+&#x2F;&#x2F; avoid_me函数
 void avoid_me()
 &#123;
-  should_succeed = 0;   
-&#125;
-</code></pre>
+  should_succeed &#x3D; 0;   
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>另外，避开avoid_me函数不仅仅是因为其数量多导致效率低，而且其还会影响maybe_good的执行路径。</p>
-<pre><code class="python">import angr
-proj = angr.Project(&#39;./01_angr_avoid&#39;)
-init_state = proj.factory.entry_state()
-sm = proj.factory.simulation_manager(init_state)
-target = 0x080485E0
-bad_addr = 0x080485A8
-sm.explore(find=target, avoid=bad_addr)
-find_state = sm.found[0]
-print(find_state.posix.dumps(0))
-</code></pre>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
+proj &#x3D; angr.Project(&#39;.&#x2F;01_angr_avoid&#39;)
+init_state &#x3D; proj.factory.entry_state()
+sm &#x3D; proj.factory.simulation_manager(init_state)
+target &#x3D; 0x080485E0
+bad_addr &#x3D; 0x080485A8
+sm.explore(find&#x3D;target, avoid&#x3D;bad_addr)
+find_state &#x3D; sm.found[0]
+print(find_state.posix.dumps(0))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>02_angr_find_condition：</b></div>
 
-<pre><code class="C">int __cdecl complex_function(int a1, int a2)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl complex_function(int a1, int a2)
 &#123;
-  if ( a1 &lt;= 64 || a1 &gt; 90 )
+  if ( a1 &lt;&#x3D; 64 || a1 &gt; 90 )
   &#123;
     puts(&quot;Try again.&quot;);
     exit(1);
   &#125;
   return (31 * a2 + a1 - 65) % 26 + 65;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>上一程序是一个函数多次调用。这个从main函数的汇编代码看，出现了很多打印<code>Good Job.</code> 、<code>Try again.</code>的地方。如果使用地址进行约束，就会很繁琐。本程序需要定义函数来<u>检测输出的字符</u>进行约束。</p>
 <p><img src="/images/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/pic04.png" alt="pic04"></p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 
 def is_successful(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Good Job.&#39; in str(output)
 
 def should_abort(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Try again.&#39; in str(output)
 
-proj = angr.Project(&quot;./02_angr_find_condition&quot;)
-init_state = proj.factory.entry_state()
-sm = proj.factory.simgr(init_state)
-sm.explore(find=is_successful, avoid=should_abort)
-find_state = sm.found[0]
-print(find_state.posix.dumps(0))
-</code></pre>
+proj &#x3D; angr.Project(&quot;.&#x2F;02_angr_find_condition&quot;)
+init_state &#x3D; proj.factory.entry_state()
+sm &#x3D; proj.factory.simgr(init_state)
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
+find_state &#x3D; sm.found[0]
+print(find_state.posix.dumps(0))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x04：angr-amp-symbolic"><a href="#0x04：angr-amp-symbolic" class="headerlink" title="0x04：angr &amp; symbolic"></a>0x04：angr &amp; symbolic</h2><div style="font-size: 21px;"><b>03_angr_symbolic_registers：</b></div>
 
-<pre><code class="C">int get_user_input()
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int get_user_input()
 &#123;
-  int v1; // [esp+0h] [ebp-18h] BYREF
-  int v2; // [esp+4h] [ebp-14h] BYREF
-  int v3[4]; // [esp+8h] [ebp-10h] BYREF
+  int v1; &#x2F;&#x2F; [esp+0h] [ebp-18h] BYREF
+  int v2; &#x2F;&#x2F; [esp+4h] [ebp-14h] BYREF
+  int v3[4]; &#x2F;&#x2F; [esp+8h] [ebp-10h] BYREF
 
-  v3[1] = __readgsdword(0x14u);
+  v3[1] &#x3D; __readgsdword(0x14u);
   __isoc99_scanf(&quot;%x %x %x&quot;, &amp;v1, &amp;v2, v3);
   return v1;
 &#125;
 
-//IDA
+&#x2F;&#x2F;IDA
 .text:0804891C                 xor     ecx, ecx
 .text:0804891E                 lea     ecx, [ebp+var_10]
 .text:08048921                 push    ecx
@@ -240,32 +240,32 @@ print(find_state.posix.dumps(0))
 .text:0804892F                 call    ___isoc99_scanf
 .text:08048934                 add     esp, 10h
 .text:08048937                 mov     ecx, [ebp+var_18]
-.text:0804893A                 mov     eax, ecx     //v1
+.text:0804893A                 mov     eax, ecx     &#x2F;&#x2F;v1
 .text:0804893C                 mov     ecx, [ebp+var_14]
-.text:0804893F                 mov     ebx, ecx     //v2
+.text:0804893F                 mov     ebx, ecx     &#x2F;&#x2F;v2
 .text:08048941                 mov     ecx, [ebp+var_10]
-.text:08048944                 mov     edx, ecx     //v3
-.text:08048946                 nop
-</code></pre>
+.text:08048944                 mov     edx, ecx     &#x2F;&#x2F;v3
+.text:08048946                 nop<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p><code>get_user_imput</code>函数的作用主要是按顺序对v1、v2和v3输入值，然后v1、v2和v3又分别传值给eax、ebx和edx。</p>
 <br>
 
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  int v3; // ebx
-  int user_input; // eax
-  int v5; // edx
-  unsigned int v7; // [esp+4h] [ebp-14h]
-  unsigned int v8; // [esp+8h] [ebp-10h]
-  int v9; // [esp+Ch] [ebp-Ch]
-  unsigned int v10; // [esp+Ch] [ebp-Ch]
+  int v3; &#x2F;&#x2F; ebx
+  int user_input; &#x2F;&#x2F; eax
+  int v5; &#x2F;&#x2F; edx
+  unsigned int v7; &#x2F;&#x2F; [esp+4h] [ebp-14h]
+  unsigned int v8; &#x2F;&#x2F; [esp+8h] [ebp-10h]
+  int v9; &#x2F;&#x2F; [esp+Ch] [ebp-Ch]
+  unsigned int v10; &#x2F;&#x2F; [esp+Ch] [ebp-Ch]
 
   printf(&quot;Enter the password: &quot;);
-  user_input = get_user_input();
-  v9 = v5;
-  v7 = complex_function_1(user_input);
-  v8 = complex_function_2(v3);
-  v10 = complex_function_3(v9);
+  user_input &#x3D; get_user_input();
+  v9 &#x3D; v5;
+  v7 &#x3D; complex_function_1(user_input);
+  v8 &#x3D; complex_function_2(v3);
+  v10 &#x3D; complex_function_3(v9);
   if ( v7 || v8 || v10 )
     puts(&quot;Try again.&quot;);
   else
@@ -273,72 +273,72 @@ print(find_state.posix.dumps(0))
   return 0;
 &#125;
 
-//IDA
+&#x2F;&#x2F;IDA
 .text:08048978                 add     esp, 10h
 .text:0804897B                 call    get_user_input
-.text:08048980                 mov     [ebp+var_14], eax   //v7
-.text:08048983                 mov     [ebp+var_10], ebx   //v8
-.text:08048986                 mov     [ebp+var_C], edx    //v10
-.text:08048989                 sub     esp, 0Ch
-</code></pre>
+.text:08048980                 mov     [ebp+var_14], eax   &#x2F;&#x2F;v7
+.text:08048983                 mov     [ebp+var_10], ebx   &#x2F;&#x2F;v8
+.text:08048986                 mov     [ebp+var_C], edx    &#x2F;&#x2F;v10
+.text:08048989                 sub     esp, 0Ch<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>在get_user_input函数中输入的值，分别作为complex_function_1/2/3的参数进行运算，只有三个函数的返回值都为假才成功。这个程序的scanf函数的格式化字符串比其他程序的要复杂(好像只有单个输入时才能自动模拟🙃)，所以需要手动注入数据。0x08048980为输入数据后的第一个指令，所以将这里设为初始状态开始模拟，在创建初始状态后，可通过<code>init_state.regs.</code>对指令传入符号变量，起到get_user_input函数的作用。</p>
 <p><img src="/images/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/pic02.png" alt="pic02"></p>
 <p>angr的求解引擎为Claripy，用来根据程序所需要的输入来设置符号变量以及收集限制式等等。</p>
 <p>创建符号变量：claripy.BVS(‘x’, 32)</p>
 <p>创建具体值变量：claripy.BVV(0x12345678, 32)</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import claripy
 
-proj = angr.Project(&quot;./03_angr_symbolic_registers&quot;)
-start_addr = 0x8048980
-init_state = proj.factory.blank_state(addr=start_addr) # 自定义起始地址
+proj &#x3D; angr.Project(&quot;.&#x2F;03_angr_symbolic_registers&quot;)
+start_addr &#x3D; 0x8048980
+init_state &#x3D; proj.factory.blank_state(addr&#x3D;start_addr) # 自定义起始地址
 
 # 创建符号位向量（angr用于给二进制文件注入符号值的数据类型）
-value0 = claripy.BVS(&#39;x&#39;, 32) # value0为32bit
-value1 = claripy.BVS(&#39;y&#39;, 32)
-value2 = claripy.BVS(&#39;z&#39;, 32)
+value0 &#x3D; claripy.BVS(&#39;x&#39;, 32) # value0为32bit
+value1 &#x3D; claripy.BVS(&#39;y&#39;, 32)
+value2 &#x3D; claripy.BVS(&#39;z&#39;, 32)
 
 # 将寄存器设置为符号值。 这是向程序中注入符号的一种方法。
 # 将不同寄存器设置为不同的符号值
-init_state.regs.eax = value0
-init_state.regs.ebx = value1
-init_state.regs.edx = value2
+init_state.regs.eax &#x3D; value0
+init_state.regs.ebx &#x3D; value1
+init_state.regs.edx &#x3D; value2
 
-sm = proj.factory.simgr(init_state)
+sm &#x3D; proj.factory.simgr(init_state)
 
 def is_successful(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Good Job.&#39; in str(output)
 
 def should_abort(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Try again.&#39; in str(output)
 
-sm.explore(find=is_successful, avoid=should_abort)
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
 
-find_state = sm.found[0]
+find_state &#x3D; sm.found[0]
 
 # 使用eval来得到求解值
 # 原解题脚本的state.se已经被废弃，根据提示使用state.solver来求解value符号变量的值
-s0 = find_state.solver.eval(value0)
-s1 = find_state.solver.eval(value1)
-s2 = find_state.solver.eval(value2)
-s = &#39; &#39;.join(map(&#39;&#123;:x&#125;&#39;.format, [s0,s1,s2]))
-print(s)
-</code></pre>
+s0 &#x3D; find_state.solver.eval(value0)
+s1 &#x3D; find_state.solver.eval(value1)
+s2 &#x3D; find_state.solver.eval(value2)
+s &#x3D; &#39; &#39;.join(map(&#39;&#123;:x&#125;&#39;.format, [s0,s1,s2]))
+print(s)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>04_angr_symbolic_stack：</b></div>
 
-<pre><code class="C">int handle_user()
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int handle_user()
 &#123;
-  int v1; // [esp+8h] [ebp-10h] BYREF
-  int v2[3]; // [esp+Ch] [ebp-Ch] BYREF
+  int v1; &#x2F;&#x2F; [esp+8h] [ebp-10h] BYREF
+  int v2[3]; &#x2F;&#x2F; [esp+Ch] [ebp-Ch] BYREF
 
-  __isoc99_scanf(&quot;%u %u&quot;, v2, &amp;v1);     //手动注入数据（栈数据）
-  v2[0] = complex_function0(v2[0]);
-  v1 = complex_function1(v1);
-  if ( v2[0] == 1999643857 &amp;&amp; v1 == -1136455217 )
+  __isoc99_scanf(&quot;%u %u&quot;, v2, &amp;v1);     &#x2F;&#x2F;手动注入数据（栈数据）
+  v2[0] &#x3D; complex_function0(v2[0]);
+  v1 &#x3D; complex_function1(v1);
+  if ( v2[0] &#x3D;&#x3D; 1999643857 &amp;&amp; v1 &#x3D;&#x3D; -1136455217 )
     return puts(&quot;Good Job.&quot;);
   else
     return puts(&quot;Try again.&quot;);
@@ -347,127 +347,127 @@ print(s)
 .text:0804868A                 push    offset aUU      ; &quot;%u %u&quot;
 .text:0804868F                 call    ___isoc99_scanf
 .text:08048694                 add     esp, 10h
-.text:08048697                 mov     eax, [ebp+var_C]    //从这里开始模拟执行
+.text:08048697                 mov     eax, [ebp+var_C]    &#x2F;&#x2F;从这里开始模拟执行
 .text:0804869A                 sub     esp, 0Ch
 .text:0804869D                 push    eax
-.text:0804869E                 call    complex_function0
-</code></pre>
+.text:0804869E                 call    complex_function0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>由于需要往栈里符号化输入，所以需要在启动该程序之前自己构造相应的栈结构。方法是通过<code>state.stack_push(my_bitvector)</code>来将值my_bitvector push到栈顶。state.regs.esp -= [ByteSize]用于填充ByteSize字节的无用数据。</p>
 <p><img src="/images/Angr%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/pic03.jpg" alt="pic03"></p>
 <br>
 
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import claripy
 
-proj = angr.Project(&quot;./04_angr_symbolic_stack&quot;)
-start_addr = 0x08048697
-init_state = proj.factory.blank_state(addr=start_addr)
+proj &#x3D; angr.Project(&quot;.&#x2F;04_angr_symbolic_stack&quot;)
+start_addr &#x3D; 0x08048697
+init_state &#x3D; proj.factory.blank_state(addr&#x3D;start_addr)
 
-init_state.regs.ebp = init_state.regs.esp   # 这里有点看不懂
-value1 = claripy.BVS(&#39;x&#39;, 32)
-value2 = claripy.BVS(&#39;y&#39;, 32)
-init_state.regs.esp -= 8
+init_state.regs.ebp &#x3D; init_state.regs.esp   # 这里有点看不懂
+value1 &#x3D; claripy.BVS(&#39;x&#39;, 32)
+value2 &#x3D; claripy.BVS(&#39;y&#39;, 32)
+init_state.regs.esp -&#x3D; 8
 init_state.stack_push(v1)  
 init_state.stack_push(v2)
 
-sm = proj.factory.simgr(init_state)
+sm &#x3D; proj.factory.simgr(init_state)
 
 def is_successful(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Good Job.&#39; in str(output)
 
 def should_abort(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Try again.&#39; in str(output)
 
-sm.explore(find=is_successful, avoid=should_abort)
-find_state = sm.found[0]
-s1 = find_state.solver.eval(value1)
-s2 = find_state.solver.eval(value2)
-s = &#39; &#39;.join(map(str, [s1,s2]))   #s1和s2的顺序？
-print(s)
-</code></pre>
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
+find_state &#x3D; sm.found[0]
+s1 &#x3D; find_state.solver.eval(value1)
+s2 &#x3D; find_state.solver.eval(value2)
+s &#x3D; &#39; &#39;.join(map(str, [s1,s2]))   #s1和s2的顺序？
+print(s)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>05_angr_symbolic_memory：</b></div>
 
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  int i; // [esp+Ch] [ebp-Ch]
+  int i; &#x2F;&#x2F; [esp+Ch] [ebp-Ch]
 
   memset(user_input, 0, 0x21u);
   printf(&quot;Enter the password: &quot;);
-  __isoc99_scanf(&quot;%8s %8s %8s %8s&quot;, user_input, &amp;unk_A1BA1C8, &amp;unk_A1BA1D0, &amp;unk_A1BA1D8);  //内存空间 bss段
-  for ( i = 0; i &lt;= 31; ++i )
-    *(_BYTE *)(i + 0xA1BA1C0) = complex_function(*(char *)(i + 0xA1BA1C0), i);
+  __isoc99_scanf(&quot;%8s %8s %8s %8s&quot;, user_input, &amp;unk_A1BA1C8, &amp;unk_A1BA1D0, &amp;unk_A1BA1D8);  &#x2F;&#x2F;内存空间 bss段
+  for ( i &#x3D; 0; i &lt;&#x3D; 31; ++i )
+    *(_BYTE *)(i + 0xA1BA1C0) &#x3D; complex_function(*(char *)(i + 0xA1BA1C0), i);
   if ( !strncmp(user_input, &quot;NJPURZPCDYEAXCSJZJMPSOMBFDDLHBVN&quot;, 0x20u) )
     puts(&quot;Good Job.&quot;);
   else
     puts(&quot;Try again.&quot;);
   return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>解题思路和上一题是一样的，不过这里使用<code>state.memory.store(address, value)</code>方法为全局变量代替为符号变量（操作一段连续的内存）。</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import claripy
 
-proj = angr.Project(&quot;./05_angr_symbolic_memory&quot;)
-start_addr = 0x080485FE
-init_state = proj.factory.blank_state(addr=start_addr)
+proj &#x3D; angr.Project(&quot;.&#x2F;05_angr_symbolic_memory&quot;)
+start_addr &#x3D; 0x080485FE
+init_state &#x3D; proj.factory.blank_state(addr&#x3D;start_addr)
 
-v1 = claripy.BVS(&#39;a&#39;, 8*8)
-v2 = claripy.BVS(&#39;b&#39;, 8*8)
-v3 = claripy.BVS(&#39;c&#39;, 8*8)
-v4 = claripy.BVS(&#39;d&#39;, 8*8)
+v1 &#x3D; claripy.BVS(&#39;a&#39;, 8*8)
+v2 &#x3D; claripy.BVS(&#39;b&#39;, 8*8)
+v3 &#x3D; claripy.BVS(&#39;c&#39;, 8*8)
+v4 &#x3D; claripy.BVS(&#39;d&#39;, 8*8)
 
-v_start = 0x0A1BA1C0
+v_start &#x3D; 0x0A1BA1C0
 init_state.memory.store(v_start, v1)
 init_state.memory.store(v_start+8, v2)
 init_state.memory.store(v_start+0x10, v3)
 init_state.memory.store(v_start+0x18, v4)
 
 def is_successful(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Good Job.&#39; in str(output)
 
 def should_abort(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Try again.&#39; in str(output)
 
-sm = proj.factory.simgr(init_state)
-sm.explore(find=is_successful, avoid=should_abort)
+sm &#x3D; proj.factory.simgr(init_state)
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
 
-find_state = sm.found[0]
-s0 = find_state.solver.eval(v1,cast_to=bytes)
-s1 = find_state.solver.eval(v2,cast_to=bytes)
-s2 = find_state.solver.eval(v3,cast_to=bytes)
-s3 = find_state.solver.eval(v4,cast_to=bytes)
-s = s0 + b&#39; &#39;+ s1 + b&#39; &#39; + s2 + b&#39; &#39; + s3
-print(s.decode(&#39;utf-8&#39;))
-</code></pre>
+find_state &#x3D; sm.found[0]
+s0 &#x3D; find_state.solver.eval(v1,cast_to&#x3D;bytes)
+s1 &#x3D; find_state.solver.eval(v2,cast_to&#x3D;bytes)
+s2 &#x3D; find_state.solver.eval(v3,cast_to&#x3D;bytes)
+s3 &#x3D; find_state.solver.eval(v4,cast_to&#x3D;bytes)
+s &#x3D; s0 + b&#39; &#39;+ s1 + b&#39; &#39; + s2 + b&#39; &#39; + s3
+print(s.decode(&#39;utf-8&#39;))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>06_angr_symbolic_dynamic_memory：</b></div>
 
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  char *v3; // ebx
-  char *v4; // ebx
-  int v6; // [esp-10h] [ebp-1Ch]
-  int i; // [esp+0h] [ebp-Ch]
+  char *v3; &#x2F;&#x2F; ebx
+  char *v4; &#x2F;&#x2F; ebx
+  int v6; &#x2F;&#x2F; [esp-10h] [ebp-1Ch]
+  int i; &#x2F;&#x2F; [esp+0h] [ebp-Ch]
 
-  buffer0 = (char *)malloc(9u);      //动态的
-  buffer1 = (char *)malloc(9u);
+  buffer0 &#x3D; (char *)malloc(9u);      &#x2F;&#x2F;动态的
+  buffer1 &#x3D; (char *)malloc(9u);
   memset(buffer0, 0, 9u);
   memset(buffer1, 0, 9u);
   printf(&quot;Enter the password: &quot;);
   __isoc99_scanf(&quot;%8s %8s&quot;, buffer0, buffer1, v6);
-  for ( i = 0; i &lt;= 7; ++i )
+  for ( i &#x3D; 0; i &lt;&#x3D; 7; ++i )
   &#123;
-    v3 = &amp;buffer0[i];
-    *v3 = complex_function(buffer0[i], i);
-    v4 = &amp;buffer1[i];
-    *v4 = complex_function(buffer1[i], i + 32);
+    v3 &#x3D; &amp;buffer0[i];
+    *v3 &#x3D; complex_function(buffer0[i], i);
+    v4 &#x3D; &amp;buffer1[i];
+    *v4 &#x3D; complex_function(buffer1[i], i + 32);
   &#125;
   if ( !strncmp(buffer0, &quot;UODXLZBI&quot;, 8u) &amp;&amp; !strncmp(buffer1, &quot;UAORRAYF&quot;, 8u) )
     puts(&quot;Good Job.&quot;);
@@ -476,65 +476,65 @@ print(s.decode(&#39;utf-8&#39;))
   free(buffer0);
   free(buffer1);
   return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>由于系统的ASLR保护机制，所以堆地址并不是固定的，因此我们不能直接对堆空间注入符号变量。但我们可以对一个固定的位置注入数据，然后将固定位置的地址赋给buffer0和buffer1，即可。</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import claripy
 
-proj = angr.Project(&quot;./06_angr_symbolic_dynamic_memory&quot;)
-start_addr = 0x08048699
-init_state = proj.factory.blank_state(addr=start_addr)
+proj &#x3D; angr.Project(&quot;.&#x2F;06_angr_symbolic_dynamic_memory&quot;)
+start_addr &#x3D; 0x08048699
+init_state &#x3D; proj.factory.blank_state(addr&#x3D;start_addr)
 
-buf1 = 0x0ABCC8A4
-buf2 = 0x0ABCC8AC
-fake_addr1 = 0xffff0000
-fake_addr2 = 0xffff0010
+buf1 &#x3D; 0x0ABCC8A4
+buf2 &#x3D; 0x0ABCC8AC
+fake_addr1 &#x3D; 0xffff0000
+fake_addr2 &#x3D; 0xffff0010
 
-v1 = claripy.BVS(&#39;a&#39;, 8*8)
-v2 = claripy.BVS(&#39;b&#39;, 8*8)
-init_state.memory.store(buf1, fake_addr1, endness=proj.arch.memory_endness)
-init_state.memory.store(buf2, fake_addr2, endness=proj.arch.memory_endness)
+v1 &#x3D; claripy.BVS(&#39;a&#39;, 8*8)
+v2 &#x3D; claripy.BVS(&#39;b&#39;, 8*8)
+init_state.memory.store(buf1, fake_addr1, endness&#x3D;proj.arch.memory_endness)
+init_state.memory.store(buf2, fake_addr2, endness&#x3D;proj.arch.memory_endness)
 
 init_state.memory.store(fake_addr1, v1)
 init_state.memory.store(fake_addr2, v2)
 
 def is_successful(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Good Job.&#39; in str(output)
 
 def should_abort(state):
-    output = state.posix.dumps(1)
+    output &#x3D; state.posix.dumps(1)
     return &#39;Try again.&#39; in str(output)
 
-sm = proj.factory.simgr(init_state)
-sm.explore(find=is_successful, avoid=should_abort)
+sm &#x3D; proj.factory.simgr(init_state)
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
 
-find_state = sm.found[0]
-s0 = find_state.solver.eval(v1,cast_to=bytes)
-s1 = find_state.solver.eval(v2,cast_to=bytes)
-s = s0 + b&#39; &#39; + s1
-print(s.decode(&#39;utf-8&#39;))
-</code></pre>
+find_state &#x3D; sm.found[0]
+s0 &#x3D; find_state.solver.eval(v1,cast_to&#x3D;bytes)
+s1 &#x3D; find_state.solver.eval(v2,cast_to&#x3D;bytes)
+s &#x3D; s0 + b&#39; &#39; + s1
+print(s.decode(&#39;utf-8&#39;))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>07_angr_symbolic_file：</b></div>
 
-<pre><code class="C">int __cdecl __noreturn main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl __noreturn main(int argc, const char **argv, const char **envp)
 &#123;
-  int i; // [esp+Ch] [ebp-Ch]
+  int i; &#x2F;&#x2F; [esp+Ch] [ebp-Ch]
 
-  memset(buffer, 0, sizeof(buffer));            // buffer: [0x0804A0A0]
+  memset(buffer, 0, sizeof(buffer));            &#x2F;&#x2F; buffer: [0x0804A0A0]
   printf(&quot;Enter the password: &quot;);
   __isoc99_scanf(&quot;%64s&quot;, buffer);
-  ignore_me((int)buffer, 0x40u);                // 将buffer的数据写入OJKSQYDP.txt
+  ignore_me((int)buffer, 0x40u);                &#x2F;&#x2F; 将buffer的数据写入OJKSQYDP.txt
   memset(buffer, 0, sizeof(buffer));
-  fp = fopen(&quot;OJKSQYDP.txt&quot;, &quot;rb&quot;);
+  fp &#x3D; fopen(&quot;OJKSQYDP.txt&quot;, &quot;rb&quot;);
   fread(buffer, 1u, 0x40u, fp);
   fclose(fp);
   unlink(&quot;OJKSQYDP.txt&quot;);
-  for ( i = 0; i &lt;= 7; ++i )
-    *(_BYTE *)(i + 0x804A0A0) = complex_function(*(char *)(i + 0x804A0A0), i);
+  for ( i &#x3D; 0; i &lt;&#x3D; 7; ++i )
+    *(_BYTE *)(i + 0x804A0A0) &#x3D; complex_function(*(char *)(i + 0x804A0A0), i);
   if ( strncmp(buffer, &quot;AQWLCTXB&quot;, 9u) )
   &#123;
     puts(&quot;Try again.&quot;);
@@ -542,73 +542,73 @@ print(s.decode(&#39;utf-8&#39;))
   &#125;
   puts(&quot;Good Job.&quot;);
   exit(0);
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>考点：输入为文件（包括网络、另一个程序的输出和/dev/urandom等）时，符号化输入的方法。</p>
 <p>方法就是将整个文件都符号化。在angr中，与文件系统、套接字、管道或终端的任何交互的根源都是一个 SimFile 对象。SimFile 是一种存储抽象，它定义一个字节序列，不管是符号的还是其他的。</p>
 <br>
 
 <p>通过SimFile创建一个有具体内容的文件：</p>
 <p>内容为字符串时：</p>
-<pre><code>password = angr.storage.SimFile(filename, content=&#39;hello world!\n&#39;,size=len(&#39;hello world!\n&#39;))
-</code></pre>
+<pre class="line-numbers language-none"><code class="language-none">password &#x3D; angr.storage.SimFile(filename, content&#x3D;&#39;hello world!\n&#39;,size&#x3D;len(&#39;hello world!\n&#39;))<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
 <p>内容为符号值时：</p>
-<pre><code>symbolic_file_size_bytes = 64
-password = claripy.BVS(&#39;password&#39;, symbolic_file_size_bytes * 8)
-password_file = angr.storage.SimFile(filename, content=password, size=symbolic_file_size_bytes)
-</code></pre>
+<pre class="line-numbers language-none"><code class="language-none">symbolic_file_size_bytes &#x3D; 64
+password &#x3D; claripy.BVS(&#39;password&#39;, symbolic_file_size_bytes * 8)
+password_file &#x3D; angr.storage.SimFile(filename, content&#x3D;password, size&#x3D;symbolic_file_size_bytes)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <p>接着，如果想让 SimFile 对程序可用，我们需要将它放在文件系统中，模拟的文件系统是 state.fs插件。将模拟文件放入文件系统有两种方法:<br>一是在创建初始状态的同时将模拟文件存储进去：</p>
-<pre><code>initial_state = project.factory.blank_state(addr=start_address,fs=&#123;filename:password_file&#125;)
-</code></pre>
+<pre class="line-numbers language-none"><code class="language-none">initial_state &#x3D; project.factory.blank_state(addr&#x3D;start_address,fs&#x3D;&#123;filename:password_file&#125;)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
 <p>二是在创建初始状态之后单独使用insert将文件存储到文件系统中，另外还可以使用 get 和 delete 方法从文件系统中加载和删除文件。更多关于SimFile的内容可看官方文档:<a target="_blank" rel="noopener" href="https://github.com/angr/angr-doc/blob/master/docs/file_system.md%E3%80%82">https://github.com/angr/angr-doc/blob/master/docs/file_system.md。</a></p>
 <br>
 
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import claripy
 import sys
 
-p = angr.Project(&quot;./07_angr_symbolic_file&quot;)
-start_addr = 0x080488D3
-filename = &quot;OJKSQYDP.txt&quot;
-passwd = claripy.BVS(&#39;passwd&#39;, 0x40*8)
-smfile = angr.storage.SimFile(filename, content=passwd, size=0x40)
+p &#x3D; angr.Project(&quot;.&#x2F;07_angr_symbolic_file&quot;)
+start_addr &#x3D; 0x080488D3
+filename &#x3D; &quot;OJKSQYDP.txt&quot;
+passwd &#x3D; claripy.BVS(&#39;passwd&#39;, 0x40*8)
+smfile &#x3D; angr.storage.SimFile(filename, content&#x3D;passwd, size&#x3D;0x40)
 
-init_state = p.factory.blank_state(addr=start_addr, fs=&#123;filename:smfile&#125;)
+init_state &#x3D; p.factory.blank_state(addr&#x3D;start_addr, fs&#x3D;&#123;filename:smfile&#125;)
 
 def is_successful(state):
-    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    stdout_output &#x3D; state.posix.dumps(sys.stdout.fileno())
     return &#39;Good Job.&#39; in str(stdout_output)
 
 def should_abort(state):
-    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    stdout_output &#x3D; state.posix.dumps(sys.stdout.fileno())
     return &#39;Try again.&#39; in str(stdout_output)
 
-sm = p.factory.simgr(init_state)
-sm.explore(find=is_successful, avoid=should_abort)
+sm &#x3D; p.factory.simgr(init_state)
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
 
 if sm.found:
-    solution_state = sm.found[0]
-    solution = solution_state.solver.eval(passwd, cast_to=bytes)
+    solution_state &#x3D; sm.found[0]
+    solution &#x3D; solution_state.solver.eval(passwd, cast_to&#x3D;bytes)
     print(solution.decode(&#39;utf-8&#39;))
 else:
-    raise Exception(&#39;Could not find the solution&#39;)
-</code></pre>
+    raise Exception(&#39;Could not find the solution&#39;)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x04：angr-amp-constraints"><a href="#0x04：angr-amp-constraints" class="headerlink" title="0x04：angr &amp; constraints"></a>0x04：angr &amp; constraints</h2><div style="font-size: 21px;"><b>08_angr_constraints：</b></div>
 
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  int i; // [esp+Ch] [ebp-Ch]
+  int i; &#x2F;&#x2F; [esp+Ch] [ebp-Ch]
 
   qmemcpy(&amp;password, &quot;AUPDNNPROEZRJWKB&quot;, 16);
   memset(&amp;buffer, 0, 0x11u);
   printf(&quot;Enter the password: &quot;);
-  __isoc99_scanf(&quot;%16s&quot;, &amp;buffer);              // 0x804A050 buffer
-  for ( i = 0; i &lt;= 15; ++i )
-    *(_BYTE *)(i + 0x804A050) = complex_function(*(char *)(i + 0x804A050), 15 - i);
+  __isoc99_scanf(&quot;%16s&quot;, &amp;buffer);              &#x2F;&#x2F; 0x804A050 buffer
+  for ( i &#x3D; 0; i &lt;&#x3D; 15; ++i )
+    *(_BYTE *)(i + 0x804A050) &#x3D; complex_function(*(char *)(i + 0x804A050), 15 - i);
   if ( check_equals_AUPDNNPROEZRJWKB(&amp;buffer, 16) )
     puts(&quot;Good Job.&quot;);
   else
@@ -616,166 +616,166 @@ else:
   return 0;
 &#125;
 
-//check_equals_AUPDNNPROEZRJWKB函数
+&#x2F;&#x2F;check_equals_AUPDNNPROEZRJWKB函数
 _BOOL4 __cdecl check_equals_AUPDNNPROEZRJWKB(int a1, unsigned int a2)
 &#123;
-  int v3; // [esp+8h] [ebp-8h]
-  unsigned int i; // [esp+Ch] [ebp-4h]
+  int v3; &#x2F;&#x2F; [esp+8h] [ebp-8h]
+  unsigned int i; &#x2F;&#x2F; [esp+Ch] [ebp-4h]
 
-  v3 = 0;
-  for ( i = 0; i &lt; a2; ++i )    //循环
+  v3 &#x3D; 0;
+  for ( i &#x3D; 0; i &lt; a2; ++i )    &#x2F;&#x2F;循环
   &#123;
-    if ( *(_BYTE *)(i + a1) == *(_BYTE *)(i + 0x804A040) )
+    if ( *(_BYTE *)(i + a1) &#x3D;&#x3D; *(_BYTE *)(i + 0x804A040) )
       ++v3;
   &#125;
-  return v3 == a2;
-&#125;
-</code></pre>
+  return v3 &#x3D;&#x3D; a2;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>这程序比之前的程序多加了个检查函数<code>check_equals_AUPDNNPROEZRJWKB</code>，而且里面含有个循环，循环的次数为16，这么说这一段在探索过程路径就有2^16个。我们需要添加约束，替代该函数。（这里没想得太明白，后续再补充😴）后面用到的hook机制，也可以解决这个问题。</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import claripy
 import sys
 
-proj = angr.Project(&#39;./08_angr_constraints&#39;)
-state = proj.factory.blank_state(addr=0x08048625)
-password = claripy.BVS(&#39;password&#39;, 16 * 8)
-buffer_addr = 0x0804A050
+proj &#x3D; angr.Project(&#39;.&#x2F;08_angr_constraints&#39;)
+state &#x3D; proj.factory.blank_state(addr&#x3D;0x08048625)
+password &#x3D; claripy.BVS(&#39;password&#39;, 16 * 8)
+buffer_addr &#x3D; 0x0804A050
 state.memory.store(buffer_addr, password)
-simgr = proj.factory.simgr(state)
-simgr.explore(find=0x08048565)
-found = simgr.found[0]
-found.add_constraints(found.memory.load(buffer_addr, 16) == b&#39;AUPDNNPROEZRJWKB&#39;)
-print(found.solver.eval(password, cast_to=bytes))
-</code></pre>
+simgr &#x3D; proj.factory.simgr(state)
+simgr.explore(find&#x3D;0x08048565)
+found &#x3D; simgr.found[0]
+found.add_constraints(found.memory.load(buffer_addr, 16) &#x3D;&#x3D; b&#39;AUPDNNPROEZRJWKB&#39;)
+print(found.solver.eval(password, cast_to&#x3D;bytes))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x05：angr-amp-hooks"><a href="#0x05：angr-amp-hooks" class="headerlink" title="0x05：angr &amp; hooks"></a>0x05：angr &amp; hooks</h2><div style="font-size: 21px;"><b>09_angr_hooks：</b></div>
 
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  _BOOL4 v3; // eax
-  int i; // [esp+8h] [ebp-10h]
-  int j; // [esp+Ch] [ebp-Ch]
+  _BOOL4 v3; &#x2F;&#x2F; eax
+  int i; &#x2F;&#x2F; [esp+8h] [ebp-10h]
+  int j; &#x2F;&#x2F; [esp+Ch] [ebp-Ch]
 
   qmemcpy(password, &quot;XYMKBKUHNIQYNQXE&quot;, 16);
   memset(buffer, 0, 0x11u);
   printf(&quot;Enter the password: &quot;);
   __isoc99_scanf(&quot;%16s&quot;, buffer);
-  for ( i = 0; i &lt;= 15; ++i )
-    *(_BYTE *)(i + 0x804A054) = complex_function(*(char *)(i + 0x804A054), 18 - i);
-  equals = check_equals_XYMKBKUHNIQYNQXE((int)buffer, 16u);// 防止路径爆炸，使用hook进行替代
-  for ( j = 0; j &lt;= 15; ++j )
-    *(_BYTE *)(j + 0x804A044) = complex_function(*(char *)(j + 0x804A044), j + 9);
+  for ( i &#x3D; 0; i &lt;&#x3D; 15; ++i )
+    *(_BYTE *)(i + 0x804A054) &#x3D; complex_function(*(char *)(i + 0x804A054), 18 - i);
+  equals &#x3D; check_equals_XYMKBKUHNIQYNQXE((int)buffer, 16u);&#x2F;&#x2F; 防止路径爆炸，使用hook进行替代
+  for ( j &#x3D; 0; j &lt;&#x3D; 15; ++j )
+    *(_BYTE *)(j + 0x804A044) &#x3D; complex_function(*(char *)(j + 0x804A044), j + 9);
   __isoc99_scanf(&quot;%16s&quot;, buffer);
-  v3 = equals &amp;&amp; !strncmp(buffer, password, 0x10u);
-  equals = v3;
+  v3 &#x3D; equals &amp;&amp; !strncmp(buffer, password, 0x10u);
+  equals &#x3D; v3;
   if ( v3 )
     puts(&quot;Good Job.&quot;);
   else
     puts(&quot;Try again.&quot;);
   return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>为了防止执行函数<code>check_equals_XYMKBKUHNIQYNQXE</code>时路径爆炸，可以自己编写个函数来代替该函数去实现同样的功能。</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import sys
 import claripy
 
-proj = angr.Project(&quot;./09_angr_hooks&quot;, auto_load_libs=False)
-init_state = proj.factory.entry_state()
-hooked_addr = 0x080486B3
-hooked_len = 5
+proj &#x3D; angr.Project(&quot;.&#x2F;09_angr_hooks&quot;, auto_load_libs&#x3D;False)
+init_state &#x3D; proj.factory.entry_state()
+hooked_addr &#x3D; 0x080486B3
+hooked_len &#x3D; 5
 
 # hooked_addr:代替的地址， hooked_len:代替字节长度
-@proj.hook(hooked_addr, length=hooked_len)   #修饰器
+@proj.hook(hooked_addr, length&#x3D;hooked_len)   #修饰器
 def skip_check_equals(state):
-    buffer_addr = 0x0804A054
-    buffer_len = 16
-    user_input = state.memory.load(buffer_addr, buffer_len)
-    check_against_string = &quot;XYMKBKUHNIQYNQXE&quot;
-    state.regs.eax = claripy.If(user_input == check_against_string, 
+    buffer_addr &#x3D; 0x0804A054
+    buffer_len &#x3D; 16
+    user_input &#x3D; state.memory.load(buffer_addr, buffer_len)
+    check_against_string &#x3D; &quot;XYMKBKUHNIQYNQXE&quot;
+    state.regs.eax &#x3D; claripy.If(user_input &#x3D;&#x3D; check_against_string, 
             claripy.BVV(1,32), claripy.BVV(0,32))
 
 def is_successful(state):
-    output = state.posix.dumps(sys.stdout.fileno())
+    output &#x3D; state.posix.dumps(sys.stdout.fileno())
     return &#39;Good Job.&#39; in str(output)
 
 def should_abort(state):
-    output = state.posix.dumps(sys.stdout.fileno())
+    output &#x3D; state.posix.dumps(sys.stdout.fileno())
     return &#39;Try again.&#39; in str(output)
 
-sm = proj.factory.simgr(init_state)
-sm.explore(find=is_successful, avoid=should_abort)
+sm &#x3D; proj.factory.simgr(init_state)
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
 if sm.found:
     for i in sm.found:
-        solution_state = i
-        solution = solution_state.posix.dumps(0)
+        solution_state &#x3D; i
+        solution &#x3D; solution_state.posix.dumps(0)
         print(&quot;[+] Success! Solution is: &#123;0&#125;&quot;.format(solution.decode(&#39;utf-8&#39;)))
 else:
-    raise Exception(&#39;Could not find the solution&#39;)
-</code></pre>
+    raise Exception(&#39;Could not find the solution&#39;)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>10_angr_simprocedures：</b></div>
 
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  int i; // [esp+20h] [ebp-28h]
-  char s[17]; // [esp+2Bh] [ebp-1Dh] BYREF
-  unsigned int v6; // [esp+3Ch] [ebp-Ch]
+  int i; &#x2F;&#x2F; [esp+20h] [ebp-28h]
+  char s[17]; &#x2F;&#x2F; [esp+2Bh] [ebp-1Dh] BYREF
+  unsigned int v6; &#x2F;&#x2F; [esp+3Ch] [ebp-Ch]
 
-  v6 = __readgsdword(0x14u);
+  v6 &#x3D; __readgsdword(0x14u);
   memcpy(&amp;password, &quot;ORSDDWXHZURJRBDH&quot;, 0x10u);
   memset(s, 0, sizeof(s));
   printf(&quot;Enter the password: &quot;);
   __isoc99_scanf(&quot;%16s&quot;, s);
-  for ( i = 0; i &lt;= 15; ++i )
-    s[i] = complex_function(s[i], 18 - i);
+  for ( i &#x3D; 0; i &lt;&#x3D; 15; ++i )
+    s[i] &#x3D; complex_function(s[i], 18 - i);
   if ( check_equals_ORSDDWXHZURJRBDH((int)s, 0x10u) )
     puts(&quot;Good Job.&quot;);
   else
     puts(&quot;Try again.&quot;);
   return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>上个程序中参数的地址是固定的，这里的s是个局部变量。可以通过函数名进行hook，这样子函数的参数可以直接引用，从而解决这个问题。</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import sys
 import claripy
 
-proj = angr.Project(&quot;./10_angr_simprocedures&quot;, auto_load_libs=False)
-init_state = proj.factory.entry_state()
+proj &#x3D; angr.Project(&quot;.&#x2F;10_angr_simprocedures&quot;, auto_load_libs&#x3D;False)
+init_state &#x3D; proj.factory.entry_state()
 
 class ReplacementCheckEquals(angr.SimProcedure):
     def run(self, to_check, length):
-        s_addr = to_check
-        s_len = length
-        user_input = self.state.memory.load(s_addr, s_len)
-        check_string = &quot;ORSDDWXHZURJRBDH&quot;
-        return claripy.If(user_input == check_string, claripy.BVV(1,32), claripy.BVV(0,32))
+        s_addr &#x3D; to_check
+        s_len &#x3D; length
+        user_input &#x3D; self.state.memory.load(s_addr, s_len)
+        check_string &#x3D; &quot;ORSDDWXHZURJRBDH&quot;
+        return claripy.If(user_input &#x3D;&#x3D; check_string, claripy.BVV(1,32), claripy.BVV(0,32))
 
-check_symbol = &quot;check_equals_ORSDDWXHZURJRBDH&quot;
+check_symbol &#x3D; &quot;check_equals_ORSDDWXHZURJRBDH&quot;
 proj.hook_symbol(check_symbol, ReplacementCheckEquals())
 
 def is_successful(state):
-    output = state.posix.dumps(sys.stdout.fileno())
+    output &#x3D; state.posix.dumps(sys.stdout.fileno())
     return &#39;Good Job.&#39; in str(output)
 
 def should_abort(state):
-    output = state.posix.dumps(sys.stdout.fileno())
+    output &#x3D; state.posix.dumps(sys.stdout.fileno())
     return &#39;Try again.&#39; in str(output)
 
-sm = proj.factory.simgr(init_state)
-sm.explore(find=is_successful, avoid=should_abort)
+sm &#x3D; proj.factory.simgr(init_state)
+sm.explore(find&#x3D;is_successful, avoid&#x3D;should_abort)
 
 if sm.found:
     for i in sm.found:
-        solution_state = i
-        solution = solution_state.posix.dumps(0)
+        solution_state &#x3D; i
+        solution &#x3D; solution_state.posix.dumps(0)
         print(&quot;[+] Success! Solution is: &#123;0&#125;&quot;.format(solution.decode(&#39;utf-8&#39;)))
 else:
-    raise Exception(&#39;Could not find the solution&#39;)
-</code></pre>
+    raise Exception(&#39;Could not find the solution&#39;)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x06：CTF例题"><a href="#0x06：CTF例题" class="headerlink" title="0x06：CTF例题"></a>0x06：CTF例题</h2><div style="font-size: 21px;"><b>defcamp_r100</b></div>
@@ -784,24 +784,24 @@ else:
 <br>
 
 <p>查看文件信息：</p>
-<pre><code>tolele@tolele-ubuntu22:~/angr_study/liti $ checksec r100
-[*] &#39;/home/tolele/angr_study/liti/r100&#39;
+<pre class="line-numbers language-none"><code class="language-none">tolele@tolele-ubuntu22:~&#x2F;angr_study&#x2F;liti $ checksec r100
+[*] &#39;&#x2F;home&#x2F;tolele&#x2F;angr_study&#x2F;liti&#x2F;r100&#39;
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
     Stack:    Canary found
     NX:       NX enabled
     PIE:      No PIE (0x400000)
-tolele@tolele-ubuntu22:~/angr_study/liti $ 
-</code></pre>
+tolele@tolele-ubuntu22:~&#x2F;angr_study&#x2F;liti $ <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <p>IDA分析：</p>
-<pre><code class="C">__int64 __fastcall main(int a1, char **a2, char **a3)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">__int64 __fastcall main(int a1, char **a2, char **a3)
 &#123;
-  char s[264]; // [rsp+0h] [rbp-110h] BYREF
-  unsigned __int64 v5; // [rsp+108h] [rbp-8h]
+  char s[264]; &#x2F;&#x2F; [rsp+0h] [rbp-110h] BYREF
+  unsigned __int64 v5; &#x2F;&#x2F; [rsp+108h] [rbp-8h]
 
-  v5 = __readfsqword(0x28u);
+  v5 &#x3D; __readfsqword(0x28u);
   printf(&quot;Enter the password: &quot;);
   if ( !fgets(s, 255, stdin) )
     return 0LL;
@@ -812,72 +812,80 @@ tolele@tolele-ubuntu22:~/angr_study/liti $
   &#125;
   else
   &#123;
-    puts(&quot;Nice!&quot;);     //目标
+    puts(&quot;Nice!&quot;);     &#x2F;&#x2F;目标
     return 0LL;
   &#125;
 &#125;
 
 __int64 __fastcall sub_4006FD(__int64 a1)
 &#123;
-  int i; // [rsp+14h] [rbp-24h]
-  __int64 v3[4]; // [rsp+18h] [rbp-20h]
+  int i; &#x2F;&#x2F; [rsp+14h] [rbp-24h]
+  __int64 v3[4]; &#x2F;&#x2F; [rsp+18h] [rbp-20h]
 
-  v3[0] = (__int64)&quot;Dufhbmf&quot;;
-  v3[1] = (__int64)&quot;pG`imos&quot;;
-  v3[2] = (__int64)&quot;ewUglpt&quot;;
-  for ( i = 0; i &lt;= 11; ++i )
+  v3[0] &#x3D; (__int64)&quot;Dufhbmf&quot;;
+  v3[1] &#x3D; (__int64)&quot;pG&#96;imos&quot;;
+  v3[2] &#x3D; (__int64)&quot;ewUglpt&quot;;
+  for ( i &#x3D; 0; i &lt;&#x3D; 11; ++i )
   &#123;
-    if ( *(char *)(v3[i % 3] + 2 * (i / 3)) - *(char *)(i + a1) != 1 )
+    if ( *(char *)(v3[i % 3] + 2 * (i &#x2F; 3)) - *(char *)(i + a1) !&#x3D; 1 )
       return 1LL;
   &#125;
   return 0LL;
 &#125;
 
-// 目标
+&#x2F;&#x2F; 目标
 .text:0000000000400840                 test    eax, eax
 .text:0000000000400842                 jnz     short loc_400855
 .text:0000000000400844                 mov     edi, offset s   ; &quot;Nice!&quot;
-.text:0000000000400849                 call    _puts
-</code></pre>
+.text:0000000000400849                 call    _puts<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>简单的方法：</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 import sys
 
-proj = angr.Project(&quot;./r100&quot;)
-sm = proj.factory.simgr()
-sm.explore(find=0x400844)
-final_state = sm.found[0]
-print(final_state.posix.dumps(sys.stdin.fileno()))
-</code></pre>
+proj &#x3D; angr.Project(&quot;.&#x2F;r100&quot;)
+sm &#x3D; proj.factory.simgr()
+sm.explore(find&#x3D;0x400844)
+final_state &#x3D; sm.found[0]
+print(final_state.posix.dumps(sys.stdin.fileno()))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <p>采用hook机制：</p>
-<pre><code class="python">import angr
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import angr
 
 class my_fgets(angr.SimProcedure):
     def run(self, s, num, f):
-        simfd = self.state.posix.get_fd(0)
-        data, real_size = simfd.read_data(12)
+        simfd &#x3D; self.state.posix.get_fd(0)
+        data, real_size &#x3D; simfd.read_data(12)
         self.state.memory.store(s, data)
         return 12
 
 def main():
-    p = angr.Project(&quot;./r100&quot;, auto_load_libs=False)
-    p.hook_symbol(&#39;printf&#39;, angr.SIM_PROCEDURES[&#39;stubs&#39;][&#39;ReturnUnconstrained&#39;](), replace=True)
-    p.hook_symbol(&#39;fgets&#39;, my_fgets(), replace=True)
-    state = p.factory.blank_state(addr=0x4007E8)
-    sm = p.factory.simulation_manager(state)
-    sm.explore(find=0x400844, avoid=0x400855)
+    p &#x3D; angr.Project(&quot;.&#x2F;r100&quot;, auto_load_libs&#x3D;False)
+    p.hook_symbol(&#39;printf&#39;, angr.SIM_PROCEDURES[&#39;stubs&#39;][&#39;ReturnUnconstrained&#39;](), replace&#x3D;True)
+    p.hook_symbol(&#39;fgets&#39;, my_fgets(), replace&#x3D;True)
+    state &#x3D; p.factory.blank_state(addr&#x3D;0x4007E8)
+    sm &#x3D; p.factory.simulation_manager(state)
+    sm.explore(find&#x3D;0x400844, avoid&#x3D;0x400855)
     return sm.found[0].posix.dumps(0).strip(b&#39;\0\n&#39;)
 
-if __name__ == &quot;__main__&quot;:
-    print(main())
-</code></pre>
+if __name__ &#x3D;&#x3D; &quot;__main__&quot;:
+    print(main())<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <hr>
 <p>还有很多练习和相关的题目，有时间再继续补充。不过得先对angr有更进一步的了解才行~</p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

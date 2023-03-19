@@ -4,20 +4,20 @@
 <p>简单介绍一下，glibc-all-in-one用来下载需要的glibc包，然后用petchelf进行更换操作。</p>
 <br>
 
-<h2 id="0x01：patchelf"><a href="#0x01：patchelf" class="headerlink" title="0x01：patchelf"></a>0x01：patchelf</h2><pre><code class="shell"># 安装命令：
+<h2 id="0x01：patchelf"><a href="#0x01：patchelf" class="headerlink" title="0x01：patchelf"></a>0x01：patchelf</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 安装命令：
 sudo apt install patchelf
 
 # 检查一下：
-patchelf -h
-</code></pre>
+patchelf -h<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p><img src="/images/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/2641001-20220729230350872-391973389.png" alt="2641001-20220729230350872-391973389"></p>
 <br>
 
 <h2 id="0x02：glibc-all-in-one"><a href="#0x02：glibc-all-in-one" class="headerlink" title="0x02：glibc-all-in-one"></a>0x02：glibc-all-in-one</h2><div style="font-size: 21px;"><b>1、下载glibc-all-in-on</b></div>
 
-<pre><code>从github克隆：
-git clone https://github.com/matrix1001/glibc-all-in-one
-</code></pre>
+<pre class="line-numbers language-none"><code class="language-none">从github克隆：
+git clone https:&#x2F;&#x2F;github.com&#x2F;matrix1001&#x2F;glibc-all-in-one<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
  <br>
 
 <div style="font-size: 21px;"><b>2、更新glibc版本信息</b></div>
@@ -37,35 +37,35 @@ git clone https://github.com/matrix1001/glibc-all-in-one
 
 <div style="font-size: 21px;"><b>3、下载需要的glibc</b></div>
 
-<pre><code class="shell"># 查看版本信息文件：
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 查看版本信息文件：
 cat list
 
 # 下载glibc：
-./dawnload [版本号]
-</code></pre>
+.&#x2F;dawnload [版本号]<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p><img src="/images/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/2641001-20220729230933666-1505933989.png" alt="2641001-20220729230933666-1505933989"></p>
 <blockquote>
 <p>也可以下载old_list里面对应的glibc，不过要用./download_old进行下载操作。（用./download会报错）</p>
 </blockquote>
 <br>
 
-<h2 id="0x03：更换glibc"><a href="#0x03：更换glibc" class="headerlink" title="0x03：更换glibc"></a>0x03：更换glibc</h2><pre><code class="shell"># 更换链接器：
-patchelf --set-interpreter /home/tolele/pwn_tools/glibc-all-in-one/libs/2.23-0ubuntu3_amd64/ld-2.23.so ./easy_heap
+<h2 id="0x03：更换glibc"><a href="#0x03：更换glibc" class="headerlink" title="0x03：更换glibc"></a>0x03：更换glibc</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 更换链接器：
+patchelf --set-interpreter &#x2F;home&#x2F;tolele&#x2F;pwn_tools&#x2F;glibc-all-in-one&#x2F;libs&#x2F;2.23-0ubuntu3_amd64&#x2F;ld-2.23.so .&#x2F;easy_heap
 
 # 更换glibc搜索路径：
-patchelf --set-rpath /home/tolele/pwn_tools/glibc-all-in-one/libs/2.23-0ubuntu3_amd64 ./easy_heap
-# (注意路径和可执行文件（参数）要按自己的来修改)
-</code></pre>
+patchelf --set-rpath &#x2F;home&#x2F;tolele&#x2F;pwn_tools&#x2F;glibc-all-in-one&#x2F;libs&#x2F;2.23-0ubuntu3_amd64 .&#x2F;easy_heap
+# (注意路径和可执行文件（参数）要按自己的来修改)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p><img src="/images/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/2641001-20220729230958520-491521183.png" alt="2641001-20220729230958520-491521183"></p>
 <br>
 
 <p>还有另外一种更常见方法：更换链接器+直接更换动态库</p>
-<pre><code class="shell"># 更换链接器命令：
-patchelf --set-interpreter /home/tolele/pwn_tools/glibc-all-in-one/libs/2.23-0ubuntu3_amd64/ld-2.23.so ./easy_heap
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 更换链接器命令：
+patchelf --set-interpreter &#x2F;home&#x2F;tolele&#x2F;pwn_tools&#x2F;glibc-all-in-one&#x2F;libs&#x2F;2.23-0ubuntu3_amd64&#x2F;ld-2.23.so .&#x2F;easy_heap
 
 # 更换动态库：（参数libc.so.6似乎是固定的）
-patchelf --replace-needed libc.so.6 /home/tolele/pwn_tools/glibc-all-in-one/libs/2.23-0ubuntu3_amd64/libc.so.6 ./easy_heap
-</code></pre>
+patchelf --replace-needed libc.so.6 &#x2F;home&#x2F;tolele&#x2F;pwn_tools&#x2F;glibc-all-in-one&#x2F;libs&#x2F;2.23-0ubuntu3_amd64&#x2F;libc.so.6 .&#x2F;easy_heap<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x04：渡劫之道"><a href="#0x04：渡劫之道" class="headerlink" title="0x04：渡劫之道"></a>0x04：渡劫之道</h2><p>   众所周知，环境配置除了正常的操作之外，还需要运气加成，你往往不知道你会遇到什么千奇百怪的<strong>error</strong>。本人在u18环境配置地比较顺，但在u16第一步就报错了，来了个开门红，接下来更是红红(error)火火(怒火)。</p>
@@ -112,15 +112,23 @@ patchelf --replace-needed libc.so.6 /home/tolele/pwn_tools/glibc-all-in-one/libs
 <p>第一种就是在gdb调试时，使用<strong>set debug-file-directory [directories]<strong>命令进行修改。</strong>show debug-file-directory</strong>查看该路径。但这个方法只是该次有效，当重新gdb调试时需要再次设置。</p>
 <p>第二种方法就是gdb调试寻找调试信息文件的默认路径是：/usr/lib/debug/。所以我们可以先将debug文件夹备份好，然后将glibc-all-in-one中的.debug修改为debug并放到该路径下即可。</p>
 <p>这里放一下e4l4师傅的shell命令：</p>
-<pre><code class="shell"># 这里是替换.build-id文件夹（主要参考命令）
-cd /usr/lib/debug
-sudo mv .build-id/ .build-id.bak
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 这里是替换.build-id文件夹（主要参考命令）
+cd &#x2F;usr&#x2F;lib&#x2F;debug
+sudo mv .build-id&#x2F; .build-id.bak
 cd ~
-sudo mv ~/.build-id/ /usr/lib/debug
-</code></pre>
+sudo mv ~&#x2F;.build-id&#x2F; &#x2F;usr&#x2F;lib&#x2F;debug<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>不过，很可惜的是，上面两种方法我在ubuntu16.04里面试了都不行，其他师傅说没问题，那应该也是可以的。最后在ubuntu22.04里面，发现不用替换调试文件也能直接使用heap/bins命令，这样的话说明调试信息文件是高版本向低版本兼容的。所以最后一条路就是换个高版本点的环境，u20差不多就可以了。</p>
 <hr>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

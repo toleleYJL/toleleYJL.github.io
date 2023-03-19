@@ -2,60 +2,60 @@
   document.body.classList.add('mobile')
 }</script><div><div class="inner"><h1>关于malloc源码中bin_at宏定义的个人见解</h1><div class="time">2022-10-16</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9A%E7%AE%80%E4%BB%8B"><span class="toc-text">0x01：简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E4%B8%AA%E4%BA%BA%E7%90%86%E8%A7%A3"><span class="toc-text">0x02：个人理解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9A%E6%B5%8B%E8%AF%95"><span class="toc-text">0x03：测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04%EF%BC%9A%E6%80%9D%E8%80%83"><span class="toc-text">0x04：思考</span></a></li></ol><h2 id="0x01：简介"><a href="#0x01：简介" class="headerlink" title="0x01：简介"></a>0x01：简介</h2><p>在堆中的内存申请和释放中，为了减少使用系统调用函数对内存操作，malloc_state（分配区）结构中使用了fastbinsY数组和bins数组。当chunk被free后，bins链会将这些free chunk组织起来。当下次malloc时，会先对bins链中的free chunk进行遍历，有适合的则使用，无合适的再进行下一步操作。</p>
 <p> 在申请和释放操作时，一般是有一个arena（分配区，其为malloc_state结构类型）。通过宏定义bin_at(m,i)即可获得对相应bins链进行操作，m为分配区，i为索引，当i=1是为unsorted bin，<code>i=2~63</code>是small bin，<code>i=64~126</code>为large bin。</p>
-<pre><code class="C">bin_at可以这样使用：
-p = bin_at(m,1)  //unsorted bin
-FD = p -&gt; fd     //FD指向该链的第一个free chunk
-BK = p -&gt; bk     //BK指向该链的最后一个free chunk
-</code></pre>
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">bin_at可以这样使用：
+p &#x3D; bin_at(m,1)  &#x2F;&#x2F;unsorted bin
+FD &#x3D; p -&gt; fd     &#x2F;&#x2F;FD指向该链的第一个free chunk
+BK &#x3D; p -&gt; bk     &#x2F;&#x2F;BK指向该链的最后一个free chunk<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x02：个人理解"><a href="#0x02：个人理解" class="headerlink" title="0x02：个人理解"></a>0x02：个人理解</h2><p>该宏定义为这样子，主要是为了操作方便（可直接fd、bk指向）和在节省空间之间取平衡。既操作方便又不浪费空间。</p>
 <p><code>bin_at(m,i)</code>宏定义原型：</p>
-<pre><code class="C">#define bin_at(m, i) \
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">#define bin_at(m, i) \
   (mbinptr) (((char *) &amp;((m)-&gt;bins[((i) - 1) * 2]))                              \
-             - offsetof (struct malloc_chunk, fd))
-</code></pre>
-<pre><code>解释：
+             - offsetof (struct malloc_chunk, fd))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-none"><code class="language-none">解释：
 1、&amp;((m)-&gt;bins[((i)-1)*2]),该式子根据bin的索引i，i为1时，即最开始的bin（unsorted bin）。
    获得bins[0]的地址，乘于2主要是因为fd和bk是一对存储的。
 
 2、offsetof(struct malloc_chunk,fd):得到fd成员在malloc_chunk结构中的偏移量。在64位系统系统下为16。
-   把第一步得到地址（令其为pt）转化为char*型，这样子减偏移值: pt - offsetof = pt - offsetof*(sizeof(char))。
+   把第一步得到地址（令其为pt）转化为char*型，这样子减偏移值: pt - offsetof &#x3D; pt - offsetof*(sizeof(char))。
 
 3、重点：
    在第二步下，第一步得到的地址指向往后推移了两个单元，比如图中的bin_at(m,1)得到的是bins[0]前两个单元所在的地址。
    然后经过最后的（mbinptr）转化为malloc_chunk*类型，这样就可以有-&gt;fd、-&gt;bk操作。
-   相当于是糊弄了操作系统，让操作系统误以为是个chunk结构。
-</code></pre>
+   相当于是糊弄了操作系统，让操作系统误以为是个chunk结构。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <p><img src="/images/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/pic01.png" alt="pic01"></p>
 <p> 语言表达不够，画图来凑~~</p>
 <br>
 
-<h2 id="0x03：测试"><a href="#0x03：测试" class="headerlink" title="0x03：测试"></a>0x03：测试</h2><pre><code class="C">// 测试代码：
+<h2 id="0x03：测试"><a href="#0x03：测试" class="headerlink" title="0x03：测试"></a>0x03：测试</h2><pre class="line-numbers language-C" data-language="C"><code class="language-C">&#x2F;&#x2F; 测试代码：
 #include&lt;stdio.h&gt;
 #include&lt;malloc.h&gt;
 
 int main()
 &#123;
-    void* p1 = malloc(0x100);
-    void* f1 = malloc(0x10);   //防止合并
-    void* p2 = malloc(0x100);
-    void* f2 = malloc(0x10);
-    void* p3 = malloc(0x100);
-    void* f3 = malloc(0x10);
+    void* p1 &#x3D; malloc(0x100);
+    void* f1 &#x3D; malloc(0x10);   &#x2F;&#x2F;防止合并
+    void* p2 &#x3D; malloc(0x100);
+    void* f2 &#x3D; malloc(0x10);
+    void* p3 &#x3D; malloc(0x100);
+    void* f3 &#x3D; malloc(0x10);
 
-    sleep(0);  //方便下断点
+    sleep(0);  &#x2F;&#x2F;方便下断点
 
     free(p1);
     free(p2);
     free(p3);
 
-    sleep(0);  //下图断在了这里
+    sleep(0);  &#x2F;&#x2F;下图断在了这里
     return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <p><img src="/images/%E5%85%B3%E4%BA%8Emalloc%E6%BA%90%E7%A0%81%E4%B8%ADbin-at%E5%AE%8F%E5%AE%9A%E4%B9%89%E7%9A%84%E4%B8%AA%E4%BA%BA%E8%A7%81%E8%A7%A3/pic02.png" alt="pic02"></p>
@@ -64,7 +64,15 @@ int main()
 
 <h2 id="0x04：思考"><a href="#0x04：思考" class="headerlink" title="0x04：思考"></a>0x04：思考</h2><p>在刚开始看这个宏定义时，一脸懵逼，觉得这个宏定义是有问题吧，减去16不是超出了范围了么？后来继续分析源码时发现了-&gt;fd和-&gt;bk的操作，陷入了沉思。巧的是，群里有师傅刚好提到这个问题，所以和该师傅交流了一下，最后得到了一个比较合理的解释。</p>
 <p> 但是令我疑惑的是，为什么在后面会留两个空白单元嘞？留在前面不是更恰当么？bin_at(m,1)指向了bins数组外面的单元（存top chunk地址的单元），这样会不会存有遗患呢？😶</p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

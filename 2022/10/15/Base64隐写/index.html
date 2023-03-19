@@ -72,30 +72,38 @@
 <br>
 
 <p>这里直接用大佬的脚本了，python2执行是没问题的，至于python3的话……</p>
-<pre><code class="python"># -*- coding: cp936 -*-
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"># -*- coding: cp936 -*-
 
-b64chars = &#39;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&#39;
+b64chars &#x3D; &#39;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+&#x2F;&#39;
 
 with open(&#39;1.txt&#39;, &#39;rb&#39;) as f:
-    bin_str = &#39;&#39;
+    bin_str &#x3D; &#39;&#39;
     for line in f.readlines():
-        stegb64 = &#39;&#39;.join(line.split())
-        rowb64 =  &#39;&#39;.join(stegb64.decode(&#39;base64&#39;).encode(&#39;base64&#39;).split())
+        stegb64 &#x3D; &#39;&#39;.join(line.split())
+        rowb64 &#x3D;  &#39;&#39;.join(stegb64.decode(&#39;base64&#39;).encode(&#39;base64&#39;).split())
 
-        offset = abs(b64chars.index(stegb64.replace(&#39;=&#39;,&#39;&#39;)[-1])-b64chars.index(rowb64.replace(&#39;=&#39;,&#39;&#39;)[-1]))
-        equalnum = stegb64.count(&#39;=&#39;) #no equalnum no offset
+        offset &#x3D; abs(b64chars.index(stegb64.replace(&#39;&#x3D;&#39;,&#39;&#39;)[-1])-b64chars.index(rowb64.replace(&#39;&#x3D;&#39;,&#39;&#39;)[-1]))
+        equalnum &#x3D; stegb64.count(&#39;&#x3D;&#39;) #no equalnum no offset
 
         if equalnum:
-            bin_str += bin(offset)[2:].zfill(equalnum * 2)
+            bin_str +&#x3D; bin(offset)[2:].zfill(equalnum * 2)
 
-        print &#39;&#39;.join([chr(int(bin_str[i:i + 8], 2)) for i in xrange(0, len(bin_str), 8)]) #8 位一组
-</code></pre>
+        print &#39;&#39;.join([chr(int(bin_str[i:i + 8], 2)) for i in xrange(0, len(bin_str), 8)]) #8 位一组<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x05-感慨"><a href="#0x05-感慨" class="headerlink" title="0x05: 感慨"></a>0x05: 感慨</h2><blockquote>
 <p>   您这flag挺能藏的呀~</p>
 </blockquote>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

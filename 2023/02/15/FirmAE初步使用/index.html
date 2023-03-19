@@ -3,25 +3,25 @@
 }</script><div><div class="inner"><h1>FirmAE 初步使用</h1><div class="time">2023-02-15</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00%EF%BC%9A%E4%BB%8B%E7%BB%8D"><span class="toc-text">0x00：介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9A%E5%AE%89%E8%A3%85"><span class="toc-text">0x01：安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E4%BD%BF%E7%94%A8"><span class="toc-text">0x02：使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9A%E8%B0%83%E8%AF%95%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="toc-text">0x03：调试注意点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04%EF%BC%9A%E7%9B%B8%E5%85%B3%E8%B5%84%E6%96%99"><span class="toc-text">0x04：相关资料</span></a></li></ol><h2 id="0x00：介绍"><a href="#0x00：介绍" class="headerlink" title="0x00：介绍"></a>0x00：介绍</h2><p>FirmAE是一款完全自动化的固件模拟和漏洞分析的工具，其固件模拟成功率与Firmadyne工具相比大大提升。</p>
 <br>
 
-<h2 id="0x01：安装"><a href="#0x01：安装" class="headerlink" title="0x01：安装"></a>0x01：安装</h2><pre><code class="shell"># 从GitHub克隆项目
-git clone --recursive https://github.com/pr0v3rbs/FirmAE
+<h2 id="0x01：安装"><a href="#0x01：安装" class="headerlink" title="0x01：安装"></a>0x01：安装</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 从GitHub克隆项目
+git clone --recursive https:&#x2F;&#x2F;github.com&#x2F;pr0v3rbs&#x2F;FirmAE
 
 # 运行download.sh脚本，下载相关程序
-./download.sh
+.&#x2F;download.sh
 
 #运行安装脚本
-./install.sh
-</code></pre>
+.&#x2F;install.sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x02：使用"><a href="#0x02：使用" class="headerlink" title="0x02：使用"></a>0x02：使用</h2><p>FirmAE的工作模式分为5种：<code>-c</code>检查是否能模拟、<code>-a</code>漏洞分析、<code>-r</code>固件模拟的运行、<code>-d</code>用户级的调试、<code>-b</code>内核级的调试。</p>
-<pre><code class="shell"># 命令
-sudo ./run.sh -c &lt;brand&gt; &lt;firmware&gt;
-sudo ./run.sh -a &lt;brand&gt; &lt;firmware&gt;
-sudo ./run.sh -r &lt;brand&gt; &lt;firmware&gt;
-sudo ./run.sh -d &lt;brand&gt; &lt;firmware&gt;
-sudo ./run.sh -b &lt;brand&gt; &lt;firmware&gt;
-</code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 命令
+sudo .&#x2F;run.sh -c &lt;brand&gt; &lt;firmware&gt;
+sudo .&#x2F;run.sh -a &lt;brand&gt; &lt;firmware&gt;
+sudo .&#x2F;run.sh -r &lt;brand&gt; &lt;firmware&gt;
+sudo .&#x2F;run.sh -d &lt;brand&gt; &lt;firmware&gt;
+sudo .&#x2F;run.sh -b &lt;brand&gt; &lt;firmware&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>其中，<code>&lt;firmware&gt;</code>是固件路径，<code>&lt;brand&gt;</code>是固件的牌子，这个可以随意写。</p>
 <p>在对固件模拟前，尽量先-c进行检查。在检查之后，运行和调试时的模拟速度也会变快。</p>
 <br>
@@ -37,7 +37,15 @@ sudo ./run.sh -b &lt;brand&gt; &lt;firmware&gt;
 
 <h2 id="0x04：相关资料"><a href="#0x04：相关资料" class="headerlink" title="0x04：相关资料"></a>0x04：相关资料</h2><p>官方文档：<a target="_blank" rel="noopener" href="https://github.com/pr0v3rbs/FirmAE">https://github.com/pr0v3rbs/FirmAE</a></p>
 <p>官方论文：<a target="_blank" rel="noopener" href="https://syssec.kaist.ac.kr/pub/2020/kim_acsac2020.pdf">https://syssec.kaist.ac.kr/pub/2020/kim_acsac2020.pdf</a></p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

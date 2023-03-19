@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="zh-CN"><head><title>RSA--从入门到癫狂</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
+  document.body.classList.add('mobile')
+}</script><div><div class="inner"><h1>RSA--从入门到癫狂</h1><div class="time">2022-07-06</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00%EF%BC%9ARSA%E7%9B%B8%E5%85%B3%E8%83%8C%E6%99%AF"><span class="toc-text">0x00：RSA相关背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9A%E7%9B%B8%E5%85%B3%E6%95%B0%E5%AD%A6%E7%9F%A5%E8%AF%86"><span class="toc-text">0x01：相关数学知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5%E7%9A%84%E7%94%9F%E6%88%90%E8%BF%87%E7%A8%8B"><span class="toc-text">0x02：公钥和私钥的生成过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9A%E5%8A%A0%E8%A7%A3%E5%AF%86%E8%BF%87%E7%A8%8B"><span class="toc-text">0x03：加解密过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04%EF%BC%9ARSA%E7%AE%97%E6%B3%95%E7%9A%84%E8%AF%81%E6%98%8E"><span class="toc-text">0x04：RSA算法的证明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05%EF%BC%9A%E6%80%BB%E7%BB%93%E6%80%9D%E8%80%83"><span class="toc-text">0x05：总结思考</span></a></li></ol><h2 id="0x00：RSA相关背景"><a href="#0x00：RSA相关背景" class="headerlink" title="0x00：RSA相关背景"></a>0x00：RSA相关背景</h2><p>目的：为了解决对称加密算法中密钥传递和保存的问题。</p>
+<p>相关概念：非对称加密算法</p>
+<p>概念发明者：Whitfield Diffie、Martin Hellman (Diffie-Hellman密钥交换算法)</p>
+<p>RSA算法发明者：Rivest、Shamir、Adleman</p>
+<p>RSA算法思想基于两个大数相乘十分容易，但是想要对其乘积进行因式分解却极其困难。</p>
+<br>
+
+<h2 id="0x01：相关数学知识"><a href="#0x01：相关数学知识" class="headerlink" title="0x01：相关数学知识"></a>0x01：相关数学知识</h2><div style="font-size: 21px;"><b>互质关系(coprime):</b></div>
+
+<p>$$<br>若gcd(a,b)=1, 则a与b互质;<br>$$</p>
+<p>互质关系的性质：</p>
+<ol>
+<li>任意两个质数构成互质关系；</li>
+<li>一个数是质数，另一个数只要不是前者的倍数，两者就构成互质关系；</li>
+<li>如果两个数之中，较大的那个数是质数，则两者构成互质关系；</li>
+<li>$1$和任意的自然数都是互质关系；</li>
+<li>$p$是大于$1$的整数，则$p$和$p-1$构成互质关系；</li>
+<li>$p$是大于$1$的奇数，则$p$和$p-2$构成互质关系；</li>
+</ol>
+ <br>
+
+<div style="font-size: 21px;"><b>整除与剩余类:</b></div>
+
+<p>（<strong>注</strong>：RSA算法没有涉及到整除、剩余类、完系和缩系的知识，可以跳过此处阅读！）</p>
+<p>整除：设有整数$a$和$b$，且$b\neq0$，如果存在一个数$c$使得$a=b\times c$，则我们称之为$b$整除$a$，记作$b|a$ . 可称$a$为$b$的倍数，$b$为$a$的约数（因子）。</p>
+<p>整除的性质：</p>
+<ol>
+<li>传递性：若$b|c$，且$c|a$，则$b|a$ ;</li>
+<li>加减封闭：若$b|c$，且$b|a$，则$b|(a\pm c)$ ;</li>
+</ol>
+ <br>
+
+<p>对证明整数关系有帮助的式子：<br>$$<br>x^n-y^n=(x-y)(x^{n-1}+x^{n-2}y+\cdots+xy^{n-2}+y^{n-1})<br>$$</p>
+<p>$$<br>x^n+y^n=(x+y)(x^{n-1}-x^{n-2}y+\cdots-xy^{n-2}+y^{n-1})<br>$$</p>
+<br>
+
+<p><strong>剩余类</strong>：基于同余的概念。对于一个模数$m (m≥1)$，根据余数可以把所有的整数划分成$m$个类。<br>$$<br>\forall r \in [0,m-1]\cup Z,\space C_r={x\in Z\space|\space x \equiv r(mod\space m)}=[r]<br>$$<br>(即除$m$余$r$的所有数的集合)，则$C_0、C_1、C_2、\cdots 、C_{m-1}$为模$m$的剩余类。</p>
+<p><strong>完系</strong>：在模$m$的剩余类中各取一个数，则这$n$个数就构成了模$m$的一个完全剩余系。</p>
+<p><strong>缩系</strong>：在与模数$m$互素的全部剩余类中，各取一数所组成的集合叫做模数$m$的一组简化剩余系。</p>
+ <br>
+
+<div style="font-size: 21px;"><b>积性函数与完全积性函数:</b></div>
+
+<p>积性函数：对于任意互质的整数$a$和$b$，满足$f(ab)=f(a)\times f(b)$的数论函数。</p>
+<p>完全积性函数：对于任意的整数a和b，满足$f(ab)=f(a)\times f(b)$的数论函数。</p>
+ <br>
+
+<div style="font-size: 21px;"><b>同余:</b></div>
+
+<p>设$m\neq0$，若$m\space|\space a-b$，即$a-b=km$，则称$m$为模，$a$同余于$b$模$m$，以及$b$是$a$对模$m$的剩余。记作：<br>$$<br>a\equiv b;(mod\space m);<br>$$<br>不然，$a$不同余于$b$模$m$，$b$不是$a$对模$m$的剩余。记作：$a\neq b;(mod\space m).$</p>
+<p>定理1：整数$a,b$对模数$m$同余的充分必要条件是$m;|;a-b$.</p>
+<p>定理2：如果有$a\equiv b;(mod;m),\alpha\equiv\beta(mod;m)$，则有如下性质：</p>
+<ol>
+<li>$ax+\alpha y\equiv bx+\beta y;(mod;m)$，其中$x,y$为任给的整数；   (用定理1即可证)</li>
+<li>$a\alpha\equiv b\beta;(mod;m)$；   （用定理1，添$a\beta$或$b\alpha$即可证)</li>
+<li>$a^n\equiv b^n;(mod;m)$，其中$n&gt;0$；    (用第2条性质即可证)</li>
+<li>$f(a)\equiv f(b);(mod;m)$，其中$f(x)$为任意给定的一个整系数多项式；   (用第1、3条性质可证)</li>
+</ol>
+<br>
+
+<div style="font-size: 21px;"><b>欧拉函数:</b></div>
+
+<p>对于一个正整数$n$，$[1,n]$中<code>与n互质</code>的数的个数，用$\varphi(n)$表示。</p>
+<p><strong>欧拉函数的性质：</strong></p>
+<ol>
+<li><p>当$p$为质数时，$\varphi(p)=p-1$；</p>
+</li>
+<li><p>欧拉函数是积性函数，但不是完全积性函数；</p>
+<p>说明：若$n$可以分解成<strong>两个互质</strong>的质数之积：$n=p_1\times p_2$，</p>
+<p>则$\varphi(n)=\varphi(p_1\times p_2)=\varphi(p_1)\times\varphi(p_2)$；</p>
+</li>
+<li><p>若$n$是质数$p$的$k$次幂，则$\varphi(n)=\varphi(p^k)=p^k-p^{k-1}$；</p>
+<p>证明：由于$p$是质数，所以只有当一个数不为$p$的乘积时，才能与$p^k$互质。为$p$的乘积的数有$p^{k-1}$个：$1\times p、2\times p、3\times p、\cdots、p^{k-1}\times p$；除了这$p^{k-1}$个数，其它的就是和$p^k$互质的数了，即$p^k-p^{k-1}$；</p>
+</li>
+<li><p>特殊性质：当为奇数时，$\varphi(2n)=\varphi(n)$；</p>
+</li>
+</ol>
+<br>
+
+<p>(<strong>Tip</strong>：对于第2点性质，可扩展到这两个数不互质时的情况)</p>
+<p>对于$n=p\times q$，$p$和$q$为任意的两个整数，有$\varphi(n)=p\times q-p-q+gcd(p,q)$；</p>
+<p>证明：设$gcd(p,q)=t,\space p=t\times p’,\space q=t\times q’$；</p>
+<p>在小于等于$n$的正整数中，$p\times 1,p\times2,\cdots,p\times q\space\space\space(式1)$和$q\times 1,q\times2,\cdots,q\times p\space\space\space(式2)$很明显不与$n$互质，但$(1)$和$(2)$中含有重复的元素，重复个数就是$gcd(p,q)$。在$(1)$中，每连续$p’$个数就有一个与$(2)$中重复的元素。$(2)$中同理。所以即可证。</p>
+<p>当然，对于$n$分解为多个数且不完全互质的情况，可结合容斥定理进行思考！</p>
+ <br>
+
+<p><strong>欧拉函数的计算：</strong></p>
+<p>素数分解：<br>$$<br>\varphi (n)=n(1-\frac{1}{p_1})(1-\frac{1}{p_2})(1-\frac{1}{p_3})\cdots(1-\frac{1}{p_m})<br>$$<br>（前提条件是：$p_1,\space p_2,\space p_3,\space \cdots,\space p_m$互质）</p>
+<p>证明：</p>
+<p>由算术基本定理，任何一个合数都能被分解成一系列质数的乘积，其中每一个质数称为该合数的质因数。对于任意大于0的自然数$n$，有3种情况：</p>
+<ol>
+<li><p>当$n=1,\varphi(1)=1$ ；</p>
+</li>
+<li><p>当$n$为质数，由性质1得：$\varphi(n)=n-1$； </p>
+</li>
+<li><p>当$n$为合数，$n=p_1\times p_2 \times p_3\times\cdots \times p_m$，由性质2得：$\varphi(n)=\varphi(p_1\times p_2 \times p_3\times\cdots \times p_m)=\varphi(p_1)\times\varphi(p_2)\times\varphi(p_3)\times\cdots\times\varphi(p_m);$</p>
+<p>再由性质1得：</p>
+<p>$$<br>= (p_1-1)(p_2-1)(p_3-1)\cdots(p_m-1)<br>$$</p>
+<p>$$<br>= n\times\frac{(p_1-1)(p_2-1)(p_3-1)\cdots(p_m-1)}{p_1\times p_2 \times p_3\times\cdots \times p_m}<br>$$</p>
+<p>$$<br>= n\times(1-\frac{1}{p_1})(1-\frac{1}{p_2})(1-\frac{1}{p_3})\cdots(1-\frac{1}{p_m})<br>$$</p>
+<br></li>
+</ol>
+<div style="font-size: 21px;"><b>欧拉定理(Euler's theorem):</b></div>
+
+<p>令$\Bbb{Z}_n^*$为小于等于$n$且与$n$互素的正整数的集合；</p>
+<p>若$a$是$\Bbb{Z}_n^*$的一个元素，则有$a^{\varphi(n)}\equiv1\space mod \space n$。</p>
+ <br>
+
+<div style="font-size: 21px;"><b>欧拉定理的特别例子：费马小定理</b></div>
+
+<p>令$\Bbb{Z}_n^*$为小于等于$n$且与$n$互素的正整数的集合；</p>
+<p>假设$n$为质数，且$a$是$\Bbb{Z}_n^*$的一个元素，则有$a^{n-1}\equiv1\space mod \space n$。</p>
+ <br>
+
+<div style="font-size: 21px;"><b>逆元(模反元素):</b></div>
+
+<p>如果两个正整数$a$和$n$互质，那么一定可以找到整数$b$，使得$ab - 1$ 被$n$整数，或者说$ab$被$n$除的余数是$1$。这时，$b$就叫做$a$的逆元（模反元素）。</p>
+<p>逆元的产生使得模运算在除法上得以运用。</p>
+<p>另外，使用欧拉定理可以得到一个逆元。</p>
+ <br>
+
+<h2 id="0x02：公钥和私钥的生成过程"><a href="#0x02：公钥和私钥的生成过程" class="headerlink" title="0x02：公钥和私钥的生成过程"></a>0x02：公钥和私钥的生成过程</h2><p><strong>步骤一：随机选择两个不相等的质数p和q</strong></p>
+<p>比如说：61和53。</p>
+<p>(实际应用中，这两个质数越大越难破解)</p>
+ <br>
+
+<p><strong>步骤二：计算p和q的乘积n</strong></p>
+<p> $n = 61×53 = 3233 = 110010100001 (b)$</p>
+<p>密钥长度为二进制数位数，即12位。</p>
+ <br>
+
+<p><strong>步骤三：计算n的欧拉函数$\varphi(n)$</strong></p>
+<p>$\varphi(n)=(p-1)(q-1)$</p>
+<p>即$\varphi(3233)=60\times 52=3120$</p>
+ <br>
+
+<p><strong>步骤四：选择合适的整数$e$</strong></p>
+<p>$e$需满足条件：$1&lt;e&lt;\varphi(n)$且$e$与$\varphi(n)$互质</p>
+<p>比如说，$e$取17。</p>
+<p>(实际应用中，常常选择$65537$)</p>
+ <br>
+
+<p><strong>步骤五：计算e对于$\varphi(n)$模反元素d</strong></p>
+<p> $ed\equiv 1(mod \space \varphi(n))$，等价于：$ed-1=k\varphi(n)$</p>
+<p>该方程用扩展欧几里得算法可求解，其中一组解为$(d,k) = (2753,15)$</p>
+<p>得$d = 2753$</p>
+ <br>
+
+<p><strong>步骤六：将n和e封装成公钥，n和d封装成私钥</strong></p>
+<p>公钥：$(3233，17)$</p>
+<p>私钥：$(3233，2753)$</p>
+ <br>
+
+<h2 id="0x03：加解密过程"><a href="#0x03：加解密过程" class="headerlink" title="0x03：加解密过程"></a>0x03：加解密过程</h2><p><strong>用公钥$(n，e)$加密：</strong></p>
+<p>现有一个单位的明文m，其加密公式为：$m^e\equiv c \space(mod\space n)$</p>
+<p>接着上面的例子：公钥为$(3233，17)$，$m$假设为$65$，那么可得$65^{17}\equiv2790\space (mod \space 3233)$</p>
+<p>密文$c$即为$2790$。</p>
+ <br>
+
+<p><strong>用私钥$(n,d)$解密：</strong></p>
+<p>得到密文后$c$，其解密公式为：$c^d\equiv m\space(mod \space n)$</p>
+<p>接着上面的例子，公钥为$(3233，2753)$，$c$为$2790$，</p>
+<p>则可计算明文：$2790^{2753}\equiv65\space(mod\space 3233)$ ，明文即为65。</p>
+<br>
+
+<h2 id="0x04：RSA算法的证明"><a href="#0x04：RSA算法的证明" class="headerlink" title="0x04：RSA算法的证明"></a>0x04：RSA算法的证明</h2><div style="font-size: 21px;"><b>简述加解密过程:</b></div>
+
+<p>$m$为明文，$c$为密文，$n$为两个质数$p$和$q$的乘积(非必要条件，可以多个质数，只是这样更难被破解)。</p>
+<p>公钥为$(e,n)$，私钥为$(d,n)$，同时$ed\equiv 1\space(mod\space\varphi(n)).$</p>
+<p>加密：$m^e\equiv c \space(mod\space n)$</p>
+<p>解密：$c^d\equiv m\space(mod\space n)$</p>
+<br>
+
+<div style="font-size: 21px;"><b>证明:</b></div>
+
+<p>根据加密公式可有：$c=kn+m^e$，将其带入解密公式得：$(kn+m^e)^d\equiv m\space(mod\space n).$</p>
+<p>显然，该式可化为：$m^{ed}\equiv m\space(mod\space n)$，我们只要证明这个式子成立即可。</p>
+<p>但是$ed$的存在难以入手，我们应该减少变量。可用$ed\equiv1\space(mod\space\varphi(n))$得到$ed=t\varphi(n)+1$代入，得$m^{t\varphi(n)+1}\equiv m\space(mod\space n).$  因为$m\equiv m\space(mod\space n)$，用定理2中性质2的类似证法，可得$m^{t\varphi(n)}\equiv1\space (mod\space n).$</p>
+<p>下面我们分情况来讨论$m^{t\varphi(n)}\equiv1\space(mod\space n).$</p>
+<br>
+
+<div style="font-size: 21px;"><b>情况1：当m和n互质时</b></div>
+
+<p>由于该公式和欧拉定理的公式太过相像了，可以据此入手。</p>
+<p>RSA加密算法是要规定$m$比$n$小的，根据欧拉定理有：$m^{\varphi(n)}\equiv1\space(mod\space n).$</p>
+<p>再根据定理2的性质3可得：$m^{t\varphi(n)}\equiv1\space(mod\space n).$</p>
+<br>
+
+<div style="font-size: 21px;"><b>情况2：当m和n不互质时</b></div>
+
+<p>此时，$m$为$kp$或$kq$，这里假设$m=kp$，要证明：$m^{t\varphi(n)}\equiv1\space(mod\space n).$</p>
+<p>由于$m&lt;n$，所以$k$和$q$互质，又$p$和$q$互质，根据欧拉定理有：$(kp)^{q-1}\equiv1\space(mod\space q).$</p>
+<p>根据同余定理2的性质3，进一步可得：$[(kp)^{q-1}]^{t(p-1)}\equiv1\space(mod\space q).$</p>
+<p>整理得：$(kp)^{t\varphi(n)}\equiv1\space(mod\space q)$，有：$(kp)^{t\varphi(n)}=hq+1.$</p>
+<p>两边同乘于$p$，得：$(kp)^{t\varphi(n)}\times p=hpq+p.$</p>
+<p>即有：$(kp)^{t\varphi(n)}\times p\equiv p\space(mod\space n).$</p>
+<p>由于同余的自反性：$p\equiv p\space(mod\space n)$，同时结合相关定理即可得：$m^{t\varphi(n)}\equiv1\space(mod\space n)$，证毕。</p>
+<br>
+
+<h2 id="0x05：总结思考"><a href="#0x05：总结思考" class="headerlink" title="0x05：总结思考"></a>0x05：总结思考</h2><p>严格来说，上面的证明更像是一个验证，是该加解密算法设计出来之后，去验证其是否可行。至于RSA是怎么被思考设计出来的呢？个人觉得应该是一个逼近的过程：不断地根据一些条件设计些数，然后用这些数搭配相应的运算，使其满足非对称加密算法以及检验其抗破解性。</p>
+<p>根据相关的资料显示，RSA的三个发明者：Rivest、Shamir、Adleman中，前两位是计算机学家，负责提出解决方案。Adleman是数学家，负责指出方案的不足，让他们在错误的道路上少浪费时间。Rivest和Shamir花费了一年的时间尝试各种想法，Adleman也花费了一年多的时间来一一击破。在最后，Rivest找到了一种解决方案，就是我们现在看到的RSA算法。</p>
+<p>大概核心的部分是：$ed\equiv1\space(mod\space\varphi(n))$，使得加解密的过程可行。至于其中含有什么性质，使得被联想到可用对应的算法实现非对称加密呢？</p>
+<p>额……，还有待学习，了解多一点数学知识。</p>
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '');</script></html>

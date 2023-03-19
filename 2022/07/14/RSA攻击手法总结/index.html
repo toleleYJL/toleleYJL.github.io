@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="zh-CN"><head><title>RSA攻击手法总结</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
+  document.body.classList.add('mobile')
+}</script><div><div class="inner"><h1>RSA攻击手法总结</h1><div class="time">2022-07-14</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00%EF%BC%9A%E8%A1%A5%E5%85%85%E8%A3%85%E5%A4%87"><span class="toc-text">0x00：补充装备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9A%E9%92%88%E5%AF%B9RSA%E7%9A%84%E6%94%BB%E5%87%BB%E6%96%B9%E6%B3%95"><span class="toc-text">0x01：针对RSA的攻击方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E4%BE%8B%E9%A2%98%E5%AE%9E%E6%88%98"><span class="toc-text">0x02：例题实战</span></a></li></ol><h2 id="0x00：补充装备"><a href="#0x00：补充装备" class="headerlink" title="0x00：补充装备"></a>0x00：补充装备</h2><div style="font-size: 21px;"><b>质因数分解:</b></div>
+
+<p><strong>1、网站</strong></p>
+<p>factor：<a target="_blank" rel="noopener" href="http://factordb.com/">http://factordb.com/</a></p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318192852848.png" alt="image-20230318192852848"></p>
+<br>
+
+<p>还有：<a target="_blank" rel="noopener" href="https://www.atool99.com/quality_factor.php">https://www.atool99.com/quality_factor.php</a></p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318192924888.png" alt="image-20230318192924888"></p>
+<br>
+
+<p><strong>2、工具yafu：</strong></p>
+<p><a target="_blank" rel="noopener" href="https://sourceforge.net/projects/yafu/">https://sourceforge.net/projects/yafu/</a></p>
+<p>yafu安装之后，可以把该文件夹下程序的路径加入环境变量，方便使用。</p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318192956391.png" alt="image-20230318192956391"></p>
+<p>注意，我这里直接用yafu命令就打开了，因为我把<code>yafu-x64.exe</code>重命名为了<code>yafu.exe</code>。</p>
+<br>
+
+<div style="font-size: 21px;"><b>Python第三方模块:</b></div>
+
+<p>第三方模块gmpy2和libnum的安装教程就不说了，可自行上网搜索。</p>
+<p><strong>1、gmpy2</strong></p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import gmpy2
+gmpy2.mpz(n)  #初始化一个大整数 n
+gmpy2.mpfr(x)  #初始化一个高精度浮点数x
+d &#x3D; gmpy2.invert(e,n)    #求逆元
+c &#x3D; gmpy2.powmod(m,e,n)  #幂取模
+gmpy2.is_prime(n)  #素数检测
+gmpy2.is_even(n)  #偶数检测 
+gmpy2.is_odd(n)   #奇数检测
+gmpy2.gcd(a,b)    #欧几里得算法求最大公约数 
+gmpy2.gcdext(a,b)  #扩展欧几里得算法 
+gmpy2.iroot(x,n)  #x开n次根<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<p><strong>2、libnum</strong></p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import libnum
+d &#x3D; libnum.invmod(e,n)   #求逆元
+libnum.s2n(str)    #字符串按ascii码转换成16进制，16进制再转换成10机制
+libnum.n2s(n)   #整数转字符串，任意进制数会先转成16进制数
+libnum.s2b(str) #字符串转2进制位串
+libnum.b2s(bin) #2进制位串转字符串<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<p><strong>3、Crypto</strong></p>
+<p>crypto在python上的名字是pycrypto，是一个第三方模块，目前已经停止更新了。推荐安装pycryptodome是pycrypto的延伸，语法是一样的。</p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318193217272.png" alt="image-20230318193217272"></p>
+<p>安装完之后有个注意的地方：</p>
+<p>Python在引入模块时是对<code>\python\Lib\site-packages</code>这个地方进行查找模块的。在里面有个crypto文件夹，与我们想引入的Crypto名称没对应好。由于大家在引入模块时默认都是Crypto，所以就把文件夹重命名为Crypto。</p>
+<p><code>long_to_bytes</code>和<code>bytes_to_long</code>函数介绍：</p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318193319390.png" alt="image-20230318193319390"></p>
+<br>
+
+<h2 id="0x01：针对RSA的攻击方法"><a href="#0x01：针对RSA的攻击方法" class="headerlink" title="0x01：针对RSA的攻击方法"></a>0x01：针对RSA的攻击方法</h2><div style="font-size: 21px;"><b>1、对模数n的因子分解</b></div>
+
+<p>假若$n$较小，以至于在现实意义上能够被分解，那么攻击者就会从而获得私钥$d$：<br>$$<br>n=pq\Rightarrow\varphi(n)=(p-1)(q-1)\Rightarrow ed\equiv1\space(mod\space\varphi(n))<br>$$<br>得到私钥$d$后可以直接$c^d\equiv m\space(mod\space n)$解密啦~</p>
+<br>
+
+<div style="font-size: 21px;"><b>2、对RSA的公共模攻击</b></div>
+
+<p>在团体内部使用RSA加密算法时，有时为了方便而使用相同的模($n$)来进行加解密。此时当使用不同的公钥对同一明文进行加密时，就会存在安全隐患了。</p>
+<p>加密过程：$m^{e_1}\equiv c_1\space(mod\space n)$，$m^{e_2}\equiv c_2\space(mod\space n)$.</p>
+<p>公钥一般为质数，在不相同时则有：$gcd(e_1,e_2)=1$</p>
+<p>进一步有：$k_1e_1+k_2e_2=1,\space k_1,k_2\in Z$  (辗转相除法的逆代可得)</p>
+<p>这样就会有：$c_1^{k_1}\times c_2^{k_2}\equiv m\space(mod\space n)$，从而得到明文。</p>
+<p>证明：</p>
+<p>$\space\space\space\space(c_1^{k_1}\times c_2^{k-2})\space mod \space n$</p>
+<p>$=[(c_1\space mod \space n)^{k_1}\times(c_2\space mod \space n)^{k_2}]\space mod\space n$</p>
+<p>$=(m^{e_1k_1}\times m^{e_2k_2})\space mod\space n$</p>
+<p>$=(m^{k_1e_1+k_2e_2})\space mod\space n$</p>
+<p>$=m\space mod \space n$</p>
+<br>
+
+<div style="font-size: 21px;"><b>3、对RSA的低指数攻击</b></div>
+
+<p>当RSA系统的公钥$e$选取较小的值时，可以使得加密和验证签名的速度有所提升。但当选取的$e$过小时，就会容易受到低指数攻击。</p>
+<p>假设有三个用户的密钥指数为$e$，有不同的模$n_1,n_2,n_3$。一用户对相同的明文$m$使用三个人的公钥加密于三人通话，得到密文$c_1,c_2,c_3$。<br>$$<br>m^e\equiv c_1\space(mod\space n_1)<br>$$</p>
+<p>$$<br>m^e\equiv c_2\space(mod\space n_2)<br>$$</p>
+<p>$$<br>m^e\equiv c_3\space(mod\space n_3)<br>$$</p>
+<p>三个密文要是被攻击者截获，利用中国剩余定理（一般$n_1,n_2,n_3$互素）即可求解出$m^e$，即使三个模不互素，也可以使用扩展剩余定理来求解。</p>
+<br>
+
+<div style="font-size: 21px;"><b>4、RSA选择密文攻击</b></div>
+
+<p>现RSA系统中，公钥为$(e,n)$，私钥为$(d,n)$。明文为$m$，密文为$c$。公钥是对外开放的，现假定攻击者获取了加密后的密文，如何用选择密文攻击进行破解呢？</p>
+<p>攻击者随机找一个随机数$r$，$r&lt;n$。进行如下计算：</p>
+<ul>
+<li>用公钥对$r$进行加密，得到临时密文$x$：$x=r^e\space mod \space n\space$ </li>
+<li>将临时密文$x$与密文$c$相乘：$y = (x\times c)\space mod \space n\space$ </li>
+<li>求$r$对模$n$的逆元$t$：$tr\equiv 1\space(mod\space n)\space$  </li>
+</ul>
+<p>由于数字签名的过程也是基于公钥与私钥系统的，当上文中的私钥也用于数字签名时。攻击者只要使对方用私钥$d$对$y$进行签名：$u=y^d\space mod \space n$，然后攻击者得到$u$后，可通过$m=(t\times u)\space mod \space n$解出密文$m$。</p>
+<p>推导证明：</p>
+<p>$(t\times u)\space mod \space n = (r^{-1}\times y^d)\space mod\space n = (r^{-1}\times x^d \times c^d)\space mod \space n=c^d\space mod\space n=m$ </p>
+<br>
+
+<h2 id="0x02：例题实战"><a href="#0x02：例题实战" class="headerlink" title="0x02：例题实战"></a>0x02：例题实战</h2><div style="font-size: 21px;"><b>例题来源：ctfshow easyrsa1</b></div>
+
+<p><a target="_blank" rel="noopener" href="https://www.ctf.show/challenges#easyrsa1-344">https://www.ctf.show/challenges#easyrsa1-344</a></p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318203057794.png" alt="image-20230318203057794"></p>
+<p>由于$n$较小，所以直接用第一种攻击手法，即分解$n$，从而得到$d$来解密。</p>
+<p>质因数分解：</p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318203129737.png" alt="image-20230318203129737"></p>
+<p>p = 1201147059438530786835365194567</p>
+<p>q = 1212112637077862917192191913841</p>
+<p>脚本：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import libnum
+from Crypto.Util.number import long_to_bytes
+e &#x3D; 65537
+n &#x3D; 1455925529734358105461406532259911790807347616464991065301847
+c &#x3D; 69380371057914246192606760686152233225659503366319332065009
+p &#x3D; 1201147059438530786835365194567
+q &#x3D; 1212112637077862917192191913841
+phi &#x3D; (p-1)*(q-1)
+d &#x3D; libnum.invmod(e,phi)
+m &#x3D; pow(c,d,n)
+print(long_to_bytes(m))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<div style="font-size: 21px;"><b>例题来源：ctfshow easyrsa3</b></div>
+
+<p><a target="_blank" rel="noopener" href="https://www.ctf.show/challenges#easyrsa3-346">https://www.ctf.show/challenges#easyrsa3-346</a></p>
+<p>打开文件分现模$n$是相同的，这里加密的明文应该是flag，所以可以猜测是同一个明文加密。可以采用公共模攻击，具体的证明上面已给出。</p>
+<p>脚本：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">import gmpy2
+from Crypto.Util.number import long_to_bytes
+ 
+e1 &#x3D; 797
+n &#x3D; 15944475431088053285580229796309956066521520107276817969079550919586650535459242543036143360865780730044733026945488511390818947440767542658956272380389388112372084760689777141392370253850735307578445988289714647332867935525010482197724228457592150184979819463711753058569520651205113690397003146105972408452854948512223702957303406577348717348753106868356995616116867724764276234391678899662774272419841876652126127684683752880568407605083606688884120054963974930757275913447908185712204577194274834368323239143008887554264746068337709465319106886618643849961551092377843184067217615903229068010117272834602469293571
+c1 &#x3D; 11157593264920825445770016357141996124368529899750745256684450189070288181107423044846165593218013465053839661401595417236657920874113839974471883493099846397002721270590059414981101686668721548330630468951353910564696445509556956955232059386625725883038103399028010566732074011325543650672982884236951904410141077728929261477083689095161596979213961494716637502980358298944316636829309169794324394742285175377601826473276006795072518510850734941703194417926566446980262512429590253643561098275852970461913026108090608491507300365391639081555316166526932233787566053827355349022396563769697278239577184503627244170930
+ 
+e2 &#x3D; 521
+n &#x3D; 15944475431088053285580229796309956066521520107276817969079550919586650535459242543036143360865780730044733026945488511390818947440767542658956272380389388112372084760689777141392370253850735307578445988289714647332867935525010482197724228457592150184979819463711753058569520651205113690397003146105972408452854948512223702957303406577348717348753106868356995616116867724764276234391678899662774272419841876652126127684683752880568407605083606688884120054963974930757275913447908185712204577194274834368323239143008887554264746068337709465319106886618643849961551092377843184067217615903229068010117272834602469293571
+c2 &#x3D; 6699274351853330023117840396450375948797682409595670560999898826038378040157859939888021861338431350172193961054314487476965030228381372659733197551597730394275360811462401853988404006922710039053586471244376282019487691307865741621991977539073601368892834227191286663809236586729196876277005838495318639365575638989137572792843310915220039476722684554553337116930323671829220528562573169295901496437858327730504992799753724465760161805820723578087668737581704682158991028502143744445435775458296907671407184921683317371216729214056381292474141668027801600327187443375858394577015394108813273774641427184411887546849
+ 
+k &#x3D; gmpy2.gcdext(e1,e2)
+m1 &#x3D; gmpy2.powmod(c1,k[1],n)
+m2 &#x3D; gmpy2.powmod(c2,k[2],n)
+m &#x3D; (m1*m2) % n
+print(long_to_bytes(m))<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<div style="font-size: 21px;"><b>例题来源：ctfshow easyrsa4</b></div>
+
+<p><a target="_blank" rel="noopener" href="https://www.ctf.show/challenges#easyrsa4-347">https://www.ctf.show/challenges#easyrsa4-347</a></p>
+<p>该题的$e$特别小，可以采用低加密指数攻击。</p>
+<p>因为$e$特别小，有两种情况：</p>
+<ul>
+<li>$m^3 &lt; n$，则$c = m^3$</li>
+<li>$m^3 &gt; n$,  则$c = (m^3 + i\times n)\space mod\space n$ （使用爆破）</li>
+</ul>
+<p>这里先试着对$c$开$3$次根，发现开出来是个整数（True），然后打印一下。</p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318203423283.png" alt="image-20230318203423283"></p>
+<br>
+
+<div style="font-size: 21px;"><b>例题来源：ctfshow easyrsa5</b></div>
+
+<p>上面的是低加密指数攻击，这道题$e$特别大，比$n$还大，说明$d$会比较小。所以，可以采用低解密指数攻击。详细的攻击手法可参考：</p>
+<p><a target="_blank" rel="noopener" href="https://www.tr0y.wang/2017/11/06/CTFRSA/index.html#%E4%BD%8E%E8%A7%A3%E5%AF%86%E6%8C%87%E6%95%B0%E6%94%BB%E5%87%BB">https://www.tr0y.wang/2017/11/06/CTFRSA/index.html#%E4%BD%8E%E8%A7%A3%E5%AF%86%E6%8C%87%E6%95%B0%E6%94%BB%E5%87%BB</a></p>
+<p>这里直接用大佬的脚本：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pablocelayes/rsa-wiener-attack">https://github.com/pablocelayes/rsa-wiener-attack</a></p>
+<p>这里要把涉及到的py文件下下载到同一的文件夹下。我github不太会用，一个个复制粘贴:( </p>
+<p><img src="/images/RSA%E6%94%BB%E5%87%BB%E6%89%8B%E6%B3%95%E6%80%BB%E7%BB%93/image-20230318203458310.png" alt="image-20230318203458310"></p>
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '');</script></html>

@@ -95,7 +95,7 @@
 <p>hitcon-lab项目中安装命令：<a target="_blank" rel="noopener" href="https://github.com/to-lele/HITCON-Training/blob/master/env_setup.sh">https://github.com/to-lele/HITCON-Training/blob/master/env_setup.sh</a></p>
 <p>（以下命令为对该项目的安装命令的相关改进！）</p>
 <p> <strong>在家目录创建一个Pwn-tools文件夹，在该文件右键打开终端：</strong></p>
-<pre><code class="shell"># 包的更新（有的需要你确认是否安装）
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"># 包的更新（有的需要你确认是否安装）
 sudo apt-get update
 sudo apt-get upgrade
 
@@ -124,16 +124,16 @@ sudo pip install --upgrade pwntools
 sudo apt install checksec
 
 # pwndbg
-# 这个工具和https://github.com/scwuaptx/Pwngdb.git很像，不过个人感觉不太好用
+# 这个工具和https:&#x2F;&#x2F;github.com&#x2F;scwuaptx&#x2F;Pwngdb.git很像，不过个人感觉不太好用
 # 按下面安装即可
-git clone https://github.com/pwndbg/pwndbg
+git clone https:&#x2F;&#x2F;github.com&#x2F;pwndbg&#x2F;pwndbg
 cd pwndbg
-./setup.sh
+.&#x2F;setup.sh
 # 检测：在终端执行命令：gdb
 # 如果底部颜色花花绿绿的,带有&quot;pwndbg&gt;&quot;命令指示头即可
 
 # ROPgadget
-git clone https://github.com/JonathanSalwan/ROPgadget.git
+git clone https:&#x2F;&#x2F;github.com&#x2F;JonathanSalwan&#x2F;ROPgadget.git
 cd  ROPgadget
 sudo python setup.py install
 # 检测：ROPgadget --help
@@ -149,15 +149,15 @@ sudo gem install seccomp-tools
 # 检测：seccomp-tools --help
 
 # LibcSearcher
-# (该工具听说有时不太准，也可以用这个网站代替：https://libc.blukat.me/ )
-git clone https://github.com/lieanu/LibcSearcher.git
+# (该工具听说有时不太准，也可以用这个网站代替：https:&#x2F;&#x2F;libc.blukat.me&#x2F; )
+git clone https:&#x2F;&#x2F;github.com&#x2F;lieanu&#x2F;LibcSearcher.git
 cd LibcSearcher
 sudo python setup.py develop
 # 检测：和pwntools类似，在python中from LibcSearcher import *没报错即可
 
 #剩下的工具：glibc-all-in-one和patchelf在堆的学习才会用到
-#需要的参考：https://toleleyjl.github.io/2022/10/12/%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E/
-</code></pre>
+#需要的参考：https:&#x2F;&#x2F;toleleyjl.github.io&#x2F;2022&#x2F;10&#x2F;12&#x2F;%E6%9B%B4%E6%8D%A2%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6glibc%E7%89%88%E6%9C%AC%E7%9A%84%E6%9F%90%E4%B8%80%E6%AC%A1%E6%8C%A3%E6%89%8E&#x2F;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <p>当遇到问题时，可以先分析大概原因所在，不能自己解决的话，要学会利用搜索工具，上网找资料找相应的博客文章来尝试解决问题。</p>
@@ -240,7 +240,15 @@ sudo python setup.py develop
 
 <p>CTF赛事时间表：<a target="_blank" rel="noopener" href="https://www.ctfhub.com/#/calendar">https://www.ctfhub.com/#/calendar</a></p>
 <p>很方便的在线编程平台：<a target="_blank" rel="noopener" href="https://lightly.teamcode.com/dashboard">https://lightly.teamcode.com/dashboard</a></p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>

