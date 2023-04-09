@@ -8,7 +8,7 @@
 <p>在学习Base64隐写之前，得先熟悉Base64编码与解码的过程。</p>
  <br>
 
-<h2 id="0x01-Base64的编码过程"><a href="#0x01-Base64的编码过程" class="headerlink" title="0x01: Base64的编码过程"></a>0x01: Base64的编码过程</h2><p>​    Base64编码后的字符为”a<del>z A</del>Z 0~9 + /“共计64个，每个需要6个比特位进行存储。原本，ASCII编码字符每个字符占8个比特位。Base64编码则是把原来每单位8个比特位的字符序列划分成每单位6个比特位，然后按单位转换成上述中的64个字符。</p>
+<h2 id="0x01-Base64的编码过程"><a href="#0x01-Base64的编码过程" class="headerlink" title="0x01: Base64的编码过程"></a>0x01: Base64的编码过程</h2><p>​    Base64编码后的字符为<code>a~z A~Z 0~9 + /</code>共计64个，每个需要6个比特位进行存储。原本，ASCII编码字符每个字符占8个比特位。Base64编码则是把原来每单位8个比特位的字符序列划分成每单位6个比特位，然后按单位转换成上述中的64个字符。</p>
 <p><img src="/images/Base64%E9%9A%90%E5%86%99/pic01.png" alt="pic01"></p>
 <center>Base64编码表</center>
 

