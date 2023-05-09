@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="zh-CN"><head><title>IoT固件模拟</title><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=0.5"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/css/highlight/xcode.min.css"><link rel="stylesheet" href="/css/bootstrap/bootstrap-tooltips.css"><link rel="stylesheet" href="/css/post.css"><script src="/js/jquery.min.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><script>if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent)) {
+  document.body.classList.add('mobile')
+}</script><div><div class="inner"><h1>IoT固件模拟</h1><div class="time">2023-04-21</div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00%EF%BC%9A%E5%89%8D%E8%A8%80"><span class="toc-text">0x00：前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01%EF%BC%9A%E5%AE%89%E8%A3%85%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7"><span class="toc-text">0x01：安装交叉编译工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02%EF%BC%9A%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91"><span class="toc-text">0x02：内核源码编译</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03%EF%BC%9A%E5%88%B6%E4%BD%9C%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-text">0x03：制作根文件系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04%EF%BC%9A%E5%88%B6%E4%BD%9C%E8%99%9A%E6%8B%9F%E5%AD%98%E5%82%A8%E4%BB%8B%E8%B4%A8"><span class="toc-text">0x04：制作虚拟存储介质</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05%EF%BC%9A%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-text">0x05：参考链接</span></a></li></ol><h2 id="0x00：前言"><a href="#0x00：前言" class="headerlink" title="0x00：前言"></a>0x00：前言</h2><p>模拟所需工具：<strong>1)</strong> 交叉编译工具； <strong>2)</strong> qemu； <strong>3)</strong> linux内核源码； <strong>4)</strong> busybox。</p>
+<p>IoT系统必须包含三件套：根文件系统、内核镜像、bootleader。在开发板中，一般是使用u-boot实现bootleader功能。不过由于qemu自带了bootleader，所以可以不需要u-boot。</p>
+<br>
+
+<h2 id="0x01：安装交叉编译工具"><a href="#0x01：安装交叉编译工具" class="headerlink" title="0x01：安装交叉编译工具"></a>0x01：安装交叉编译工具</h2><p>在将linux源码和一些程序编译成对应目标架构时，需要用到交叉编译工具。如32位小端的arm，交叉编译工具的下载：</p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">$ sudo apt install gcc-arm-linux-gnueabi<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>使用与gcc类似，只是相应的程序为<code>arm-linux-gnueabi-gcc</code>。工具项目目录在：<code>/usr/arm-linux-gnueabi</code>。</p>
+<p>注意：交叉编译工具的版本和Linux版本不能相差太大（比如我内核是5.15的，对应gcc11是没有问题的）</p>
+<br>
+
+<h2 id="0x02：内核源码编译"><a href="#0x02：内核源码编译" class="headerlink" title="0x02：内核源码编译"></a>0x02：内核源码编译</h2><p>下载内核源码：<a target="_blank" rel="noopener" href="https://cdn.kernel.org/pub/linux/kernel/">https://cdn.kernel.org/pub/linux/kernel/</a></p>
+<p>我选择的版本是5.15.1，xz和gz都可以，不过xz压缩率比较高。</p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">wget https:&#x2F;&#x2F;cdn.kernel.org&#x2F;pub&#x2F;linux&#x2F;kernel&#x2F;v5.x&#x2F;linux-5.15.1.tar.xz
+tar -xvf linux-5.15.1.tar.xz
+
+# 注：下面的命令中“CROSS_COMPILE&#x3D;arm-linux-gnueabi- ARCH&#x3D;arm” 可以在顶层的(也就是根目录下的)Makefile进行设置，这样下面命令中该字段可以省略
+
+# 产生配置文件 .config
+# 第一种方法：在已知开发板的情况下，采用该开发板默认的配置设置
+make CROSS_COMPILE&#x3D;arm-linux-gnueabi- ARCH&#x3D;arm vexpress_defconfig
+# 第二种方法：自己进行指定的配置，menuconfig：图形配置界面
+make CROSS_COMPILE&#x3D;arm-linux-gnueabi- ARCH&#x3D;arm menuconfig
+# 一二种方法也可以结合, xxx_defconfig大体配置, menuconfig进行微调
+# 这里我仅使用了第一种
+
+# 开始编译（时间比较久）
+make -j4 CROSS_COMPILE&#x3D;arm-linux-gnueabi- ARCH&#x3D;arm  # -j4:用多少个核心编译
+
+# 两个将会用到的文件
+linux-5.15.1&#x2F;arch&#x2F;arm&#x2F;boot&#x2F;zImage   # 内核镜像
+linux-5.15.1&#x2F;arch&#x2F;arm&#x2F;boot&#x2F;dts&#x2F;vexpress-v2p-ca9.dtb  # 设备树文件，待深入了解<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>xxx_defconfig</code>有哪些默认配置可在<code>/arch/$ARCH/configs</code>获知。</p>
+<br>
+
+<div style="font-size: 21px;"><b>尝试使用qemu启动</b></div>
+
+<p>为了方便后续测试，编写个shell文件：</p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">#!&#x2F;bin&#x2F;bash
+qemu-system-arm \
+        -M vexpress-a9 \
+        -m 512M \
+        -kernel .&#x2F;linux-5.15.1&#x2F;arch&#x2F;arm&#x2F;boot&#x2F;zImage \
+        -dtb .&#x2F;linux-5.15.1&#x2F;arch&#x2F;arm&#x2F;boot&#x2F;vexpress-v2p-ca9.dtb \
+        -append &quot;console&#x3D;ttyAMA0&quot; \
+        -nographic
+$ chmod +x arm_start.sh
+$ sudo .&#x2F;arm_start.sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>由于没有根文件系统，所以会产生<em><strong>Kernel panic</strong></em>：</p>
+<p><img src="/images/IoT%E5%9B%BA%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F/image-20230504130936476.png" alt="image-20230504130936476"></p>
+<p>(注：退出qemu快捷键为<code>Ctrl + A</code>，按完后再按<code>X</code>，不要同时按！ 命令：<code>reboot -f</code>)</p>
+<br>
+
+<h2 id="0x03：制作根文件系统"><a href="#0x03：制作根文件系统" class="headerlink" title="0x03：制作根文件系统"></a>0x03：制作根文件系统</h2><p>Busybox官网：<a target="_blank" rel="noopener" href="http://www.busybox.net/">http://www.busybox.net/</a></p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell"># 下载源码
+$ wget https:&#x2F;&#x2F;busybox.net&#x2F;downloads&#x2F;busybox-1.35.0.tar.bz2
+$ tar xvf busybox-1.35.0.tar.bz2
+$ cd busybox-1.35.0&#x2F;
+
+# busybox有三种配置模式: 1)defconfig(缺省配置); 2)allyesconfig(最大配置); 3)allnoconfig(最小配置)
+$ make ARCH&#x3D;arm CROSS_COMPILE&#x3D;arm-linux-gnueabi- defconfig
+$ make ARCH&#x3D;arm CROSS_COMPILE&#x3D;arm-linux-gnueabi-
+# # CONFIG_PREFIX可以设置保存处,否则默认_install&#x2F;
+$ make ARCH&#x3D;arm CROSS_COMPILE&#x3D;arm-linux-gnueabi- install CONFIG_PREFIX&#x3D;.&#x2F;FS_space&#x2F;arm32<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>make install</code>执行成功后，在<code>./FS_space/arm32</code>下出现了<code>bin  linuxrc  sbin  usr</code>。</p>
+<p>继续填充其它文件：</p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell"># 因为busybox编译时使用的是动态链接的方法，所以需要库文件
+# 我们也可以通过menuconfig将其改为静态链接：
+# Busybox Settings  ---&gt;
+#       Build Options  ---&gt;
+#           [*] Build BusyBox as a static binary (no shared libs)
+$ mkdir .&#x2F;FS_space&#x2F;arm32&#x2F;lib&#x2F;
+$ sudo cp -p &#x2F;usr&#x2F;arm-linux-gnueabi&#x2F;lib&#x2F;* .&#x2F;FS_space&#x2F;arm32&#x2F;lib&#x2F;
+$ mkdir .&#x2F;FS_space&#x2F;arm32&#x2F;dev&#x2F;
+$ sudo mknod .&#x2F;FS_space&#x2F;arm32&#x2F;dev&#x2F;tty1 c 4 1
+$ sudo mknod .&#x2F;FS_space&#x2F;arm32&#x2F;dev&#x2F;tty2 c 4 2
+$ sudo mknod .&#x2F;FS_space&#x2F;arm32&#x2F;dev&#x2F;tty3 c 4 3
+$ sudo mknod .&#x2F;FS_space&#x2F;arm32&#x2F;dev&#x2F;tty4 c 4 4
+$ sudo mknod -m 666 .&#x2F;FS_space&#x2F;arm32&#x2F;console c 5 1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<div style="font-size: 21px;"><b>事故插播：</b></div>
+
+<p>在make install时，意外地发生了报错：</p>
+<p><img src="/images/IoT%E5%9B%BA%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F/image-20230504131053259.png" alt="image-20230504131053259"></p>
+<p>在查看<code>Makefile.custom</code>无关后，看这报错觉得是字符串上的问题(//多了个/)。所以直接在busybox根目录下执行：<code>grep -r &quot;/bin/arch&quot;</code>。查找结果：<code>busybox.links:/bin/arch</code>，busybox.links里面着是需要创建的文件或目录。在尝试性地将<code>/bin/arch</code>改为<code>bin/arch</code>后，报错点发生的转移：</p>
+<p><img src="/images/IoT%E5%9B%BA%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F/image-20230504131213930.png" alt="image-20230504131213930"></p>
+<p>然后编写了python脚本，将前面的/都去掉了，结果还报错：</p>
+<p><img src="/images/IoT%E5%9B%BA%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F/image-20230504131231295.png" alt="image-20230504131231295"></p>
+<p>后来尝试了好几个版本的busybox，版本低的在编译时会报编译器的兼容问题，高版本的1.36.0不能<code>make defconfig</code>。为了避免问题的复杂化，还是回到原来版本的问题吧。</p>
+<p>后来想到，我是在共享文件夹（win主机，因为虚拟机空间不太够，便下载到这里）中操作的。又想到有时可以使用<code>/bin//sh</code>来代替<code>/bin/sh\x00</code>来绕过\x00，更加感觉是这个原因，然后把项目移到虚拟机空间中重复操作，成功了。至于具体原因的细节有待研究…😶</p>
+<br>
+
+<h2 id="0x04：制作虚拟存储介质"><a href="#0x04：制作虚拟存储介质" class="headerlink" title="0x04：制作虚拟存储介质"></a>0x04：制作虚拟存储介质</h2><p>在开发板中，根文件系统是保存在flash 中的。或者，通过nfs的方式挂载网络文件系统供linux内核启动时访问。为了模拟，我们需要虚拟一个存储介质。</p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">$ dd if&#x3D;&#x2F;dev&#x2F;zero of&#x3D;rootfs.ext3 bs&#x3D;1M count&#x3D;512   # 用\x00初始化一个镜像
+$ mkfs.ext3 rootfs.ext3   # 格式化
+
+# 下面的挂载-拷贝-卸载，可以联想用U盘拷贝插入电脑拷贝数据后拔出的过程
+$ sudo mount -t ext3 rootfs.ext3 &#x2F;mnt&#x2F;rootfs&#x2F; -o loop
+$ sudo cp -rf ~&#x2F;iot&#x2F;linuxSRC&#x2F;busybox-1.35.0&#x2F;FS_space&#x2F;arm32&#x2F;* &#x2F;mnt&#x2F;rootfs
+$ ls &#x2F;mnt&#x2F;rootfs&#x2F;
+bin  linuxrc  lost+found  sbin  usr
+$ sudo umount &#x2F;mnt&#x2F;rootfs&#x2F;
+$ ls &#x2F;mnt&#x2F;rootfs&#x2F;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<p>qemu添加，尝试启动：</p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">#!&#x2F;bin&#x2F;bash
+qemu-system-arm \
+        -M vexpress-a9 \
+        -m 512M \
+        -kernel .&#x2F;linux-5.15.1&#x2F;arch&#x2F;arm&#x2F;boot&#x2F;zImage \
+        -dtb .&#x2F;linux-5.15.1&#x2F;arch&#x2F;arm&#x2F;boot&#x2F;vexpress-v2p-ca9.dtb \
+        -append &quot;root&#x3D;&#x2F;dev&#x2F;mmcblk0 console&#x3D;ttyAMA0&quot; \
+        -sd .&#x2F;rootfs.ext3 \
+        -nographic<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>成功执行：</p>
+<p><img src="/images/IoT%E5%9B%BA%E4%BB%B6%E7%B3%BB%E7%BB%9F%E6%A8%A1%E6%8B%9F/image-20230504131728877.png" alt="image-20230504131728877"></p>
+<p>不过还是有一些警告：<code>can&#39;t run &#39;/etc/init.d/rcS&#39;: No such file or directory</code></p>
+<p>完善方案(仅供参考)：</p>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">$ sudo mount -t ext3 rootfs.ext3 &#x2F;mnt&#x2F;rootfs&#x2F; -o loop
+$ cd &#x2F;mnt&#x2F;rootfs&#x2F;
+$ ls
+bin  console  dev  lib  linuxrc  lost+found  sbin  usr
+$ sudo mkdir etc mnt
+$ sudo mkdir -p etc&#x2F;init.d&#x2F;
+$ sudo vim etc&#x2F;fstab
+$ cat etc&#x2F;fstab
+proc &#x2F;proc proc&amp;nbsp;defaults 0 0
+tmpfs &#x2F;tmp tmpfs&amp;nbsp;defaults 0 0
+none &#x2F;tmp ramfs defaults 0 0
+sysfs &#x2F;sys sysfs defaults 0 0
+mdev &#x2F;dev&amp;nbsp;ramfs defaults 0 0
+$ sudo vim etc&#x2F;init.d&#x2F;rcS
+$ sudo chmod 755 etc&#x2F;init.d&#x2F;rcS
+$ sudo vim etc&#x2F;inittab
+$ cat etc&#x2F;inittab
+::sysinit:&#x2F;etc&#x2F;init.d&#x2F;rcS
+::respawn:-&#x2F;bin&#x2F;sh
+::askfirst:-&#x2F;bin&#x2F;sh
+::cttlaltdel:&#x2F;bin&#x2F;umount -a -r
+$ sudo chmod 755 etc&#x2F;inittab
+$ sudo mknod dev&#x2F;null c 1 3
+$ cd ~    # 退出&#x2F;mnt&#x2F;rootfs才能umount
+$ sudo umount &#x2F;mnt&#x2F;rootfs&#x2F;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<br>
+
+<h2 id="0x05：参考链接"><a href="#0x05：参考链接" class="headerlink" title="0x05：参考链接"></a>0x05：参考链接</h2><p><a target="_blank" rel="noopener" href="https://www.orientdisplay.com/emulating-embedded-linux-systems-with-qemu/">https://www.orientdisplay.com/emulating-embedded-linux-systems-with-qemu/</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_56548489/article/details/124720860">https://blog.csdn.net/m0_56548489/article/details/124720860</a></p>
+<p class="textAlignRight"><span>↶ </span><a href="/">返回首页</a><span></span></p></div></div></body><script src="/js/highlight.min.js"></script><script src="/js/main.js"></script><script src="/js/bootstrap/bootstrap.min.js"></script><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>MathJax = {
+      tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+          fontCache: 'global'
+      }
+  };
+</script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '');</script></html>
